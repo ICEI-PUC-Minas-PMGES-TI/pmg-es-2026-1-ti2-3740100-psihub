@@ -1,73 +1,71 @@
-# TITULO DO PROJETO
+# psiHub
 
 
-**Nome completo do Aluno 1, email do aluno 1**
+*Hugo Tavares Dutra, Hdutra@sga.pucminas.br*
 
-**Nome completo do Aluno 2, email do aluno 2**
+*Gustavo Fitipaldi Moreira, gustavo.fitipaldi@sga.pucminas.br*
 
-**Nome completo do Aluno 3, email do aluno 3**
+*Gabriel Eduardo de Oliveira Martins, 1473855@sga.pucminas.br*
 
-**Nome completo do Aluno 4, email do aluno 4**
+*Yago Garzon Chaves, yago.chaves@sga.pucminas.br*
 
-**Nome completo do Aluno 5, email do aluno 5**
-
-**Nome completo do Aluno 6, email do aluno 6**
+*Davi D'Assuncao Coelho, davi.assuncao@sga.pucminas.br*
 
 ---
 
 Professores:
 
-** Prof. Nome do Prof 1 **
+* Prof. Lucca Soares de Paiva Lacerda *
 
-** Prof. Nome do Prof 2 **
+* Prof. Michelle Hanne Soares de Andrade 2 *
 
-** Prof. Nome do Prof 3 **
-
----
-
-_Curso de Engenharia de Software_
-
-_Instituto de Informática e Ciências Exatas – Pontifícia Universidade Católica de Minas Gerais (PUC MINAS), Belo Horizonte – MG – Brasil_
+* Prof. Luiz Carlos *
 
 ---
 
-_**Resumo**. Escrever aqui o resumo. O resumo deve contextualizar rapidamente o trabalho, descrever seu objetivo e, ao final, 
-mostrar algum resultado relevante do trabalho (até 10 linhas)._
+Curso de Engenharia de Software, Unidade Coração Eucaristico
+
+Instituto de Informática e Ciências Exatas – Pontifícia Universidade Católica de Minas Gerais (PUC MINAS), Belo Horizonte – MG – Brasil
+
+---
+
+_O PsiHub surge no contexto da crescente demanda por cuidados em saúde mental, visando solucionar a fragmentação de dados e a gestão ineficiente em consultórios de psicologia. O objetivo do projeto é desenvolver uma plataforma digital centralizada que integra agendamento, prontuários eletrônicos e o monitoramento emocional contínuo do paciente entre as sessões. Como resultado relevante, o sistema estabelece um novo padrão de segurança através da conformidade rigorosa com a LGPD e o uso de criptografia, garantindo o sigilo terapêutico e proporcionando ao psicólogo uma visão analítica da evolução do paciente por meio de relatórios dinâmicos, tornando o tratamento mais preciso, organizado e humanizado._
 
 ---
 
 
 ## 1. Introdução
 
-_Apresente uma frase introdutória definindo o que será apresentado._
+Este trabalho descreve o planejamento e o desenvolvimento de uma plataforma digital voltada para a gestão de atendimentos psicológicos, com foco em modernizar e otimizar a rotina de psicólogos e o acompanhamento de pacientes.
 
 ### 1.1 Contextualização
 
-_Na **contextualização**, o aluno deve dizer do que se trata o trabalho, em que área ou contexto se insere.
-A **contextualização** deve ser desenvolvida de algo mais genérico para algo mais específico. 
-A citação de pesquisas quantitativas é bem aceita aqui (corretamente referenciadas)._
+A saúde mental tem se tornado um tema cada vez mais relevante na sociedade atual, diante do aumento da busca por acompanhamento psicológico. Com rotinas cada vez mais aceleradas e maiores níveis de estresse, cresce a demanda por atendimentos mais organizados, acessíveis e contínuos. No entanto, muitos profissionais ainda utilizam métodos tradicionais para gerenciar agendas e registrar informações dos pacientes, o que pode dificultar o acompanhamento adequado da evolução clínica.
+
+Diante desse cenário, a escolha do desenvolvimento de uma plataforma digital para psicólogos justifica-se pela necessidade de modernizar e centralizar a gestão dos atendimentos e do acompanhamento dos pacientes. A proposta de integrar recursos como agendamento de consultas, registros clínicos organizados em linha do tempo e acompanhamento emocional do paciente entre as sessões contribui para tornar o processo terapêutico mais eficiente, organizado e humanizado.
 
 ### 1.2 Problema
 
-_Em seguida o aluno deve caminhar a contextualização para descrever o **problema** que o trabalho trata. 
-O **problema** pode ser algo vivido em uma empresa específica. Neste caso, o aluno deve rapidamente apresentar 
-o cenário de problema da empresa. A empresa só deve ser citada explicitamente se o aluno tiver autorização 
-para tal._
+Em muitos contextos de atendimento psicológico, a organização das consultas, o registro de informações clínicas e o acompanhamento da evolução do paciente ainda são realizados por meio de ferramentas genéricas ou métodos manuais, como anotações em papel e planilhas. Esse modelo descentralizado dificulta a consolidação do histórico do paciente ao longo do tempo e pode tornar o processo de acompanhamento menos prático e eficiente.
+
+Além disso, a ausência de um meio estruturado de registro entre as sessões faz com que informações relevantes sobre o cotidiano emocional do paciente dependam, em grande parte, de relatos pontuais durante as consultas. Esse formato limita a visão contínua do processo terapêutico e reduz as possibilidades de um acompanhamento mais próximo e orientado por dados ao longo do tratamento.
 
 ### 1.3 Objetivo geral
 
-_O aluno deve escrever um pequeno parágrafo ou frase com o **objetivo geral** do trabalho. 
-O objetivo deve ser bem direto, específico e definido com verbos de ação (elaborar, propor, avaliar, comparar, desenvolver, etc.). No caso específico deste projeto, o objetivo deste trabalho é desenvolver um sistema para automação de processos para um problema específico._
+Desenvolver uma plataforma digital para psicólogos que auxilie na gestão de atendimentos e no acompanhamento contínuo dos pacientes, integrando recursos de agendamento de consultas, organização de registros clínicos e monitoramento do bem-estar do paciente entre as sessões, visando tornar o processo terapêutico mais organizado, eficiente e humanizado.
 
 #### 1.3.1 Objetivos específicos
 
-_Apresente também alguns (pelo menos 4) **objetivos específicos** dependendo de onde você vai querer 
-concentrar sua prática investigativa, ou como você irá aprofundar seu trabalho._
+* Desenvolver um sistema de agendamento e cancelamento de consultas para pacientes.
+* Criar um painel de gerenciamento para psicólogos, com controle de agenda e lista de pacientes.
+* Implementar um espaço de anotações clínicas antes, durante e após as consultas.
+* Desenvolver uma linha do tempo para organizar e visualizar a evolução do paciente ao longo do acompanhamento.
 
 ### 1.4 Justificativas
 
-_Mostre também as **justificativas** para o 
-desenvolvimento do seu trabalho e, caso deseje, destaque alguma contribuição do trabalho._
+A criação de um sistema digital voltado para a gestão de atendimentos psicológicos justifica-se pela necessidade de centralizar e organizar informações clínicas, agenda de consultas e registros de evolução do paciente em um único ambiente. A utilização de ferramentas genéricas ou métodos manuais dificulta a visualização do histórico do paciente ao longo do tempo e torna o acompanhamento menos prático e integrado.
+
+Além disso, a proposta de incluir recursos de acompanhamento emocional entre as sessões possibilita ao profissional obter informações mais contínuas sobre o estado do paciente, contribuindo para uma condução terapêutica mais direcionada e eficiente. Dessa forma, o sistema proposto surge como uma solução tecnológica que apoia o trabalho do psicólogo e melhora a experiência do paciente, promovendo um atendimento mais organizado, acessível e humanizado.
 
 ## 2. Participantes do processo
 
