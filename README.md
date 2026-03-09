@@ -9,8 +9,7 @@ Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
 * Gabriel Eduardo de Oliveira Martins
 * Yago Garzon Chaves
 * Davi D'Assuncao Coelho
-* Nome completo do aluno 6
-* 
+
 ## Professor
 
 * Lucca Soares de Paiva Lacerda
