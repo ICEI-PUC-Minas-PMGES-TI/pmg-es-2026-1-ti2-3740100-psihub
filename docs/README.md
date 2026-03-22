@@ -29,7 +29,7 @@ Instituto de Informática e Ciências Exatas – Pontifícia Universidade Catól
 
 ---
 
-_O PsiHub surge no contexto da crescente demanda por cuidados em saúde mental, visando solucionar a fragmentação de dados e a gestão ineficiente em consultórios de psicologia. O objetivo do projeto é desenvolver uma plataforma digital centralizada que integra agendamento, prontuários eletrônicos e o monitoramento emocional contínuo do paciente entre as sessões. Como resultado relevante, o sistema estabelece um novo padrão de segurança através da conformidade rigorosa com a LGPD e o uso de criptografia, garantindo o sigilo terapêutico e proporcionando ao psicólogo uma visão analítica da evolução do paciente por meio de relatórios dinâmicos, tornando o tratamento mais preciso, organizado e humanizado._
+O PsiHub surge no contexto da crescente demanda por cuidados em saúde mental, visando solucionar a fragmentação de dados e a gestão ineficiente em consultórios de psicologia. O objetivo do projeto é desenvolver uma plataforma digital centralizada que integra agendamento, prontuários eletrônicos e o monitoramento emocional contínuo do paciente entre as sessões. Como resultado relevante, o sistema estabelece um novo padrão de segurança através da conformidade rigorosa com a LGPD e o uso de criptografia, garantindo o sigilo terapêutico e proporcionando ao psicólogo uma visão analítica da evolução do paciente por meio de relatórios dinâmicos, tornando o tratamento mais preciso, organizado e humanizado.
 
 ---
 
@@ -67,19 +67,29 @@ A criação de um sistema digital voltado para a gestão de atendimentos psicol�
 
 Além disso, a proposta de incluir recursos de acompanhamento emocional entre as sessões possibilita ao profissional obter informações mais contínuas sobre o estado do paciente, contribuindo para uma condução terapêutica mais direcionada e eficiente. Dessa forma, o sistema proposto surge como uma solução tecnológica que apoia o trabalho do psicólogo e melhora a experiência do paciente, promovendo um atendimento mais organizado, acessível e humanizado.
 
-## 2. Participantes do processo
+## 2. Participantes do Processo
 
-_Apresente aqui os perfis dos usuários-chave do sistema. Diversas são as informações que podem ser relevantes para a definição dos perfis dos usuários, tais como idade, gênero, aspectos culturais, nível de educação, entre outros. A pesquisa de mercado pode ser uma ferramenta poderosa para se identificar e caracterizar os perfis de usuários. Apresente claramente o papel a ser desempenhado por cada usuário._
+O ecossistema do PsiHub é estruturado em torno de dois perfis centrais:
 
-## 3. Modelagem do processo de negócio
+* **Psicólogo (Administrador Clínica):** Profissionais graduados (CRP ativo) que buscam migrar do registro analógico para o digital. Atuam na gestão da agenda, prontuários e análise de dados. Sua principal dor é a fragmentação de informações e o tempo gasto com burocracia.
+* **Paciente (Usuário Final):** Pessoas de diversas faixas etárias em busca de suporte terapêutico. Utilizam a interface para agendamentos e, principalmente, para o registro de estados emocionais diários, servindo como a fonte primária de dados para o acompanhamento contínuo.
 
-### 3.1. Análise da situação atual
+## 3. Modelagem do Processo de Negócio
 
-_Apresente uma descrição textual de como os sistemas atuais resolvem o problema que seu projeto se propõe a resolver. Caso sua proposta seja inovadora e não existam processos claramente definidos, **apresente como as tarefas que o seu sistema pretende implementar são executadas atualmente**, mesmo que não se utilize tecnologia computacional._
+### 3.1. Análise da Situação Atual
 
-### 3.2. Descrição geral da proposta de solução
+Atualmente, o fluxo de trabalho na maioria dos consultórios é fragmentado e vulnerável:
+* **Agendamento:** Feito via ferramentas genéricas (WhatsApp/E-mail), gerando confusão de horários e mistura entre vida pessoal e profissional.
+* **Registros:** Prontuários em papel ou arquivos soltos (Word/Excel), o que dificulta a busca histórica e compromete a segurança dos dados sensíveis.
+* **O "Vácuo" Terapêutico:** Entre uma sessão e outra, o terapeuta perde o contato com a realidade emocional do paciente, dependendo apenas do relato verbal (muitas vezes impreciso) na consulta seguinte.
 
-_Apresente aqui uma descrição da sua proposta abordando seus limites e suas ligações com as estratégias do negócio e os objetivos geral e específicos do projeto. Apresente aqui as oportunidades de melhorias._
+### 3.2. Descrição Geral da Proposta de Solução
+
+O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na **continuidade do cuidado**:
+
+* **Centralização Operacional:** Agenda, prontuários eletrônicos e histórico financeiro em um único ambiente seguro e adequado à LGPD.
+* **Monitoramento Inter-Sessões:** Ferramenta de registro emocional diário para o paciente, permitindo que o psicólogo visualize "picos" de ansiedade ou gatilhos antes mesmo da próxima consulta.
+* **Evolução Orientada a Dados:** Transformação de anotações estáticas em relatórios dinâmicos. Isso permite uma visão analítica do progresso clínico, tornando o tratamento mais objetivo, seguro e focado no bem-estar real do paciente.
 
 ### 3.3. Modelagem dos processos
 
