@@ -1,4 +1,4 @@
-# Nome do projeto
+# Psihub
 
 Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
 
@@ -14,7 +14,7 @@ Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
 
 * Lucca Soares de Paiva Lacerda
 * Michelle Hanne Soares de Andrade
-* Luiz Carlos
+* Luiz Carlos da silva
 
 ## Instruções de utilização
 
