@@ -93,13 +93,15 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 ### 3.3. Modelagem dos processos
 
-[PROCESSO 1 - Nome do Processo](processo-1-nome-do-processo.md "Detalhamento do Processo 1.")
+[PROCESSO 1 - Gestão do psicologo](processo-1-gestao-do-psicologo.md "Detalhamento do Processo 1.")
 
 [PROCESSO 2 - Nome do Processo](processo-2-nome-do-processo.md "Detalhamento do Processo 2.")
 
 [PROCESSO 3 - Nome do Processo](processo-3-nome-do-processo.md "Detalhamento do Processo 3.")
 
-[PROCESSO 4 - Nome do Processo](processo-4-nome-do-processo.md "Detalhamento do Processo 4.")
+[PROCESSO 4 - Gestão financeira](processo-4-gestao-financeira.md "Detalhamento do Processo 4.")
+
+[PROCESSO 5 - Nome do Processo](processo-5-nome-do-processo.md "Detalhamento do Processo 5.")
 
 ## 4. Projeto da solução
 
