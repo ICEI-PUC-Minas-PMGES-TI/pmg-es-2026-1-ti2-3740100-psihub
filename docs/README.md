@@ -95,13 +95,13 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 [PROCESSO 1 - Gestão do psicologo](processo-1-gestao-do-psicologo.md "Detalhamento do Processo 1.")
 
-[PROCESSO 2 - Nome do Processo](processo-2-nome-do-processo.md "Detalhamento do Processo 2.")
+[PROCESSO 2 - Gestão do paciente](processo-2-gestão-do-paciente.md "Detalhamento do Processo 2.")
 
-[PROCESSO 3 - Nome do Processo](processo-3-nome-do-processo.md "Detalhamento do Processo 3.")
+[PROCESSO 3 - Processo da secção](processo-3-processo-da-secção.md "Detalhamento do Processo 3.")
 
 [PROCESSO 4 - Gestão financeira](processo-4-gestao-financeira.md "Detalhamento do Processo 4.")
 
-[PROCESSO 5 - Nome do Processo](processo-5-nome-do-processo.md "Detalhamento do Processo 5.")
+[PROCESSO 5 - Agendamento de consultas](processo-5-agendamento-de-consultas.md "Detalhamento do Processo 5.")
 
 ## 4. Projeto da solução
 
