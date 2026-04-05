@@ -1,67 +1,61 @@
-### 3.3.4 Processo 4 – NOME DO PROCESSO
+### 3.3.4 Processo 4 – Gestão Financeira
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 4. 
-Em seguida, apresente o modelo do processo 4, descrito no padrão BPMN._
+Apresenta-se o processo de gestão financeira, responsável por controlar os pagamentos das consultas realizadas. 
+Como oportunidade de melhoria, busca-se automatizar o registro de pagamentos, reduzir erros manuais, evitar perdas financeiras e garantir maior controle sobre pagamentos pendentes e concluídos.
 
-![Exemplo de um Modelo BPMN do PROCESSO 4](images/process.png "Modelo BPMN do Processo 4.")
+Em seguida, apresenta-se o modelo do processo descrito no padrão BPMN.
 
+![Modelo BPMN do Processo 4](images/gestao-financeira.png)
+
+---
 
 #### Detalhamento das atividades
 
-_Descreva aqui cada uma das propriedades das atividades do processo 4. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+As atividades do processo de gestão financeira são descritas a seguir, contendo seus respectivos campos, tipos de dados, restrições e comandos associados.
 
-_Os tipos de dados a serem utilizados são:_
+---
 
-_* **Área de texto** - campo texto de múltiplas linhas_
+### **Registrar Pagamento**
 
-_* **Caixa de texto** - campo texto de uma linha_
+Responsável por registrar os dados do pagamento realizado pelo paciente.
 
-_* **Número** - campo numérico_
+| Campo            | Tipo           | Restrições           | Valor default |
+|------------------|---------------|---------------------|--------------|
+| id_paciente      | Número        | obrigatório         | -            |
+| valor            | Número        | maior que 0         | -            |
+| forma_pagamento  | Seleção única | pix/cartão/dinheiro | -            |
+| data_pagamento   | Data          | obrigatória         | -            |
 
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
+| Comandos | Destino               | Tipo    |
+|----------|----------------------|--------|
+| salvar   | Verificar Pagamento  | default|
+| cancelar | Fim do processo      | cancel |
 
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
+---
 
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
+### **Verificar Pagamento**
 
-_* **Imagem** - campo contendo uma imagem_
+Responsável por verificar se o pagamento foi realizado corretamente.
 
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
+| Campo            | Tipo           | Restrições       | Valor default |
+|------------------|---------------|------------------|--------------|
+| status_pagamento | Seleção única | pago/pendente    | pendente     |
 
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
+| Comandos | Destino           | Tipo    |
+|----------|------------------|--------|
+| confirmar| Gerar Recibo     | default|
+| pendente | Fim do processo  | cancel |
 
-_* **Arquivo** - campo de upload de documento_
+---
 
-_* **Link** - campo que armazena uma URL_
+### **Gerar Recibo**
 
-_* **Tabela** - campo formado por uma matriz de valores_
+Responsável por gerar o comprovante de pagamento.
 
-**Nome da atividade 1**
+| Campo  | Tipo    | Restrições  | Valor default |
+|--------|--------|------------|--------------|
+| recibo | Arquivo| obrigatório | -            |
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
-
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
-
-
-**Nome da atividade 2**
-
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
-
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| Comandos  | Destino          | Tipo    |
+|-----------|------------------|--------|
+| finalizar | Fim do processo  | default|
