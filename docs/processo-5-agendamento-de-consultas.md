@@ -74,7 +74,7 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 | --- | --- | --- |
 | Selecionar horário | Atividade 5 – Confirmar Consulta | default |
 | Alterar data | Atualiza agenda exibida | — |
-| Voltar | Atividade 1 – Acessar Agendamento | cancel |
+| Voltar | Atividade 3 – Acessar Agendamento | cancel |
 
 ---
 
