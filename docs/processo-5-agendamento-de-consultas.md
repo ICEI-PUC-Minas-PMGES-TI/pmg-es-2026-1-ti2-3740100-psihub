@@ -1,4 +1,4 @@
-### 3.3.5 Processo 5 – Agendamento de Consulta
+### 3.3.5 Processo 5 – Agendamento de Consulta 
 
 Este processo descreve o fluxo de agendamento de consultas psicológicas na plataforma PsiHub, envolvendo tanto o paciente quanto o psicólogo. O objetivo é permitir que o paciente visualize horários disponíveis e realize o agendamento, enquanto o psicólogo mantém sua agenda atualizada.
 
