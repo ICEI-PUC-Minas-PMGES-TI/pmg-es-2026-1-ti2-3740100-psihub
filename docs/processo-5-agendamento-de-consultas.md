@@ -1,11 +1,10 @@
 ### 3.3.5 Processo 5 – Agendamento de Consulta
 
-Este processo descreve o fluxo de agendamento de consultas psicológicas na plataforma PsiHub, realizado pelo paciente. O objetivo é permitir que o usuário visualize a disponibilidade do psicólogo e selecione um horário adequado de forma simples e organizada.
+Este processo descreve o fluxo de agendamento de consultas psicológicas na plataforma PsiHub, envolvendo tanto o paciente quanto o psicólogo. O objetivo é permitir que o paciente visualize horários disponíveis e realize o agendamento, enquanto o psicólogo mantém sua agenda atualizada.
 
-O processo se inicia com o acesso do paciente à funcionalidade de agendamento, onde ele pode buscar um psicólogo e visualizar sua agenda. Em seguida, o paciente seleciona uma data e horário disponíveis, confirma as informações da consulta e finaliza o agendamento. Após a confirmação, o sistema registra a consulta e atualiza automaticamente a agenda do psicólogo.
+O processo se inicia com o psicólogo definindo sua disponibilidade de horários. Em seguida, o paciente acessa a funcionalidade de agendamento, escolhe um psicólogo, visualiza a agenda e seleciona um horário disponível. Após a confirmação, o sistema registra a consulta e atualiza automaticamente a agenda.
 
 Uma melhoria importante em relação a modelos tradicionais é a automatização do processo, eliminando a necessidade de contato manual (como mensagens ou ligações), reduzindo erros e conflitos de horário.
-
 ![Modelo BPMN do Processo 5 – Agendamento de Consulta](images/agendamento-de-consulta.svg "Modelo BPMN do Processo 5.")
 
 ---
@@ -14,7 +13,44 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 ---
 
-**Atividade 1 – Acessar Agendamento**
+### **Atividades do Psicólogo**
+
+---
+
+**Atividade 1 – Definir Disponibilidade**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Dias disponíveis | Seleção múltipla | Pelo menos 1 dia selecionado | — |
+| Horário de início | Hora | Obrigatório | — |
+| Horário de fim | Hora | Deve ser posterior ao início | — |
+| Duração da consulta | Número | Em minutos; obrigatório | 50 |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Salvar horários | Agenda atualizada no sistema | default |
+| Cancelar | Retorna sem salvar | cancel |
+
+---
+
+**Atividade 2 – Gerenciar Agenda**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Lista de horários | Tabela | Exibe horários disponíveis e ocupados | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Adicionar horário | Inclui novo horário disponível | default |
+| Remover horário | Remove horário disponível | cancel |
+
+---
+
+### **Atividades do Paciente**
+
+---
+
+**Atividade 3 – Acessar Agendamento**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -22,12 +58,12 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
-| Selecionar psicólogo | Atividade 2 – Visualizar Agenda | default |
+| Selecionar psicólogo | Atividade 4 – Visualizar Agenda | default |
 | Voltar | Tela inicial | cancel |
 
 ---
 
-**Atividade 2 – Visualizar Agenda**
+**Atividade 4 – Visualizar Agenda**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -36,13 +72,13 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
-| Selecionar horário | Atividade 3 – Confirmar Consulta | default |
+| Selecionar horário | Atividade 5 – Confirmar Consulta | default |
 | Alterar data | Atualiza agenda exibida | — |
 | Voltar | Atividade 1 – Acessar Agendamento | cancel |
 
 ---
 
-**Atividade 3 – Confirmar Consulta**
+**Atividade 5 – Confirmar Consulta**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -54,12 +90,12 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
-| Confirmar agendamento | Atividade 4 – Registrar Consulta | default |
-| Cancelar | Atividade 2 – Visualizar Agenda | cancel |
+| Confirmar agendamento | Atividade 6 – Registrar Consulta | default |
+| Cancelar | Atividade 4 – Visualizar Agenda | cancel |
 
 ---
 
-**Atividade 4 – Registrar Consulta**
+**Atividade 6 – Registrar Consulta**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -67,12 +103,12 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
-| Finalizar | Atividade 5 – Exibir Confirmação | default |
+| Finalizar | Atividade 7 – Exibir Confirmação | default |
 
 
 ---
 
-**Atividade 5 – Exibir Confirmação**
+**Atividade 7 – Exibir Confirmação**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -84,3 +120,4 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 | Voltar ao início | Tela inicial | default |
 
 ---
+
