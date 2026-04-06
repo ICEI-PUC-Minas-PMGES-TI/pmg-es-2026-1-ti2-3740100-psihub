@@ -19,7 +19,6 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
 | Lista de psicólogos | Tabela | Exibe nome, especialidade e avaliação | — |
-| Filtro por disponibilidade | Data | Opcional | — |
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
