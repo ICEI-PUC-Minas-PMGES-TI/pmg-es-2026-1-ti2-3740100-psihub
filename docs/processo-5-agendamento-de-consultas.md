@@ -95,6 +95,7 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 ---
 
+
 **Atividade 6 – Registrar Consulta**
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
@@ -120,4 +121,20 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 | Voltar ao início | Tela inicial | default |
 
 ---
+
+**Atividade 8 - Cancelar consulta**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Lista de consultas agendadas | Tabela | Exibe data, horário, psicólogo e status | — |
+| Motivo do cancelamento | Área de Texto | Opcional; máximo de 300 caracteres | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Cancelar consulta | Atualiza status da consulta para "Cancelada" | default |
+| Voltar | Retorna à tela anterior | cancel |
+
+> **Regra de negócio:** Ao cancelar uma consulta, o horário deve ser automaticamente liberado novamente na agenda do psicólogo.
+
+> **Regra de negócio:** O sistema deve notificar o psicólogo sobre o cancelamento da consulta.
 
