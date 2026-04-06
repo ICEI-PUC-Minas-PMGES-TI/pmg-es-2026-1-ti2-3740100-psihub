@@ -5,6 +5,7 @@ Este processo descreve o fluxo de agendamento de consultas psicológicas na plat
 O processo se inicia com o psicólogo definindo sua disponibilidade de horários. Em seguida, o paciente acessa a funcionalidade de agendamento, escolhe um psicólogo, visualiza a agenda e seleciona um horário disponível. Após a confirmação, o sistema registra a consulta e atualiza automaticamente a agenda.
 
 Uma melhoria importante em relação a modelos tradicionais é a automatização do processo, eliminando a necessidade de contato manual (como mensagens ou ligações), reduzindo erros e conflitos de horário.
+
 ![Modelo BPMN do Processo 5 – Agendamento de Consulta](images/agendamento-de-consulta.svg "Modelo BPMN do Processo 5.")
 
 ---
