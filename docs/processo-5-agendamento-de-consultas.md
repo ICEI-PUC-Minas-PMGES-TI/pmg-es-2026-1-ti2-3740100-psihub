@@ -1,67 +1,141 @@
-### 3.3.5 Processo 5 – NOME DO PROCESSO
+### 3.3.5 Processo 5 – Agendamento de Consulta 
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 3. 
-Em seguida, apresente o modelo do processo 3, descrito no padrão BPMN._
+Este processo descreve o fluxo de agendamento de consultas psicológicas na plataforma PsiHub, envolvendo tanto o paciente quanto o psicólogo. O objetivo é permitir que o paciente visualize horários disponíveis e realize o agendamento, enquanto o psicólogo mantém sua agenda atualizada.
 
-![Exemplo de um Modelo BPMN do PROCESSO 3](images/process.png "Modelo BPMN do Processo 3.")
+O processo se inicia com o psicólogo definindo sua disponibilidade de horários. Em seguida, o paciente acessa a funcionalidade de agendamento, escolhe um psicólogo, visualiza a agenda e seleciona um horário disponível. Após a confirmação, o sistema registra a consulta e atualiza automaticamente a agenda.
 
+Uma melhoria importante em relação a modelos tradicionais é a automatização do processo, eliminando a necessidade de contato manual (como mensagens ou ligações), reduzindo erros e conflitos de horário.
+
+![Modelo BPMN do Processo 5 – Agendamento de Consulta](images/agendamento-de-consulta.svg "Modelo BPMN do Processo 5.")
+
+---
 
 #### Detalhamento das atividades
 
-_Descreva aqui cada uma das propriedades das atividades do processo 3. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+---
 
-_Os tipos de dados a serem utilizados são:_
+### **Atividades do Psicólogo**
 
-_* **Área de texto** - campo texto de múltiplas linhas_
+---
 
-_* **Caixa de texto** - campo texto de uma linha_
+**Atividade 1 – Definir Disponibilidade**
 
-_* **Número** - campo numérico_
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Dias disponíveis | Seleção múltipla | Pelo menos 1 dia selecionado | — |
+| Horário de início | Hora | Obrigatório | — |
+| Horário de fim | Hora | Deve ser posterior ao início | — |
+| Duração da consulta | Número | Em minutos; obrigatório | 50 |
 
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Salvar horários | Agenda atualizada no sistema | default |
+| Cancelar | Retorna sem salvar | cancel |
 
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
+---
 
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
+**Atividade 2 – Gerenciar Agenda**
 
-_* **Imagem** - campo contendo uma imagem_
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Lista de horários | Tabela | Exibe horários disponíveis e ocupados | — |
 
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Adicionar horário | Inclui novo horário disponível | default |
+| Remover horário | Remove horário disponível | cancel |
 
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
+---
 
-_* **Arquivo** - campo de upload de documento_
+### **Atividades do Paciente**
 
-_* **Link** - campo que armazena uma URL_
+---
 
-_* **Tabela** - campo formado por uma matriz de valores_
+**Atividade 3 – Acessar Agendamento**
 
-**Nome da atividade 1**
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Lista de psicólogos | Tabela | Exibe nome, especialidade e avaliação | — |
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Selecionar psicólogo | Atividade 4 – Visualizar Agenda | default |
+| Voltar | Tela inicial | cancel |
 
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
+---
+
+**Atividade 4 – Visualizar Agenda**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Agenda do psicólogo | Calendário | Somente leitura; exibe horários disponíveis e indisponíveis | — |
+| Data selecionada | Data | Deve ser futura | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Selecionar horário | Atividade 5 – Confirmar Consulta | default |
+| Alterar data | Atualiza agenda exibida | — |
+| Voltar | Atividade 3 – Acessar Agendamento | cancel |
+
+---
+
+**Atividade 5 – Confirmar Consulta**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Nome do paciente | Caixa de Texto | Preenchido automaticamente; obrigatório | — |
+| Psicólogo selecionado | Caixa de Texto | Somente leitura | — |
+| Data e horário | Caixa de Texto | Somente leitura | — |
+| Tipo de consulta | Seleção única | Online ou Presencial | Online |
+| Observações | Área de Texto | Opcional; máximo de 300 caracteres | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Confirmar agendamento | Atividade 6 – Registrar Consulta | default |
+| Cancelar | Atividade 4 – Visualizar Agenda | cancel |
+
+---
 
 
-**Nome da atividade 2**
+**Atividade 6 – Registrar Consulta**
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Dados da consulta | Registro interno | Deve conter paciente, psicólogo, data e horário | — |
 
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Finalizar | Atividade 7 – Exibir Confirmação | default |
+
+
+---
+
+**Atividade 7 – Exibir Confirmação**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Mensagem de confirmação | Texto | Exibe sucesso no agendamento | — |
+| Detalhes da consulta | Texto | Data, horário e psicólogo | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Voltar ao início | Tela inicial | default |
+
+---
+
+**Atividade 8 - Cancelar consulta**
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+| --- | --- | --- | --- |
+| Lista de consultas agendadas | Tabela | Exibe data, horário, psicólogo e status | — |
+| Motivo do cancelamento | Área de Texto | Opcional; máximo de 300 caracteres | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+| --- | --- | --- |
+| Cancelar consulta | Atualiza status da consulta para "Cancelada" | default |
+| Voltar | Retorna à tela anterior | cancel |
+
+> **Regra de negócio:** Ao cancelar uma consulta, o horário deve ser automaticamente liberado novamente na agenda do psicólogo.
+
+> **Regra de negócio:** O sistema deve notificar o psicólogo sobre o cancelamento da consulta.
+

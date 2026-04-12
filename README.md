@@ -1,6 +1,8 @@
 # Psihub
 
-Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
+O **PsiHub** é uma plataforma digital desenvolvida para modernizar e centralizar a gestão de atendimentos psicológicos, integrando em um único ambiente recursos de agendamento de consultas, prontuários eletrônicos e monitoramento emocional contínuo do paciente entre as sessões. O projeto nasce da necessidade de superar a fragmentação causada pelo uso de ferramentas genéricas e métodos manuais — como anotações em papel e planilhas — que dificultam a consolidação do histórico clínico e tornam o acompanhamento terapêutico menos eficiente.
+
+Ao unificar esses recursos, o PsiHub busca oferecer ao psicólogo uma visão analítica e contínua da evolução de seus pacientes, com relatórios dinâmicos gerados a partir dos registros emocionais diários. A plataforma também prioriza a segurança e a privacidade das informações, seguindo rigorosamente as diretrizes da LGPD e utilizando criptografia para garantir o sigilo terapêutico. O resultado esperado é um processo terapêutico mais organizado, humanizado e orientado por dados, beneficiando tanto os profissionais quanto os pacientes.
 
 ## Integrantes
 
