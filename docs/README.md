@@ -1,6 +1,5 @@
 # psiHub
 
-
 *Hugo Tavares Dutra, Hdutra@sga.pucminas.br*
 
 *Gustavo Fitipaldi Moreira, gustavo.fitipaldi@sga.pucminas.br*
@@ -17,9 +16,9 @@ Professores:
 
 * Prof. Lucca Soares de Paiva Lacerda *
 
-* Prof. Michelle Hanne Soares de Andrade 2 *
+* Prof. Michelle Hanne Soares de Andrade *
 
-* Prof. Luiz Carlos *
+* Prof. Luiz Carlos da silva *
 
 ---
 
@@ -32,7 +31,6 @@ Instituto de Informática e Ciências Exatas – Pontifícia Universidade Catól
 O PsiHub surge no contexto da crescente demanda por cuidados em saúde mental, visando solucionar a fragmentação de dados e a gestão ineficiente em consultórios de psicologia. O objetivo do projeto é desenvolver uma plataforma digital centralizada que integra agendamento, prontuários eletrônicos e o monitoramento emocional contínuo do paciente entre as sessões. Como resultado relevante, o sistema estabelece um novo padrão de segurança através da conformidade rigorosa com a LGPD e o uso de criptografia, garantindo o sigilo terapêutico e proporcionando ao psicólogo uma visão analítica da evolução do paciente por meio de relatórios dinâmicos, tornando o tratamento mais preciso, organizado e humanizado.
 
 ---
-
 
 ## 1. Introdução
 
