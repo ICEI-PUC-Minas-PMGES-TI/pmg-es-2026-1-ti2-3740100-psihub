@@ -8,8 +8,6 @@ O modelo relacional do PsiHub foi definido para cobrir os cinco processos de neg
 
 ### 4.2. Tecnologias
 
-_Descreva qual(is) tecnologias você vai usar para resolver o seu problema, ou seja, implementar a sua solução. Liste todas as tecnologias envolvidas, linguagens a serem utilizadas, serviços Web, frameworks, bibliotecas, IDEs de desenvolvimento, e ferramentas._
-
 | **Dimensao** | **Tecnologia** | **Uso no projeto** |
 | --- | --- | --- |
 | Linguagem Back-end | Java 21 | Implementacao da API e regras de negocio |

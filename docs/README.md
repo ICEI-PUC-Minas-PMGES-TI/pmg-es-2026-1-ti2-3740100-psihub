@@ -103,8 +103,6 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 ## 4. Projeto da solução
 
-_O documento a seguir apresenta o detalhamento do projeto da solução. São apresentadas duas seções que descrevem, respectivamente: modelo relacional e tecnologias._
-
 [Projeto da solução](solution-design.md "Detalhamento do projeto da solução: modelo relacional e tecnologias.")
 
 
