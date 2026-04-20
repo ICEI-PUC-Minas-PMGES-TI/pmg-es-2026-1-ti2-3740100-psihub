@@ -1,5 +1,109 @@
 ## 4. Projeto da solução
 
+## 4.0 Detalhamento das atividades
+
+### 4.0.1 Gestão do Psicólogo
+Este processo é responsável pelo gerenciamento dos dados dos profissionais cadastrados na plataforma, permitindo controle e atualização das informações do psicólogo.
+
+**Tarefas**
+- Cadastrar psicólogo
+- Atualizar perfil
+- Consultar dados
+- Excluir cadastro
+
+**Campos**
+- id_psicologo
+- nome
+- cpf
+- crp
+- email
+- telefone
+
+**Comandos**
+- Criar
+- Atualizar
+- Buscar
+- Excluir
+
+
+### 4.0.2 Gestão do Paciente
+Este processo permite o cadastro, atualização e consulta dos dados dos pacientes atendidos na plataforma.
+
+**Tarefas**
+- Cadastrar paciente
+- Atualizar dados
+- Consultar cadastro
+
+**Campos**
+- id_paciente
+- nome
+- cpf
+- histórico clínico
+
+**Comandos**
+- Criar
+- Atualizar
+- Buscar
+
+
+### 4.0.3 Processo da Sessão
+Este processo registra as sessões realizadas, incluindo anotações clínicas e evolução do paciente.
+
+**Tarefas**
+- Registrar sessão
+- Inserir anotações
+- Finalizar sessão
+
+**Campos**
+- id_sessao
+- data
+- observacoes
+- diagnostico
+
+**Comandos**
+- Criar sessão
+- Atualizar sessão
+- Consultar sessão
+
+
+### 4.0.4 Gestão Financeira
+Este processo gerencia os pagamentos e o controle financeiro das consultas realizadas.
+
+**Tarefas**
+- Registrar pagamento
+- Consultar pagamentos
+- Gerar relatório
+
+**Campos**
+- id_pagamento
+- valor
+- status
+
+**Comandos**
+- Registrar
+- Consultar
+- Gerar relatório
+
+
+### 4.0.5 Agendamento de Consultas
+Este processo permite o gerenciamento das consultas, incluindo criação, remarcação e cancelamento.
+
+**Tarefas**
+- Criar agendamento
+- Reagendar
+- Cancelar consulta
+
+**Campos**
+- id_consulta
+- data
+- horario
+- status
+
+**Comandos**
+- Criar
+- Atualizar
+- Cancelar
+
 ### 4.1. Modelo de dados
 
 O modelo relacional do PsiHub foi definido para cobrir os cinco processos de negocio: gestao do psicologo, gestao do paciente, processo da sessao, gestao financeira e agendamento de consultas. A estrutura foi organizada para garantir rastreabilidade clinica, controle financeiro, integridade dos agendamentos e conformidade com LGPD.
