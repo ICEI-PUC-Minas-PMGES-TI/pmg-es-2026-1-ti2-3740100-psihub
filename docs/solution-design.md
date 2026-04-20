@@ -5,7 +5,8 @@
 ### 4.0.1 Gestão do Psicólogo
 Este processo é responsável pelo gerenciamento dos dados dos profissionais cadastrados na plataforma, permitindo controle e atualização das informações do psicólogo.
 
-**Tarefas**
+**Tarefa**
+
 - Cadastrar psicólogo
 - Atualizar perfil
 - Consultar dados
@@ -29,7 +30,7 @@ Este processo é responsável pelo gerenciamento dos dados dos profissionais cad
 ### 4.0.2 Gestão do Paciente
 Este processo permite o cadastro, atualização e consulta dos dados dos pacientes atendidos na plataforma.
 
-**Tarefas**
+**Tarefa**
 - Cadastrar paciente
 - Atualizar dados
 - Consultar cadastro
@@ -49,7 +50,7 @@ Este processo permite o cadastro, atualização e consulta dos dados dos pacient
 ### 4.0.3 Processo da Sessão
 Este processo registra as sessões realizadas, incluindo anotações clínicas e evolução do paciente.
 
-**Tarefas**
+**Tarefa**
 - Registrar sessão
 - Inserir anotações
 - Finalizar sessão
@@ -69,7 +70,7 @@ Este processo registra as sessões realizadas, incluindo anotações clínicas e
 ### 4.0.4 Gestão Financeira
 Este processo gerencia os pagamentos e o controle financeiro das consultas realizadas.
 
-**Tarefas**
+**Tarefa**
 - Registrar pagamento
 - Consultar pagamentos
 - Gerar relatório
@@ -88,7 +89,7 @@ Este processo gerencia os pagamentos e o controle financeiro das consultas reali
 ### 4.0.5 Agendamento de Consultas
 Este processo permite o gerenciamento das consultas, incluindo criação, remarcação e cancelamento.
 
-**Tarefas**
+**Tarefa**
 - Criar agendamento
 - Reagendar
 - Cancelar consulta
