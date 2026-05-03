@@ -12,9 +12,9 @@ Tela principal do sistema
 
 ## 6.2. Telas do processo 1
 
-_Descrição da tela relativa à atividade 1._
+Tela da Gestão de psicologos
 
-Tela da atividade 1
+<img width="791" height="556" alt="image" src="https://github.com/user-attachments/assets/070172e2-8bb1-4e52-a0a7-1a32fe7144fd" />
 
 _Descrição da tela relativa à atividade 2._
 
