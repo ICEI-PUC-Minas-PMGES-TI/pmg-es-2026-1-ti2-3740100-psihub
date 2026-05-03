@@ -4,7 +4,7 @@
 
 O modelo relacional do PsiHub foi definido para cobrir os cinco processos de negocio: gestao do psicologo, gestao do paciente, processo da sessao, gestao financeira e agendamento de consultas. A estrutura foi organizada para garantir rastreabilidade clinica, controle financeiro, integridade dos agendamentos e conformidade com LGPD.
 
-![Modelo relacional do PsiHub](images/modeloRelacional.png "Modelo Relacional do PsiHub")
+![Modelo relacional do PsiHub](images/modeloRelacional_v2.png "Modelo Relacional do PsiHub")
 
 ### 4.2. Tecnologias
 
