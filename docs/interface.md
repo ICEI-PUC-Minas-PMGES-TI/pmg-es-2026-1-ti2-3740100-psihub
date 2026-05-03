@@ -16,6 +16,15 @@ Tela da Gestão de psicologos
 
 <img width="791" height="556" alt="image" src="https://github.com/user-attachments/assets/070172e2-8bb1-4e52-a0a7-1a32fe7144fd" />
 
+Tela de Gestão do paciente
+
+<img width="798" height="582" alt="image" src="https://github.com/user-attachments/assets/439974c5-1c53-4c78-a4d6-76879cea2309" />
+
+Tela Inicial
+
+<img width="800" height="561" alt="image" src="https://github.com/user-attachments/assets/d57a1e45-d615-4501-b384-1fb7588e20b6" />
+
+
 _Descrição da tela relativa à atividade 2._
 
 Tela da atividade 2
