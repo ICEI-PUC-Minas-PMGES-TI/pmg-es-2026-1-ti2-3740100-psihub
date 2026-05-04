@@ -24,8 +24,10 @@ Tela Inicial
 
 <img width="800" height="561" alt="image" src="https://github.com/user-attachments/assets/d57a1e45-d615-4501-b384-1fb7588e20b6" />
 
+Tela Financeiro
 
-_Descrição da tela relativa à atividade 2._
+<img width="861" height="609" alt="image" src="https://github.com/user-attachments/assets/30b6a80d-b74c-4014-b975-aa1c6bab69ef" />
+
 
 Tela da atividade 2
 
