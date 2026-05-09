@@ -1,20 +1,37 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: psihub-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: "${BACKEND_DB_URL:-jdbc:mysql://mysql:3306/psihub?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo}"
+      DB_USERNAME: "${DB_USERNAME:-psihub}"
+      DB_PASSWORD: "${DB_PASSWORD:-psihub}"
+      SERVER_PORT: "${SERVER_PORT:-8080}"
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+
   mysql:
     image: mysql:8.4
     container_name: psihub-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: psihub
-      MYSQL_USER: psihub
-      MYSQL_PASSWORD: psihub
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-psihub}"
+      MYSQL_USER: "${MYSQL_USER:-psihub}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-psihub}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root}"
       TZ: America/Sao_Paulo
     ports:
       - "3306:3306"
     volumes:
       - psihub_mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5

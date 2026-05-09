@@ -9,9 +9,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "slots_consulta")
@@ -35,8 +37,8 @@ public class SlotConsulta extends BaseEntity {
     @Column(nullable = false, length = 20)
     private StatusSlotConsulta status = StatusSlotConsulta.DISPONIVEL;
 
-    @OneToOne(mappedBy = "slotConsulta", fetch = FetchType.LAZY)
-    private Consulta consulta;
+    @OneToMany(mappedBy = "slotConsulta")
+    private List<Consulta> consultas = new ArrayList<>();
 
     public Psicologo getPsicologo() {
         return psicologo;
@@ -78,11 +80,11 @@ public class SlotConsulta extends BaseEntity {
         this.status = status;
     }
 
-    public Consulta getConsulta() {
-        return consulta;
+    public List<Consulta> getConsultas() {
+        return consultas;
     }
 
-    public void setConsulta(Consulta consulta) {
-        this.consulta = consulta;
+    public void setConsultas(List<Consulta> consultas) {
+        this.consultas = consultas;
     }
 }

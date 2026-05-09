@@ -26,8 +26,8 @@ public class Consulta extends BaseEntity {
     @JoinColumn(name = "psicologo_id", nullable = false)
     private Psicologo psicologo;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "slot_consulta_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "slot_consulta_id", nullable = false)
     private SlotConsulta slotConsulta;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
