@@ -7,4 +7,6 @@ import psihub.domain.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

@@ -13,6 +13,7 @@ services:
       DB_USERNAME: "${DB_USERNAME:-psihub}"
       DB_PASSWORD: "${DB_PASSWORD:-psihub}"
       SERVER_PORT: "${SERVER_PORT:-8080}"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET deve ser definido no .env}"
     ports:
       - "${SERVER_PORT:-8080}:8080"
 

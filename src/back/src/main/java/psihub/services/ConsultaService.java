@@ -10,6 +10,7 @@ import psihub.domain.enums.StatusAcesso;
 import psihub.domain.enums.StatusConsulta;
 import psihub.domain.enums.StatusSlotConsulta;
 import psihub.domain.enums.TipoAtendimento;
+import psihub.domain.enums.TipoUsuario;
 import psihub.domain.model.Consulta;
 import psihub.domain.model.Paciente;
 import psihub.domain.model.Psicologo;
@@ -35,6 +36,7 @@ public class ConsultaService {
     private final UsuarioRepository usuarioRepository;
     private final SlotConsultaRepository slotConsultaRepository;
     private final ApiResponseMapper mapper;
+    private final NotificacaoService notificacaoService;
 
     public ConsultaService(
             ConsultaRepository consultaRepository,
@@ -42,7 +44,8 @@ public class ConsultaService {
             PsicologoRepository psicologoRepository,
             UsuarioRepository usuarioRepository,
             SlotConsultaRepository slotConsultaRepository,
-            ApiResponseMapper mapper
+            ApiResponseMapper mapper,
+            NotificacaoService notificacaoService
     ) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
@@ -50,15 +53,16 @@ public class ConsultaService {
         this.usuarioRepository = usuarioRepository;
         this.slotConsultaRepository = slotConsultaRepository;
         this.mapper = mapper;
+        this.notificacaoService = notificacaoService;
     }
 
     @Transactional
-    public ConsultaResponse agendar(AgendarConsultaRequest request) {
-        Paciente paciente = pacienteRepository.findById(request.pacienteId())
+    public ConsultaResponse agendarComoPaciente(Long pacienteId, AgendarConsultaRequest request) {
+        Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
         Psicologo psicologo = psicologoRepository.findById(request.psicologoId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
-        Usuario agendadoPor = usuarioRepository.findById(request.agendadoPorUsuarioId())
+        Usuario agendadoPor = usuarioRepository.findById(pacienteId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario responsavel pelo agendamento nao encontrado"));
         SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(request.slotConsultaId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Horario nao encontrado"));
@@ -73,11 +77,10 @@ public class ConsultaService {
         consulta.setAgendadoPorUsuario(agendadoPor);
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
         consulta.setStatus(StatusConsulta.AGENDADA);
-        consulta.setObservacoes(request.observacoes());
+        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
 
         slot.setStatus(StatusSlotConsulta.RESERVADO);
-        Consulta consultaSalva = consultaRepository.save(consulta);
-        return mapper.toResponse(consultaSalva);
+        return mapper.toResponse(consultaRepository.save(consulta));
     }
 
     @Transactional(readOnly = true)
@@ -112,9 +115,31 @@ public class ConsultaService {
         return mapper.toResponse(buscarConsultaDetalhada(consultaId));
     }
 
+    @Transactional(readOnly = true)
+    public ConsultaResponse detalharComoUsuario(Long consultaId, Long userId, TipoUsuario tipoUsuario) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarAcessoConsulta(consulta, userId, tipoUsuario);
+        return mapper.toResponse(consulta);
+    }
+
     @Transactional
     public ConsultaResponse confirmar(Long consultaId) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
+
+        if (consulta.getStatus() != StatusConsulta.AGENDADA) {
+            throw new ApiException(HttpStatus.CONFLICT, "Apenas consultas agendadas podem ser confirmadas");
+        }
+
+        consulta.setStatus(StatusConsulta.CONFIRMADA);
+        return mapper.toResponse(consulta);
+    }
+
+    @Transactional
+    public ConsultaResponse confirmarComoPsicologo(Long consultaId, Long psicologoId) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        if (!consulta.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+        }
 
         if (consulta.getStatus() != StatusConsulta.AGENDADA) {
             throw new ApiException(HttpStatus.CONFLICT, "Apenas consultas agendadas podem ser confirmadas");
@@ -143,6 +168,37 @@ public class ConsultaService {
         return mapper.toResponse(consulta);
     }
 
+    @Transactional
+    public ConsultaResponse cancelarComoUsuario(
+            Long consultaId,
+            Long userId,
+            TipoUsuario tipoUsuario,
+            CancelarConsultaRequest request
+    ) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarAcessoConsulta(consulta, userId, tipoUsuario);
+
+        if (consulta.getStatus() == StatusConsulta.CONCLUIDA) {
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluidas nao podem ser canceladas");
+        }
+
+        if (consulta.getStatus() == StatusConsulta.CANCELADA) {
+            return mapper.toResponse(consulta);
+        }
+
+        consulta.setStatus(StatusConsulta.CANCELADA);
+        consulta.setMotivoCancelamento(request == null ? null : sanitizeOptional(request.motivoCancelamento()));
+        consulta.getSlotConsulta().setStatus(StatusSlotConsulta.DISPONIVEL);
+
+        if (tipoUsuario == TipoUsuario.PACIENTE) {
+            notificacaoService.notificarCancelamentoParaPsicologo(consulta);
+        } else if (tipoUsuario == TipoUsuario.PSICOLOGO) {
+            notificacaoService.notificarCancelamentoParaPaciente(consulta);
+        }
+
+        return mapper.toResponse(consulta);
+    }
+
     @Transactional(readOnly = true)
     public Consulta buscarConsultaDetalhada(Long consultaId) {
         return consultaRepository.findDetailedById(consultaId)
@@ -167,5 +223,22 @@ public class ConsultaService {
         if (slot.getInicioEm().isBefore(LocalDateTime.now())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido agendar consulta em horario passado");
         }
+    }
+
+    private void validarAcessoConsulta(Consulta consulta, Long userId, TipoUsuario tipoUsuario) {
+        boolean pertenceAoPaciente = tipoUsuario == TipoUsuario.PACIENTE && consulta.getPaciente().getId().equals(userId);
+        boolean pertenceAoPsicologo = tipoUsuario == TipoUsuario.PSICOLOGO && consulta.getPsicologo().getId().equals(userId);
+
+        if (!pertenceAoPaciente && !pertenceAoPsicologo) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+        }
+    }
+
+    private String sanitizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim().replaceAll("\\s+", " ");
+        return normalized.isBlank() ? null : normalized;
     }
 }

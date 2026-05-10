@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Size;
 import psihub.domain.enums.TipoAtendimento;
 
 public record AgendarConsultaRequest(
-        @NotNull Long pacienteId,
+        Long pacienteId,
         @NotNull Long psicologoId,
         @NotNull Long slotConsultaId,
-        @NotNull Long agendadoPorUsuarioId,
+        Long agendadoPorUsuarioId,
         TipoAtendimento tipoAtendimento,
         @Size(max = 300) String observacoes
 ) {

@@ -18,10 +18,6 @@ Ao unificar esses recursos, o PsiHub busca oferecer ao psicólogo uma visão ana
 * Michelle Hanne Soares de Andrade
 * Luiz Carlos da silva
 
-## Instruções de utilização
-
-Assim que a primeira versão do sistema estiver disponível, deverá complementar com as instruções de utilização. Descreva como instalar eventuais dependências e como executar a aplicação.
-
 ## Histórico de versões
 
 * 0.1.1

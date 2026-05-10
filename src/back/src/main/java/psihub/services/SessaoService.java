@@ -52,6 +52,17 @@ public class SessaoService {
     @Transactional(readOnly = true)
     public PreparacaoSessaoResponse preparar(Long consultaId) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
+        return montarPreparacao(consulta, consultaId);
+    }
+
+    @Transactional(readOnly = true)
+    public PreparacaoSessaoResponse prepararComoPsicologo(Long consultaId, Long psicologoId) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarPsicologoDaConsulta(consulta, psicologoId);
+        return montarPreparacao(consulta, consultaId);
+    }
+
+    private PreparacaoSessaoResponse montarPreparacao(Consulta consulta, Long consultaId) {
         ResumoEmocionalResponse resumo = montarResumoEmocional(consulta);
         ProntuarioSessaoResponse prontuario = prontuarioSessaoRepository.findByConsultaId(consultaId)
                 .map(mapper::toResponse)
@@ -63,6 +74,17 @@ public class SessaoService {
     @Transactional
     public ProntuarioSessaoResponse iniciar(Long consultaId, IniciarSessaoRequest request) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
+        return iniciarConsulta(consulta, request);
+    }
+
+    @Transactional
+    public ProntuarioSessaoResponse iniciarComoPsicologo(Long consultaId, Long psicologoId, IniciarSessaoRequest request) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarPsicologoDaConsulta(consulta, psicologoId);
+        return iniciarConsulta(consulta, request);
+    }
+
+    private ProntuarioSessaoResponse iniciarConsulta(Consulta consulta, IniciarSessaoRequest request) {
         validarConsultaPodeIniciar(consulta);
 
         LocalDateTime inicio = request.iniciadoEm() == null ? LocalDateTime.now() : request.iniciadoEm();
@@ -82,6 +104,21 @@ public class SessaoService {
     @Transactional
     public ProntuarioSessaoResponse salvarRascunho(Long consultaId, SalvarRascunhoSessaoRequest request) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
+        return salvarRascunhoConsulta(consulta, request);
+    }
+
+    @Transactional
+    public ProntuarioSessaoResponse salvarRascunhoComoPsicologo(
+            Long consultaId,
+            Long psicologoId,
+            SalvarRascunhoSessaoRequest request
+    ) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarPsicologoDaConsulta(consulta, psicologoId);
+        return salvarRascunhoConsulta(consulta, request);
+    }
+
+    private ProntuarioSessaoResponse salvarRascunhoConsulta(Consulta consulta, SalvarRascunhoSessaoRequest request) {
         validarConsultaEditavel(consulta);
 
         ProntuarioSessao prontuario = buscarOuCriarProntuario(consulta);
@@ -96,6 +133,17 @@ public class SessaoService {
     @Transactional
     public ProntuarioSessaoResponse encerrar(Long consultaId, EncerrarSessaoRequest request) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
+        return encerrarConsulta(consulta, request);
+    }
+
+    @Transactional
+    public ProntuarioSessaoResponse encerrarComoPsicologo(Long consultaId, Long psicologoId, EncerrarSessaoRequest request) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarPsicologoDaConsulta(consulta, psicologoId);
+        return encerrarConsulta(consulta, request);
+    }
+
+    private ProntuarioSessaoResponse encerrarConsulta(Consulta consulta, EncerrarSessaoRequest request) {
 
         if (consulta.getStatus() != StatusConsulta.EM_ANDAMENTO) {
             throw new ApiException(HttpStatus.CONFLICT, "Sessao precisa estar em andamento para ser encerrada");
@@ -162,6 +210,15 @@ public class SessaoService {
     public ProntuarioSessaoResponse detalharProntuario(Long prontuarioId) {
         ProntuarioSessao prontuario = prontuarioSessaoRepository.findDetailedById(prontuarioId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuario nao encontrado"));
+
+        return mapper.toResponse(prontuario);
+    }
+
+    @Transactional(readOnly = true)
+    public ProntuarioSessaoResponse detalharProntuarioComoPsicologo(Long prontuarioId, Long psicologoId) {
+        ProntuarioSessao prontuario = prontuarioSessaoRepository.findDetailedById(prontuarioId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuario nao encontrado"));
+        validarPsicologoDaConsulta(prontuario.getConsulta(), psicologoId);
 
         return mapper.toResponse(prontuario);
     }
@@ -248,6 +305,12 @@ public class SessaoService {
                 || consulta.getStatus() == StatusConsulta.CONCLUIDA
                 || consulta.getStatus() == StatusConsulta.FALTOU) {
             throw new ApiException(HttpStatus.CONFLICT, "Consulta nao permite alteracao de sessao neste status");
+        }
+    }
+
+    private void validarPsicologoDaConsulta(Consulta consulta, Long psicologoId) {
+        if (!consulta.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
         }
     }
 

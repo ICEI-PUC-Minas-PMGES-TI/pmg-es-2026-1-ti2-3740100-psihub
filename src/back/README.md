@@ -4,6 +4,7 @@ Backend em Java 21 com Spring Boot 3, Spring Data JPA/Hibernate, Flyway e MySQL 
 
 O backend implementa APIs para:
 
+- autenticacao JWT de pacientes e psicologos;
 - agenda e disponibilidade do psicologo;
 - agendamento, confirmacao e cancelamento de consultas;
 - preparacao, rascunho, encerramento e linha do tempo de sessoes;
@@ -86,6 +87,7 @@ Variaveis de ambiente aceitas:
 - `DB_USERNAME`
 - `DB_PASSWORD`
 - `SERVER_PORT`
+- `JWT_SECRET`
 - `MYSQL_DATABASE`
 - `MYSQL_USER`
 - `MYSQL_PASSWORD`
@@ -98,8 +100,46 @@ Valores padrao:
 - `DB_USERNAME=psihub`
 - `DB_PASSWORD=psihub`
 - `SERVER_PORT=8080`
+- `JWT_SECRET` nao possui valor padrao e deve ter pelo menos 32 caracteres
 
-O `application.yml` importa `optional:file:.env[.properties]`, entao um `.env` local pode definir essas variaveis sem alterar o codigo. Use `.env.example` como base.
+O `application.yml` importa `optional:file:.env[.properties]`, entao um `.env` local pode definir essas variaveis sem alterar o codigo. Use `.env.exemple` como base.
+
+## Autenticacao
+
+Rotas publicas:
+
+```http
+POST /auth/register
+POST /auth/login
+```
+
+As demais rotas `/api/**` exigem `Authorization: Bearer <token>`. O token e assinado com `JWT_SECRET`, expira em 7 dias e carrega `userId`, `email` e `tipo`.
+
+Exemplo de cadastro:
+
+```json
+{
+  "nome": "Maria Silva",
+  "email": "maria@email.com",
+  "senha": "senhaSegura123",
+  "tipo": "paciente"
+}
+```
+
+Para psicologos autenticados, use as rotas de agenda com `me`, por exemplo:
+
+```http
+POST /api/psicologos/me/disponibilidades
+GET /api/psicologos/me/agenda/slots
+```
+
+Para pacientes autenticados, o backend usa o `userId` do token ao listar, agendar e cancelar consultas. Nao envie `pacienteId` ou `agendadoPorUsuarioId` no corpo da requisicao.
+
+## Seed local
+
+Em ambientes fora de producao, o backend popula dados mockados automaticamente na inicializacao quando a tabela `usuarios` esta vazia. O seed cria 2 psicologos, 3 pacientes, regras de disponibilidade, slots futuros e consultas agendadas/concluidas usando a senha `senha123`.
+
+O seed nao roda quando `NODE_ENV=production` ou quando o profile ativo e `production`/`prod`.
 
 ## Estrutura
 

@@ -42,6 +42,8 @@ public interface SlotConsultaRepository extends JpaRepository<SlotConsulta, Long
 
     boolean existsByPsicologoIdAndInicioEmAndFimEm(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEm);
 
+    Optional<SlotConsulta> findByPsicologoIdAndInicioEmAndFimEm(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEm);
+
     @Query("""
             select count(slot) > 0
             from SlotConsulta slot

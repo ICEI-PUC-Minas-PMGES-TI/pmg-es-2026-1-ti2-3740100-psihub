@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,8 @@ import psihub.dtos.sessoes.LinhaTempoSessaoResponse;
 import psihub.dtos.sessoes.PreparacaoSessaoResponse;
 import psihub.dtos.sessoes.ProntuarioSessaoResponse;
 import psihub.dtos.sessoes.SalvarRascunhoSessaoRequest;
+import psihub.exceptions.ApiException;
+import psihub.security.AuthenticatedUser;
 import psihub.services.SessaoService;
 
 @RestController
@@ -31,50 +35,69 @@ public class SessaoController {
     }
 
     @GetMapping("/consultas/{consultaId}/sessao/preparacao")
-    public PreparacaoSessaoResponse preparar(@PathVariable Long consultaId) {
-        return sessaoService.preparar(consultaId);
+    public PreparacaoSessaoResponse preparar(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long consultaId
+    ) {
+        validarPsicologo(user);
+        return sessaoService.prepararComoPsicologo(consultaId, user.userId());
     }
 
     @PostMapping("/consultas/{consultaId}/sessao/iniciar")
     public ProntuarioSessaoResponse iniciar(
+            @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long consultaId,
             @Valid @RequestBody(required = false) IniciarSessaoRequest request
     ) {
-        return sessaoService.iniciar(
-                consultaId,
-                request == null ? new IniciarSessaoRequest(null, null) : request
-        );
+        validarPsicologo(user);
+        return sessaoService.iniciarComoPsicologo(consultaId, user.userId(), request == null ? new IniciarSessaoRequest(null, null) : request);
     }
 
     @PutMapping("/consultas/{consultaId}/sessao/rascunho")
     public ProntuarioSessaoResponse salvarRascunho(
+            @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long consultaId,
             @Valid @RequestBody SalvarRascunhoSessaoRequest request
     ) {
-        return sessaoService.salvarRascunho(consultaId, request);
+        validarPsicologo(user);
+        return sessaoService.salvarRascunhoComoPsicologo(consultaId, user.userId(), request);
     }
 
     @PostMapping("/consultas/{consultaId}/sessao/encerrar")
     public ProntuarioSessaoResponse encerrar(
+            @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long consultaId,
             @Valid @RequestBody EncerrarSessaoRequest request
     ) {
-        return sessaoService.encerrar(consultaId, request);
+        validarPsicologo(user);
+        return sessaoService.encerrarComoPsicologo(consultaId, user.userId(), request);
     }
 
     @GetMapping("/pacientes/{pacienteId}/linha-do-tempo")
     public List<LinhaTempoSessaoResponse> linhaTempo(
+            @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long pacienteId,
-            @RequestParam Long psicologoId,
+            @RequestParam(required = false) Long psicologoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             @RequestParam(required = false) String tema
     ) {
-        return sessaoService.linhaTempo(pacienteId, psicologoId, inicio, fim, tema);
+        validarPsicologo(user);
+        return sessaoService.linhaTempo(pacienteId, user.userId(), inicio, fim, tema);
     }
 
     @GetMapping("/prontuarios/{prontuarioId}")
-    public ProntuarioSessaoResponse detalharProntuario(@PathVariable Long prontuarioId) {
-        return sessaoService.detalharProntuario(prontuarioId);
+    public ProntuarioSessaoResponse detalharProntuario(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long prontuarioId
+    ) {
+        validarPsicologo(user);
+        return sessaoService.detalharProntuarioComoPsicologo(prontuarioId, user.userId());
+    }
+
+    private void validarPsicologo(AuthenticatedUser user) {
+        if (!user.isPsicologo()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar prontuarios e sessoes");
+        }
     }
 }
