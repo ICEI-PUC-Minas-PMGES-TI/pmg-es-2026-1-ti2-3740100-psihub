@@ -14,19 +14,11 @@ Tela principal do sistema
 
 Tela da Gestão de psicologos
 
-<img width="791" height="556" alt="image" src="https://github.com/user-attachments/assets/070172e2-8bb1-4e52-a0a7-1a32fe7144fd" />
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/50c78224-108d-4a08-9a2e-3dc2b3c718aa" />
 
 Tela de Gestão do paciente
 
 <img width="798" height="582" alt="image" src="https://github.com/user-attachments/assets/439974c5-1c53-4c78-a4d6-76879cea2309" />
-
-Tela Inicial
-
-<img width="800" height="561" alt="image" src="https://github.com/user-attachments/assets/d57a1e45-d615-4501-b384-1fb7588e20b6" />
-
-Tela Financeiro
-
-<img width="861" height="609" alt="image" src="https://github.com/user-attachments/assets/30b6a80d-b74c-4014-b975-aa1c6bab69ef" />
 
 
 Tela da atividade 2
@@ -34,7 +26,9 @@ Tela da atividade 2
 
 ## 6.3. Telas do processo 2
 
-_Descrição da tela relativa à atividade 1._
+Tela do Processo de secção
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/4850a491-8364-410b-8e17-13174fddf902" />
 
 Tela da atividade 1
 
