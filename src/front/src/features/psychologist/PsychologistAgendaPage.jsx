@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarPlus, ChevronLeft, ChevronRight, Download, Edit3, Loader2, Save, Search, Trash2, X } from 'lucide-react';
 import { schedulingApi } from '../../api/schedulingApi.js';
 import { addDays, formatDate, formatTime, toIsoDate } from '../../utils/date.js';
@@ -336,9 +336,10 @@ export function PsychologistAgendaPage({ onToast }) {
                 data: toIsoDate(date),
                 horaInicio: start,
                 horaFim: end,
-                pacienteId: '',
+                pacienteId: null,
+                pacienteNome: '',
                 tipoAtendimento: 'ONLINE',
-                observacoes: '',
+                observacoes: '',,
             });
         } catch (error) {
             onToast?.({ type: 'error', message: error?.message || 'Não foi possível criar o horário.' });
@@ -907,6 +908,120 @@ function SingleDayAvailabilityModal({ state, onClose, onChange, onSubmit, saving
     );
 }
 
+function PatientSearchField({ value, selectedId, onSelect, onClear }) {
+    const [query, setQuery] = useState(value || '');
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+    const debounceRef = useRef(null);
+    const containerRef = useRef(null);
+
+    const search = useCallback((term) => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (!term.trim()) {
+            setResults([]);
+            setOpen(false);
+            return;
+        }
+        debounceRef.current = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const data = await schedulingApi.listMyPatients({ nome: term.trim() });
+                setResults(data || []);
+                setOpen(true);
+            } catch {
+                setResults([]);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+    }, []);
+
+    function handleChange(event) {
+        const term = event.target.value;
+        setQuery(term);
+        if (selectedId) {
+            onClear();
+        }
+        search(term);
+    }
+
+    function handleSelect(paciente) {
+        setQuery(paciente.nome);
+        setResults([]);
+        setOpen(false);
+        onSelect(paciente);
+    }
+
+    function handleBlur(event) {
+        if (containerRef.current && !containerRef.current.contains(event.relatedTarget)) {
+            setOpen(false);
+            if (!selectedId) {
+                setQuery('');
+            }
+        }
+    }
+
+    return (
+        <div className="field" ref={containerRef} onBlur={handleBlur} style={{ position: 'relative' }}>
+            <label htmlFor="patient-search">Paciente</label>
+            <input
+                id="patient-search"
+                type="text"
+                value={query}
+                onChange={handleChange}
+                onFocus={() => query.trim() && !selectedId && search(query)}
+                placeholder="Buscar paciente pelo nome..."
+                autoComplete="off"
+                required
+            />
+            {loading && <span style={{ position: 'absolute', right: '10px', top: '34px', fontSize: '12px', color: '#6B7280' }}>Buscando...</span>}
+            {open && !loading && (
+                <ul style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: '#fff',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                    zIndex: 100,
+                    margin: 0,
+                    padding: 0,
+                    listStyle: 'none',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                }}>
+                    {results.length === 0
+                        ? <li style={{ padding: '10px 14px', color: '#6B7280', fontSize: '14px' }}>Nenhum paciente encontrado</li>
+                        : results.map((paciente) => (
+                            <li key={paciente.id}>
+                                <button
+                                    type="button"
+                                    style={{
+                                        width: '100%',
+                                        textAlign: 'left',
+                                        padding: '10px 14px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                    }}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={() => handleSelect(paciente)}
+                                >
+                                    {paciente.nome}
+                                </button>
+                            </li>
+                        ))
+                    }
+                </ul>
+            )}
+        </div>
+    );
+}
+
 function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, saving }) {
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
@@ -922,17 +1037,12 @@ function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, saving 
                 </div>
 
                 <form className="stack-form" onSubmit={onSubmit}>
-                    <label className="field">
-                        ID do Paciente
-                        <input
-                            type="number"
-                            min="1"
-                            value={state.pacienteId}
-                            onChange={(event) => onChange((current) => ({ ...current, pacienteId: event.target.value }))}
-                            placeholder="Digite o ID do paciente"
-                            required
-                        />
-                    </label>
+                    <PatientSearchField
+                        value={state.pacienteNome}
+                        selectedId={state.pacienteId}
+                        onSelect={(paciente) => onChange((current) => ({ ...current, pacienteId: paciente.id, pacienteNome: paciente.nome }))}
+                        onClear={() => onChange((current) => ({ ...current, pacienteId: null, pacienteNome: '' }))}
+                    />
 
                     <div className="form-grid">
                         <label>

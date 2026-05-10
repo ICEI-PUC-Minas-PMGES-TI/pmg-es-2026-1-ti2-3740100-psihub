@@ -20,6 +20,7 @@ import psihub.domain.enums.DiaSemana;
 import psihub.domain.enums.StatusConsulta;
 import psihub.domain.enums.StatusAcesso;
 import psihub.domain.enums.StatusSlotConsulta;
+import psihub.domain.enums.StatusVinculo;
 import psihub.domain.model.Consulta;
 import psihub.domain.model.Psicologo;
 import psihub.domain.model.RegraDisponibilidade;
@@ -28,11 +29,13 @@ import psihub.dtos.agenda.BloquearSlotRequest;
 import psihub.dtos.agenda.CriarSlotManualRequest;
 import psihub.dtos.agenda.DefinirDisponibilidadeRequest;
 import psihub.dtos.agenda.DisponibilidadeResponse;
+import psihub.dtos.agenda.PacienteResumoResponse;
 import psihub.dtos.agenda.RegraDisponibilidadeResponse;
 import psihub.dtos.agenda.SlotConsultaResponse;
 import psihub.exceptions.ApiException;
 import psihub.mappers.ApiResponseMapper;
 import psihub.repositories.ConsultaRepository;
+import psihub.repositories.PacienteRepository;
 import psihub.repositories.PsicologoRepository;
 import psihub.repositories.RegraDisponibilidadeRepository;
 import psihub.repositories.SlotConsultaRepository;
@@ -71,6 +74,7 @@ public class AgendaService {
     private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
     private final SlotConsultaRepository slotConsultaRepository;
     private final ConsultaRepository consultaRepository;
+    private final PacienteRepository pacienteRepository;
     private final ApiResponseMapper mapper;
 
     public AgendaService(
@@ -78,12 +82,14 @@ public class AgendaService {
             RegraDisponibilidadeRepository regraDisponibilidadeRepository,
             SlotConsultaRepository slotConsultaRepository,
             ConsultaRepository consultaRepository,
+            PacienteRepository pacienteRepository,
             ApiResponseMapper mapper
     ) {
         this.psicologoRepository = psicologoRepository;
         this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
         this.slotConsultaRepository = slotConsultaRepository;
         this.consultaRepository = consultaRepository;
+        this.pacienteRepository = pacienteRepository;
         this.mapper = mapper;
     }
 
@@ -155,6 +161,16 @@ public class AgendaService {
         return slotConsultaRepository.findAgenda(psicologoId, inicioFiltro, fimFiltro, status)
                 .stream()
                 .map(slot -> mapper.toResponse(slot, consultasPorSlot.get(slot.getId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PacienteResumoResponse> listarPacientesVinculados(Long psicologoId, String nome) {
+        buscarPsicologo(psicologoId);
+        String filtroNome = (nome == null || nome.isBlank()) ? null : nome.trim();
+        return pacienteRepository.findByPsicologoIdAndVinculo(psicologoId, StatusVinculo.ACEITO, filtroNome)
+                .stream()
+                .map(paciente -> new PacienteResumoResponse(paciente.getId(), paciente.getUsuario().getNome()))
                 .toList();
     }
 

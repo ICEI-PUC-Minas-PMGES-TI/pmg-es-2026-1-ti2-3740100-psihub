@@ -21,6 +21,7 @@ import psihub.dtos.agenda.BloquearSlotRequest;
 import psihub.dtos.agenda.CriarSlotManualRequest;
 import psihub.dtos.agenda.DefinirDisponibilidadeRequest;
 import psihub.dtos.agenda.DisponibilidadeResponse;
+import psihub.dtos.agenda.PacienteResumoResponse;
 import psihub.dtos.agenda.RegraDisponibilidadeResponse;
 import psihub.dtos.agenda.SlotConsultaResponse;
 import psihub.dtos.consultas.AgendarPorPsicologoRequest;
@@ -49,6 +50,14 @@ public class AgendaController {
             @Valid @RequestBody AgendarPorPsicologoRequest request
     ) {
         return consultaService.agendarComoPsicologo(user.userId(), request);
+    }
+
+    @GetMapping("/me/pacientes")
+    public List<PacienteResumoResponse> listarMeusPacientes(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(required = false) String nome
+    ) {
+        return agendaService.listarPacientesVinculados(user.userId(), nome);
     }
 
     @PostMapping("/me/disponibilidades")

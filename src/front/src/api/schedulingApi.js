@@ -86,4 +86,11 @@ export const schedulingApi = {
             body: {},
         });
     },
+
+    listMyPatients({ nome, signal } = {}) {
+        return apiRequest('/api/psicologos/me/pacientes', {
+            query: nome ? { nome } : undefined,
+            signal,
+        });
+    },
 };
