@@ -42,6 +42,13 @@ public interface SlotConsultaRepository extends JpaRepository<SlotConsulta, Long
 
     boolean existsByPsicologoIdAndInicioEmAndFimEm(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEm);
 
+    boolean existsByPsicologoIdAndInicioEmAndFimEmAndStatusNot(
+            Long psicologoId,
+            LocalDateTime inicioEm,
+            LocalDateTime fimEm,
+            StatusSlotConsulta status
+    );
+
     Optional<SlotConsulta> findByPsicologoIdAndInicioEmAndFimEm(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEm);
 
     @Query("""
@@ -53,6 +60,22 @@ public interface SlotConsultaRepository extends JpaRepository<SlotConsulta, Long
               and slot.fimEm > :inicio
             """)
     boolean existsOverlap(
+            @Param("psicologoId") Long psicologoId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("statuses") Collection<StatusSlotConsulta> statuses
+    );
+
+    @Query("""
+            select slot
+            from SlotConsulta slot
+            where slot.psicologo.id = :psicologoId
+              and slot.status in :statuses
+              and slot.inicioEm < :fim
+              and slot.fimEm > :inicio
+            order by slot.inicioEm asc
+            """)
+    List<SlotConsulta> findOverlapping(
             @Param("psicologoId") Long psicologoId,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim,

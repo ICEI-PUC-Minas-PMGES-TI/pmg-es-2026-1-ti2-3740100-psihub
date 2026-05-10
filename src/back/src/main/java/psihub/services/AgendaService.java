@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +40,29 @@ import psihub.repositories.SlotConsultaRepository;
 @Service
 public class AgendaService {
 
+    private static final Logger log = LoggerFactory.getLogger(AgendaService.class);
+
     private static final int DURACAO_PADRAO_MINUTOS = 50;
     private static final int DIAS_GERACAO_PADRAO = 30;
+
+    /**
+     * Statuses used when auto-generating slots from availability rules.
+     * DISPONIVEL is included to avoid creating duplicate available slots.
+     */
     private static final Collection<StatusSlotConsulta> STATUSES_COM_CONFLITO = EnumSet.of(
             StatusSlotConsulta.DISPONIVEL,
+            StatusSlotConsulta.RESERVADO,
+            StatusSlotConsulta.BLOQUEADO
+    );
+
+    /**
+     * Statuses used when validating a manually created slot.
+     * DISPONIVEL is intentionally excluded: an existing available slot must not block
+     * the creation of a manual slot at the same or overlapping time (the exact-duplicate
+     * check handles identical slots separately). Only an already-booked (RESERVADO) or
+     * explicitly blocked (BLOQUEADO) slot constitutes a real conflict.
+     */
+    private static final Collection<StatusSlotConsulta> STATUSES_CONFLITO_SLOT_MANUAL = EnumSet.of(
             StatusSlotConsulta.RESERVADO,
             StatusSlotConsulta.BLOQUEADO
     );
@@ -149,11 +170,31 @@ public class AgendaService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido criar horario em data passada");
         }
 
-        if (slotConsultaRepository.existsByPsicologoIdAndInicioEmAndFimEm(psicologoId, inicio, fim)) {
+        // Exact-duplicate check: ignore CANCELADO slots so a previously cancelled slot
+        // at the same time does not prevent re-creation of the slot.
+        if (slotConsultaRepository.existsByPsicologoIdAndInicioEmAndFimEmAndStatusNot(
+                psicologoId, inicio, fim, StatusSlotConsulta.CANCELADO)) {
             throw new ApiException(HttpStatus.CONFLICT, "Ja existe um horario cadastrado para este periodo");
         }
 
-        if (slotConsultaRepository.existsOverlap(psicologoId, inicio, fim, STATUSES_COM_CONFLITO)) {
+        // Overlap check: only RESERVADO and BLOQUEADO slots constitute a real conflict.
+        // An existing DISPONIVEL slot at the same time is NOT a conflict — the exact-duplicate
+        // check above already handles identical slots, and partially-overlapping available
+        // slots must not block manual creation (e.g. blocking a time that has an auto-generated
+        // available slot).
+        List<SlotConsulta> conflitantes = slotConsultaRepository.findOverlapping(
+                psicologoId, inicio, fim, STATUSES_CONFLITO_SLOT_MANUAL);
+        if (!conflitantes.isEmpty()) {
+            log.warn(
+                    "[AgendaService] Conflito detectado ao criar slot manual para psicologo {}. "
+                    + "Novo intervalo: {} - {}. Slots conflitantes: {}",
+                    psicologoId,
+                    inicio,
+                    fim,
+                    conflitantes.stream()
+                            .map(s -> String.format("id=%d inicio=%s fim=%s status=%s",
+                                    s.getId(), s.getInicioEm(), s.getFimEm(), s.getStatus()))
+                            .collect(Collectors.joining("; ")));
             throw new ApiException(HttpStatus.CONFLICT, "O horario informado conflita com outro horario da agenda");
         }
 
