@@ -6,5 +6,5 @@ import psihub.domain.model.RegraDisponibilidade;
 
 public interface RegraDisponibilidadeRepository extends JpaRepository<RegraDisponibilidade, Long> {
 
-    List<RegraDisponibilidade> findByPsicologoIdOrderByDiaSemanaAscHoraInicioAsc(Long psicologoId);
+    List<RegraDisponibilidade> findByPsicologoIdAndAtivoTrueOrderByDiaSemanaAscHoraInicioAsc(Long psicologoId);
 }

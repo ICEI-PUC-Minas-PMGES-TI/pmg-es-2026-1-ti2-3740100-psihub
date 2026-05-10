@@ -135,7 +135,9 @@ export function PsychologistAgendaPage({ onToast }) {
     const weekConsultations = useMemo(() => {
         const start = weekStart;
         const end = addDays(weekStart, 7);
+        const CALENDAR_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO']);
         return consultations.filter((consultation) => {
+            if (!CALENDAR_STATUSES.has(consultation.status)) return false;
             const date = new Date(consultation.inicioEm);
             return date >= start && date < end;
         });

@@ -124,7 +124,7 @@ public class AgendaService {
     @Transactional(readOnly = true)
     public List<RegraDisponibilidadeResponse> listarRegras(Long psicologoId) {
         buscarPsicologo(psicologoId);
-        return regraDisponibilidadeRepository.findByPsicologoIdOrderByDiaSemanaAscHoraInicioAsc(psicologoId)
+        return regraDisponibilidadeRepository.findByPsicologoIdAndAtivoTrueOrderByDiaSemanaAscHoraInicioAsc(psicologoId)
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
