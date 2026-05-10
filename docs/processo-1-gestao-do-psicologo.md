@@ -170,3 +170,5 @@ Dois fluxos são possíveis:
 | Voltar | Dashboard | cancel |
 
 > **Restrição crítica (LGPD + Art. 9º do Código de Ética):** O administrador visualiza **exclusivamente** dados cadastrais e de status de conta dos psicólogos. É **vedado** o acesso a qualquer informação clínica, prontuário, anotação de sessão ou registro emocional de pacientes, independentemente do vínculo com o profissional.
+>
+> <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/777fd047-591a-4e23-a7dc-b073da29d257" />
