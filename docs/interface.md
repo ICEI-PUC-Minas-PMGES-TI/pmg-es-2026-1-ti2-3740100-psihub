@@ -28,7 +28,7 @@ Tela da atividade 2
 
 Tela do Processo de secção
 
-web application/stitch/projects/3883057540415093762/screens/d7377eec4e5e4f0898168f5c83ee3542
+<img width="1600" height="1280" alt="image" src="https://github.com/user-attachments/assets/9bf1c756-5c56-4a73-9802-91ae44f9de36" />
 
 Tela da atividade 1
 
