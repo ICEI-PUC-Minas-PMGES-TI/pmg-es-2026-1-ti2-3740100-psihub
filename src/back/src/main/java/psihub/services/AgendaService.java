@@ -20,7 +20,6 @@ import psihub.domain.enums.DiaSemana;
 import psihub.domain.enums.StatusConsulta;
 import psihub.domain.enums.StatusAcesso;
 import psihub.domain.enums.StatusSlotConsulta;
-import psihub.domain.enums.StatusVinculo;
 import psihub.domain.model.Consulta;
 import psihub.domain.model.Psicologo;
 import psihub.domain.model.RegraDisponibilidade;
@@ -167,8 +166,8 @@ public class AgendaService {
     @Transactional(readOnly = true)
     public List<PacienteResumoResponse> listarPacientesVinculados(Long psicologoId, String nome) {
         buscarPsicologo(psicologoId);
-        String filtroNome = (nome == null || nome.isBlank()) ? null : nome.trim();
-        return pacienteRepository.findByPsicologoIdAndVinculo(psicologoId, StatusVinculo.ACEITO, filtroNome)
+        String filtroNome = (nome == null || nome.isBlank()) ? null : ("%" + nome.trim().toLowerCase() + "%");
+        return pacienteRepository.findByPsicologoId(psicologoId, filtroNome)
                 .stream()
                 .map(paciente -> new PacienteResumoResponse(paciente.getId(), paciente.getUsuario().getNome()))
                 .toList();

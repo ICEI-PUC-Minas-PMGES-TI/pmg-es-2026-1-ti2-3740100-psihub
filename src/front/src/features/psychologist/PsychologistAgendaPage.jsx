@@ -314,14 +314,16 @@ export function PsychologistAgendaPage({ onToast }) {
     }
 
     function openCellActionMenu(date, minutesFromMidnight) {
-        setCellActionMenu({ date, minutesFromMidnight, loading: null });
+        const dayRule = normalizedRules.get(dayValueFromDate(date));
+        const duration = dayRule?.duracaoSlotMinutos || DEFAULT_DURATION;
+        setCellActionMenu({ date, minutesFromMidnight, duration, loading: null });
     }
 
     async function handleCellActionSchedule() {
         if (!cellActionMenu) return;
-        const { date, minutesFromMidnight } = cellActionMenu;
+        const { date, minutesFromMidnight, duration } = cellActionMenu;
         const start = minutesToTimeLabel(minutesFromMidnight);
-        const end = minutesToTimeLabel(minutesFromMidnight + DEFAULT_DURATION);
+        const end = minutesToTimeLabel(minutesFromMidnight + (duration || DEFAULT_DURATION));
 
         setCellActionMenu((current) => ({ ...current, loading: 'schedule' }));
         try {
@@ -339,7 +341,7 @@ export function PsychologistAgendaPage({ onToast }) {
                 pacienteId: null,
                 pacienteNome: '',
                 tipoAtendimento: 'ONLINE',
-                observacoes: '',,
+                observacoes: '',
             });
         } catch (error) {
             onToast?.({ type: 'error', message: error?.message || 'Não foi possível criar o horário.' });
@@ -349,9 +351,9 @@ export function PsychologistAgendaPage({ onToast }) {
 
     async function handleCellActionBlock() {
         if (!cellActionMenu) return;
-        const { date, minutesFromMidnight } = cellActionMenu;
+        const { date, minutesFromMidnight, duration } = cellActionMenu;
         const start = minutesToTimeLabel(minutesFromMidnight);
-        const end = minutesToTimeLabel(minutesFromMidnight + DEFAULT_DURATION);
+        const end = minutesToTimeLabel(minutesFromMidnight + (duration || DEFAULT_DURATION));
 
         setCellActionMenu((current) => ({ ...current, loading: 'block' }));
         try {
@@ -616,6 +618,7 @@ export function PsychologistAgendaPage({ onToast }) {
                 <CellActionMenuModal
                     date={cellActionMenu.date}
                     minutesFromMidnight={cellActionMenu.minutesFromMidnight}
+                    duration={cellActionMenu.duration || DEFAULT_DURATION}
                     loading={cellActionMenu.loading}
                     onSchedule={handleCellActionSchedule}
                     onBlock={handleCellActionBlock}
@@ -929,7 +932,8 @@ function PatientSearchField({ value, selectedId, onSelect, onClear }) {
                 const data = await schedulingApi.listMyPatients({ nome: term.trim() });
                 setResults(data || []);
                 setOpen(true);
-            } catch {
+            } catch (error) {
+                console.error('[PsiHub] Erro ao buscar pacientes:', error);
                 setResults([]);
             } finally {
                 setLoading(false);
@@ -1148,9 +1152,9 @@ function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCance
     );
 }
 
-function CellActionMenuModal({ date, minutesFromMidnight, loading, onSchedule, onBlock, onClose }) {
+function CellActionMenuModal({ date, minutesFromMidnight, duration, loading, onSchedule, onBlock, onClose }) {
     const timeLabel = minutesToTimeLabel(minutesFromMidnight);
-    const endLabel = minutesToTimeLabel(minutesFromMidnight + DEFAULT_DURATION);
+    const endLabel = minutesToTimeLabel(minutesFromMidnight + duration);
     const dateLabel = date ? formatDate(date) : '';
 
     return (
@@ -1352,7 +1356,7 @@ function dayValueFromDate(date) {
 }
 
 function dayHeaderLabel(date) {
-    return `${DAY_LABELS[dayValueFromDate(date)]} ${formatDate(date).slice(0, 5)}`;
+    return DAY_LABELS[dayValueFromDate(date)];
 }
 
 function timeStringToMinutes(value) {
