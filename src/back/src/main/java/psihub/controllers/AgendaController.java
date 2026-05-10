@@ -23,18 +23,32 @@ import psihub.dtos.agenda.DefinirDisponibilidadeRequest;
 import psihub.dtos.agenda.DisponibilidadeResponse;
 import psihub.dtos.agenda.RegraDisponibilidadeResponse;
 import psihub.dtos.agenda.SlotConsultaResponse;
+import psihub.dtos.consultas.AgendarPorPsicologoRequest;
+import psihub.dtos.consultas.ConsultaResponse;
 import psihub.exceptions.ApiException;
 import psihub.security.AuthenticatedUser;
 import psihub.services.AgendaService;
+import psihub.services.ConsultaService;
 
 @RestController
 @RequestMapping("/api/psicologos")
 public class AgendaController {
 
     private final AgendaService agendaService;
+    private final ConsultaService consultaService;
 
-    public AgendaController(AgendaService agendaService) {
+    public AgendaController(AgendaService agendaService, ConsultaService consultaService) {
         this.agendaService = agendaService;
+        this.consultaService = consultaService;
+    }
+
+    @PostMapping("/me/agenda/agendamentos")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ConsultaResponse agendarParaPaciente(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody AgendarPorPsicologoRequest request
+    ) {
+        return consultaService.agendarComoPsicologo(user.userId(), request);
     }
 
     @PostMapping("/me/disponibilidades")
@@ -67,7 +81,7 @@ public class AgendaController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fim,
             @RequestParam(required = false) StatusSlotConsulta status
     ) {
-        return agendaService.listarSlots(user.userId(), inicio, fim, status);
+        return agendaService.listarMeusSlots(user.userId(), inicio, fim, status);
     }
 
     @PatchMapping("/me/agenda/slots/{slotId}/bloquear")
@@ -144,7 +158,7 @@ public class AgendaController {
             @RequestParam(required = false) StatusSlotConsulta status
     ) {
         validarPsicologoAutenticado(user, psicologoId);
-        return agendaService.listarSlots(user.userId(), inicio, fim, status);
+        return agendaService.listarMeusSlots(user.userId(), inicio, fim, status);
     }
 
     @PatchMapping("/{psicologoId}/agenda/slots/{slotId}/bloquear")

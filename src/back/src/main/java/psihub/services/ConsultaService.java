@@ -17,6 +17,7 @@ import psihub.domain.model.Psicologo;
 import psihub.domain.model.SlotConsulta;
 import psihub.domain.model.Usuario;
 import psihub.dtos.consultas.AgendarConsultaRequest;
+import psihub.dtos.consultas.AgendarPorPsicologoRequest;
 import psihub.dtos.consultas.CancelarConsultaRequest;
 import psihub.dtos.consultas.ConsultaResponse;
 import psihub.exceptions.ApiException;
@@ -69,6 +70,33 @@ public class ConsultaService {
 
         validarPsicologoAtivo(psicologo);
         validarSlotDisponivel(slot, psicologo.getId());
+
+        Consulta consulta = new Consulta();
+        consulta.setPaciente(paciente);
+        consulta.setPsicologo(psicologo);
+        consulta.setSlotConsulta(slot);
+        consulta.setAgendadoPorUsuario(agendadoPor);
+        consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
+        consulta.setStatus(StatusConsulta.AGENDADA);
+        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
+
+        slot.setStatus(StatusSlotConsulta.RESERVADO);
+        return mapper.toResponse(consultaRepository.save(consulta));
+    }
+
+    @Transactional
+    public ConsultaResponse agendarComoPsicologo(Long psicologoId, AgendarPorPsicologoRequest request) {
+        Psicologo psicologo = psicologoRepository.findById(psicologoId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
+        Paciente paciente = pacienteRepository.findById(request.pacienteId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
+        Usuario agendadoPor = usuarioRepository.findById(psicologoId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario responsavel pelo agendamento nao encontrado"));
+        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(request.slotConsultaId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Horario nao encontrado"));
+
+        validarPsicologoAtivo(psicologo);
+        validarSlotDisponivel(slot, psicologoId);
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);

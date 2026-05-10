@@ -72,7 +72,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Object>> handleMessageNotReadable(HttpMessageNotReadableException exception) {
-        String message = "Corpo da requisicao invalido";
+        String cause = exception.getMostSpecificCause().getMessage();
+        String message = cause != null && cause.length() < 200
+                ? "Corpo da requisicao invalido: " + cause
+                : "Corpo da requisicao invalido";
         return build(
                 HttpStatus.BAD_REQUEST,
                 message,

@@ -37,6 +37,10 @@ public class ApiResponseMapper {
     }
 
     public SlotConsultaResponse toResponse(SlotConsulta slot) {
+        return toResponse(slot, null);
+    }
+
+    public SlotConsultaResponse toResponse(SlotConsulta slot, Consulta consulta) {
         Long regraId = slot.getRegraDisponibilidade() == null ? null : slot.getRegraDisponibilidade().getId();
         return new SlotConsultaResponse(
                 slot.getId(),
@@ -44,7 +48,12 @@ public class ApiResponseMapper {
                 regraId,
                 slot.getInicioEm(),
                 slot.getFimEm(),
-                slot.getStatus()
+                slot.getStatus(),
+                consulta == null ? null : consulta.getPaciente().getUsuario().getNome(),
+                consulta == null ? null : consulta.getTipoAtendimento(),
+                consulta == null ? null : consulta.getStatus(),
+                consulta == null ? null : consulta.getObservacoes(),
+                consulta == null ? null : consulta.getMotivoCancelamento()
         );
     }
 

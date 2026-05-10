@@ -8,12 +8,17 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import psihub.domain.enums.DiaSemana;
+import psihub.domain.enums.StatusConsulta;
 import psihub.domain.enums.StatusAcesso;
 import psihub.domain.enums.StatusSlotConsulta;
+import psihub.domain.model.Consulta;
 import psihub.domain.model.Psicologo;
 import psihub.domain.model.RegraDisponibilidade;
 import psihub.domain.model.SlotConsulta;
@@ -25,6 +30,7 @@ import psihub.dtos.agenda.RegraDisponibilidadeResponse;
 import psihub.dtos.agenda.SlotConsultaResponse;
 import psihub.exceptions.ApiException;
 import psihub.mappers.ApiResponseMapper;
+import psihub.repositories.ConsultaRepository;
 import psihub.repositories.PsicologoRepository;
 import psihub.repositories.RegraDisponibilidadeRepository;
 import psihub.repositories.SlotConsultaRepository;
@@ -43,17 +49,20 @@ public class AgendaService {
     private final PsicologoRepository psicologoRepository;
     private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
     private final SlotConsultaRepository slotConsultaRepository;
+    private final ConsultaRepository consultaRepository;
     private final ApiResponseMapper mapper;
 
     public AgendaService(
             PsicologoRepository psicologoRepository,
             RegraDisponibilidadeRepository regraDisponibilidadeRepository,
             SlotConsultaRepository slotConsultaRepository,
+            ConsultaRepository consultaRepository,
             ApiResponseMapper mapper
     ) {
         this.psicologoRepository = psicologoRepository;
         this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
         this.slotConsultaRepository = slotConsultaRepository;
+        this.consultaRepository = consultaRepository;
         this.mapper = mapper;
     }
 
@@ -92,6 +101,39 @@ public class AgendaService {
         return regraDisponibilidadeRepository.findByPsicologoIdOrderByDiaSemanaAscHoraInicioAsc(psicologoId)
                 .stream()
                 .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SlotConsultaResponse> listarMeusSlots(
+            Long psicologoId,
+            LocalDateTime inicio,
+            LocalDateTime fim,
+            StatusSlotConsulta status
+    ) {
+        buscarPsicologo(psicologoId);
+        LocalDateTime inicioFiltro = inicio == null ? LocalDate.now().atStartOfDay() : inicio;
+        LocalDateTime fimFiltro = fim == null ? inicioFiltro.plusDays(30) : fim;
+        validarIntervaloDataHora(inicioFiltro, fimFiltro);
+
+        Map<Long, Consulta> consultasPorSlot = consultaRepository.findByFiltros(
+                null,
+                psicologoId,
+                null,
+                inicioFiltro,
+                fimFiltro
+            )
+            .stream()
+            .filter(consulta -> consulta.getStatus() != StatusConsulta.CANCELADA)
+            .collect(Collectors.toMap(
+                consulta -> consulta.getSlotConsulta().getId(),
+                Function.identity(),
+                (first, second) -> second.getId() > first.getId() ? second : first
+            ));
+
+        return slotConsultaRepository.findAgenda(psicologoId, inicioFiltro, fimFiltro, status)
+                .stream()
+                .map(slot -> mapper.toResponse(slot, consultasPorSlot.get(slot.getId())))
                 .toList();
     }
 
