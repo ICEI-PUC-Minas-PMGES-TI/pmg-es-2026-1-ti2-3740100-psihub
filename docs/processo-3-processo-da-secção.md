@@ -84,3 +84,5 @@ O Processo da Sessão contempla todas as etapas que envolvem a condução de uma
 | Visualizar sessão específica | Detalhes do prontuário selecionado | default |
 | Exportar relatório | Download do arquivo PDF | — |
 | Voltar | Painel do psicólogo | cancel |
+
+<img width="1600" height="1280" alt="image" src="https://github.com/user-attachments/assets/4913c5b3-e7ad-44be-90c7-7177711c5243" />
