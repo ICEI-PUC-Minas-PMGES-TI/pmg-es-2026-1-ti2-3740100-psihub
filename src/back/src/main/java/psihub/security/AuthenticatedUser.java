@@ -1,9 +1,10 @@
 package psihub.security;
 
+import org.springframework.lang.NonNull;
 import psihub.domain.enums.TipoUsuario;
 
 public record AuthenticatedUser(
-        Long userId,
+        @NonNull Long userId,
         String email,
         TipoUsuario tipo
 ) {
