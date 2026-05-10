@@ -41,6 +41,7 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [showHistory, setShowHistory] = useState(false);
 
     const availableDateKeys = useMemo(() => {
         return new Set(
@@ -119,8 +120,9 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
 
         setLoading(true);
         schedulingApi.listConsultations({
-            inicio: toIsoDate(today),
-            fim: toIsoDate(addDays(today, 120)),
+            inicio: showHistory ? toIsoDate(addDays(today, -365)) : toIsoDate(today),
+            fim: showHistory ? toIsoDate(addDays(today, 30)) : toIsoDate(addDays(today, 120)),
+            historico: showHistory,
             signal: controller.signal,
         })
             .then((data) => setAppointments(data || []))
@@ -132,7 +134,7 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
             .finally(() => setLoading(false));
 
         return () => controller.abort();
-    }, [activeView, onToast, refreshKey]);
+    }, [activeView, onToast, refreshKey, showHistory]);
 
     function openAgenda(psychologist) {
         setSelectedPsychologist(psychologist);
@@ -197,6 +199,8 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
                 canceling={canceling}
                 cancelReason={cancelReason}
                 submitting={submitting}
+                showHistory={showHistory}
+                onToggleHistory={() => setShowHistory((h) => !h)}
                 onStartCancel={setCanceling}
                 onCancelReasonChange={setCancelReason}
                 onAbortCancel={() => setCanceling(null)}
@@ -470,11 +474,25 @@ function AppointmentsView({
     canceling,
     cancelReason,
     submitting,
+    showHistory,
+    onToggleHistory,
     onStartCancel,
     onCancelReasonChange,
     onAbortCancel,
     onConfirmCancel,
 }) {
+    const sortedAppointments = useMemo(() => {
+        const list = [...appointments];
+        list.sort((a, b) => {
+            const diff = new Date(a.inicioEm) - new Date(b.inicioEm);
+            return showHistory ? -diff : diff;
+        });
+        return list;
+    }, [appointments, showHistory]);
+
+    const todayKey = toIsoDate(new Date());
+    let todaySepInserted = false;
+
     return (
         <section className="panel">
             <div className="panel__header">
@@ -482,51 +500,69 @@ function AppointmentsView({
                     <p className="eyebrow">Consultas</p>
                     <h2>Minhas consultas</h2>
                 </div>
+                <button className="ghost-button" type="button" onClick={onToggleHistory}>
+                    {showHistory ? 'Ocultar histórico' : 'Ver histórico'}
+                </button>
             </div>
 
             {loading && <LoadingState />}
-            {!loading && appointments.length === 0 && <EmptyState icon={CalendarCheck} title="Você ainda não tem consultas agendadas." />}
+            {!loading && sortedAppointments.length === 0 && (
+                <EmptyState
+                    icon={CalendarCheck}
+                    title={showHistory ? 'Nenhuma consulta encontrada no histórico.' : 'Você ainda não tem consultas agendadas.'}
+                />
+            )}
 
-            {!loading && appointments.length > 0 && (
+            {!loading && sortedAppointments.length > 0 && (
                 <div className="appointment-list">
-                    {appointments.map((appointment) => {
-                        const canCancel = !['CANCELADA', 'CONCLUIDA'].includes(appointment.status);
+                    {sortedAppointments.map((appointment) => {
+                        const canCancel = !['CANCELADA', 'CONCLUIDA', 'FALTOU'].includes(appointment.status);
                         const isCanceling = canceling?.id === appointment.id;
+                        const dateKey = appointment.inicioEm.slice(0, 10);
+                        const showTodaySep = !showHistory && !todaySepInserted && dateKey === todayKey;
+                        if (showTodaySep) todaySepInserted = true;
 
                         return (
-                            <article className="appointment-card" key={appointment.id}>
-                                <div className="appointment-card__main">
-                                    <span className={`status-badge status-badge--${appointment.status.toLowerCase()}`}>
-                                        {statusLabels[appointment.status] || appointment.status}
-                                    </span>
-                                    <h3>{appointment.psicologoNome}</h3>
-                                    <p>{formatDateTime(appointment.inicioEm)}</p>
-                                </div>
-
-                                {isCanceling ? (
-                                    <div className="cancel-box">
-                                        <textarea
-                                            rows={2}
-                                            maxLength={300}
-                                            value={cancelReason}
-                                            onChange={(event) => onCancelReasonChange(event.target.value)}
-                                        />
-                                        <div className="inline-actions">
-                                            <button className="danger-button" type="button" disabled={submitting} onClick={() => onConfirmCancel(appointment)}>
-                                                <X size={16} />
-                                                Confirmar cancelamento
-                                            </button>
-                                            <button className="ghost-button" type="button" onClick={onAbortCancel}>Voltar</button>
-                                        </div>
+                            <div key={appointment.id}>
+                                {showTodaySep && (
+                                    <div className="appointment-list__today-separator">
+                                        <span>Hoje</span>
                                     </div>
-                                ) : (
-                                    canCancel && (
-                                        <button className="ghost-button" type="button" onClick={() => onStartCancel(appointment)}>
-                                            Cancelar consulta
-                                        </button>
-                                    )
                                 )}
-                            </article>
+                                <article className="appointment-card">
+                                    <div className="appointment-card__main">
+                                        <span className={`status-badge status-badge--${appointment.status.toLowerCase()}`}>
+                                            {statusLabels[appointment.status] || appointment.status}
+                                        </span>
+                                        <h3>{appointment.psicologoNome}</h3>
+                                        <p>{formatDateTime(appointment.inicioEm)}</p>
+                                    </div>
+
+                                    {isCanceling ? (
+                                        <div className="cancel-box">
+                                            <textarea
+                                                rows={2}
+                                                maxLength={300}
+                                                value={cancelReason}
+                                                onChange={(event) => onCancelReasonChange(event.target.value)}
+                                            />
+                                            <div className="inline-actions">
+                                                <button className="danger-button" type="button" disabled={submitting} onClick={() => onConfirmCancel(appointment)}>
+                                                    <X size={16} />
+                                                    Confirmar cancelamento
+                                                </button>
+                                                <button className="ghost-button" type="button" onClick={onAbortCancel}>Voltar</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        canCancel && (
+                                            <button className="ghost-button" type="button" onClick={() => onStartCancel(appointment)}>
+                                                Cancelar consulta
+                                            </button>
+                                        )
+                                    )}
+                                </article>
+                            </div>
                         );
                     })}
                 </div>

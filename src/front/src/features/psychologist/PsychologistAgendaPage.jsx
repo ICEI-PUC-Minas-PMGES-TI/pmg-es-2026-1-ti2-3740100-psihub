@@ -23,12 +23,18 @@ const DAY_FULL_LABELS = {
     DOMINGO: 'Domingo',
 };
 const DAY_OPTIONS = DAY_ORDER.map((value) => ({ value, label: DAY_FULL_LABELS[value] }));
+const ACTIVE_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO']);
 const STATUS_OPTIONS = [
     { value: 'ALL', label: 'Todos' },
     { value: 'AGENDADA', label: 'Agendada' },
     { value: 'EM_ANDAMENTO', label: 'Em andamento' },
     { value: 'CONCLUIDA', label: 'Concluída' },
     { value: 'CANCELADA', label: 'Cancelada' },
+];
+const STATUS_OPTIONS_ACTIVE = [
+    { value: 'ALL', label: 'Ativos' },
+    { value: 'AGENDADA', label: 'Agendada' },
+    { value: 'EM_ANDAMENTO', label: 'Em andamento' },
 ];
 const TYPE_OPTIONS = [
     { value: 'ALL', label: 'Todos' },
@@ -68,6 +74,7 @@ export function PsychologistAgendaPage({ onToast }) {
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
     const [consultationPage, setConsultationPage] = useState(1);
+    const [showHistory, setShowHistory] = useState(false);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -115,6 +122,7 @@ export function PsychologistAgendaPage({ onToast }) {
         schedulingApi.listConsultations({
             inicio: toIsoDate(addDays(today, -CONSULTATION_RANGE_PAST_DAYS)),
             fim: toIsoDate(addDays(today, CONSULTATION_RANGE_FUTURE_DAYS)),
+            historico: true,
             signal: controller.signal,
         })
             .then((data) => setConsultations(data || []))
@@ -148,18 +156,38 @@ export function PsychologistAgendaPage({ onToast }) {
 
         return consultations
             .filter((consultation) => {
+                if (!showHistory && !ACTIVE_STATUSES.has(consultation.status)) return false;
                 if (statusFilter !== 'ALL' && consultation.status !== statusFilter) return false;
                 if (typeFilter !== 'ALL' && consultation.tipoAtendimento !== typeFilter) return false;
                 if (!normalizedQuery) return true;
                 return normalizeText(consultation.pacienteNome).includes(normalizedQuery);
             })
-            .sort((first, second) => new Date(first.inicioEm) - new Date(second.inicioEm));
-    }, [consultations, searchQuery, statusFilter, typeFilter]);
+            .sort((first, second) => {
+                const diff = new Date(first.inicioEm) - new Date(second.inicioEm);
+                return showHistory ? -diff : diff;
+            });
+    }, [consultations, searchQuery, statusFilter, typeFilter, showHistory]);
 
     const pagedConsultations = useMemo(() => {
         const startIndex = (consultationPage - 1) * CONSULTATION_PAGE_SIZE;
         return filteredConsultations.slice(startIndex, startIndex + CONSULTATION_PAGE_SIZE);
     }, [consultationPage, filteredConsultations]);
+
+    const rowsWithSeparators = useMemo(() => {
+        if (showHistory) return pagedConsultations.map((c) => ({ type: 'consultation', data: c }));
+        const todayKey = toIsoDate(new Date());
+        const items = [];
+        let todayInserted = false;
+        for (const consultation of pagedConsultations) {
+            const dateKey = consultation.inicioEm.slice(0, 10);
+            if (!todayInserted && dateKey === todayKey) {
+                items.push({ type: 'separator', label: 'Hoje' });
+                todayInserted = true;
+            }
+            items.push({ type: 'consultation', data: consultation });
+        }
+        return items;
+    }, [pagedConsultations, showHistory]);
 
     const consultationPages = Math.max(1, Math.ceil(filteredConsultations.length / CONSULTATION_PAGE_SIZE));
     const weekAvailabilityByDay = useMemo(() => buildWeekAvailability(weekDays, normalizedRules), [normalizedRules, weekDays]);
@@ -184,7 +212,7 @@ export function PsychologistAgendaPage({ onToast }) {
 
     useEffect(() => {
         setConsultationPage(1);
-    }, [searchQuery, statusFilter, typeFilter]);
+    }, [searchQuery, statusFilter, typeFilter, showHistory]);
 
     function refreshAll() {
         setRefreshKey((current) => current + 1);
@@ -478,13 +506,23 @@ export function PsychologistAgendaPage({ onToast }) {
                         <h2>Lista de Consultas Agendadas</h2>
                     </div>
                     <div className="agenda-table__summary">
-                        {filteredConsultations.length} consulta(s) encontrada(s)
+                        <span>{filteredConsultations.length} consulta(s) encontrada(s)</span>
+                        <button
+                            className="ghost-button"
+                            type="button"
+                            onClick={() => {
+                                setShowHistory((h) => !h);
+                                setStatusFilter('ALL');
+                            }}
+                        >
+                            {showHistory ? 'Ocultar histórico' : 'Ver histórico de consultas'}
+                        </button>
                     </div>
                 </div>
 
                 <div className="agenda-table-filters">
                     <div className="agenda-filter-group">
-                        {STATUS_OPTIONS.map((option) => (
+                        {(showHistory ? STATUS_OPTIONS : STATUS_OPTIONS_ACTIVE).map((option) => (
                             <button
                                 key={option.value}
                                 type="button"
@@ -533,35 +571,45 @@ export function PsychologistAgendaPage({ onToast }) {
                                 <span>Status</span>
                                 <span>Ações</span>
                             </div>
-                            {pagedConsultations.map((consultation) => (
-                                <div className="agenda-table__row" key={consultation.id}>
-                                    <span>{consultation.pacienteNome}</span>
-                                    <span>{formatDate(consultation.inicioEm)}</span>
-                                    <span>{formatTime(consultation.inicioEm)} - {formatTime(consultation.fimEm)}</span>
-                                    <span>{consultation.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}</span>
-                                    <span>
-                                        <span className={`status-badge ${statusBadgeClass(consultation.status)}`}>
-                                            {consultationStatusLabel(consultation.status)}
+                            {rowsWithSeparators.map((item) => {
+                                if (item.type === 'separator') {
+                                    return (
+                                        <div key="today-separator" className="agenda-table__today-separator">
+                                            <span>{item.label}</span>
+                                        </div>
+                                    );
+                                }
+                                const consultation = item.data;
+                                return (
+                                    <div className="agenda-table__row" key={consultation.id}>
+                                        <span>{consultation.pacienteNome}</span>
+                                        <span>{formatDate(consultation.inicioEm)}</span>
+                                        <span>{formatTime(consultation.inicioEm)} - {formatTime(consultation.fimEm)}</span>
+                                        <span>{consultation.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}</span>
+                                        <span>
+                                            <span className={`status-badge ${statusBadgeClass(consultation.status)}`}>
+                                                {consultationStatusLabel(consultation.status)}
+                                            </span>
                                         </span>
-                                    </span>
-                                    <span className="agenda-table__actions">
-                                        <button className="ghost-button" type="button" onClick={() => setConsultationModal(consultation)}>
-                                            Ver detalhes
-                                        </button>
-                                        <button
-                                            className="ghost-button"
-                                            type="button"
-                                            disabled={!canCancelConsultation(consultation)}
-                                            onClick={() => {
-                                                setConsultationModal(consultation);
-                                                setCancelReason('');
-                                            }}
-                                        >
-                                            Cancelar
-                                        </button>
-                                    </span>
-                                </div>
-                            ))}
+                                        <span className="agenda-table__actions">
+                                            <button className="ghost-button" type="button" onClick={() => setConsultationModal(consultation)}>
+                                                Ver detalhes
+                                            </button>
+                                            <button
+                                                className="ghost-button"
+                                                type="button"
+                                                disabled={!canCancelConsultation(consultation)}
+                                                onClick={() => {
+                                                    setConsultationModal(consultation);
+                                                    setCancelReason('');
+                                                }}
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <div className="agenda-pagination">

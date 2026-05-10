@@ -1,6 +1,7 @@
 package psihub.repositories;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,7 +36,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
             join fetch consulta.agendadoPorUsuario agendadoPor
             where (:pacienteId is null or paciente.id = :pacienteId)
               and (:psicologoId is null or psicologo.id = :psicologoId)
-              and (:status is null or consulta.status = :status)
+              and consulta.status in :statuses
               and slot.inicioEm >= :inicio
               and slot.inicioEm < :fim
             order by slot.inicioEm asc
@@ -43,7 +44,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     List<Consulta> findByFiltros(
             @Param("pacienteId") Long pacienteId,
             @Param("psicologoId") Long psicologoId,
-            @Param("status") StatusConsulta status,
+            @Param("statuses") Collection<StatusConsulta> statuses,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim
     );

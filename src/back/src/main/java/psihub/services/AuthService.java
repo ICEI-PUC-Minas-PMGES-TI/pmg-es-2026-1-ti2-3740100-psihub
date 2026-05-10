@@ -3,6 +3,7 @@ package psihub.services;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -120,7 +121,7 @@ public class AuthService {
     private AuthUserResponse toUserResponse(Usuario usuario) {
         boolean isPsychologist = usuario.getTipoUsuario() == TipoUsuario.PSICOLOGO;
         String crp = isPsychologist
-                ? psicologoRepository.findById(usuario.getId()).map(Psicologo::getCrp).orElse(null)
+                ? psicologoRepository.findById(Objects.requireNonNull(usuario.getId())).map(Psicologo::getCrp).orElse(null)
                 : null;
 
         return new AuthUserResponse(

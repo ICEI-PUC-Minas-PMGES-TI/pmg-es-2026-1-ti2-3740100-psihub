@@ -2,7 +2,10 @@ package psihub.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +30,16 @@ import psihub.repositories.PacienteRepository;
 import psihub.repositories.PsicologoRepository;
 import psihub.repositories.SlotConsultaRepository;
 import psihub.repositories.UsuarioRepository;
+import org.springframework.lang.NonNull;
 
 @Service
 public class ConsultaService {
+
+    private static final Collection<StatusConsulta> ACTIVE_STATUSES = List.of(
+            StatusConsulta.AGENDADA, StatusConsulta.CONFIRMADA, StatusConsulta.EM_ANDAMENTO);
+
+    private static final Collection<StatusConsulta> ALL_STATUSES =
+            Arrays.asList(StatusConsulta.values());
 
     private final ConsultaRepository consultaRepository;
     private final PacienteRepository pacienteRepository;
@@ -58,14 +68,14 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponse agendarComoPaciente(Long pacienteId, AgendarConsultaRequest request) {
+    public ConsultaResponse agendarComoPaciente(@NonNull Long pacienteId, AgendarConsultaRequest request) {
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
-        Psicologo psicologo = psicologoRepository.findById(request.psicologoId())
+        Psicologo psicologo = psicologoRepository.findById(Objects.requireNonNull(request.psicologoId()))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
         Usuario agendadoPor = usuarioRepository.findById(pacienteId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario responsavel pelo agendamento nao encontrado"));
-        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(request.slotConsultaId())
+        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(Objects.requireNonNull(request.slotConsultaId()))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Horario nao encontrado"));
 
         validarPsicologoAtivo(psicologo);
@@ -85,14 +95,14 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponse agendarComoPsicologo(Long psicologoId, AgendarPorPsicologoRequest request) {
+    public ConsultaResponse agendarComoPsicologo(@NonNull Long psicologoId, AgendarPorPsicologoRequest request) {
         Psicologo psicologo = psicologoRepository.findById(psicologoId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
-        Paciente paciente = pacienteRepository.findById(request.pacienteId())
+        Paciente paciente = pacienteRepository.findById(Objects.requireNonNull(request.pacienteId()))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
         Usuario agendadoPor = usuarioRepository.findById(psicologoId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario responsavel pelo agendamento nao encontrado"));
-        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(request.slotConsultaId())
+        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(Objects.requireNonNull(request.slotConsultaId()))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Horario nao encontrado"));
 
         validarPsicologoAtivo(psicologo);
@@ -115,12 +125,28 @@ public class ConsultaService {
     public List<ConsultaResponse> listar(
             Long pacienteId,
             Long psicologoId,
-            StatusConsulta status,
+            StatusConsulta statusFilter,
             LocalDate inicio,
-            LocalDate fim
+            LocalDate fim,
+            boolean historico
     ) {
-        LocalDate dataInicio = inicio == null ? LocalDate.now().minusDays(30) : inicio;
-        LocalDate dataFim = fim == null ? dataInicio.plusDays(60) : fim;
+        Collection<StatusConsulta> statuses;
+        if (statusFilter != null) {
+            statuses = List.of(statusFilter);
+        } else if (!historico) {
+            statuses = ACTIVE_STATUSES;
+        } else {
+            statuses = ALL_STATUSES;
+        }
+
+        LocalDate dataInicio, dataFim;
+        if (!historico) {
+            dataInicio = inicio != null ? inicio : LocalDate.now();
+            dataFim = fim != null ? fim : dataInicio.plusDays(90);
+        } else {
+            dataInicio = inicio != null ? inicio : LocalDate.now().minusDays(365);
+            dataFim = fim != null ? fim : LocalDate.now().plusDays(30);
+        }
 
         if (dataFim.isBefore(dataInicio)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Data final deve ser posterior ou igual a inicial");
@@ -129,7 +155,7 @@ public class ConsultaService {
         return consultaRepository.findByFiltros(
                         pacienteId,
                         psicologoId,
-                        status,
+                        statuses,
                         dataInicio.atStartOfDay(),
                         dataFim.plusDays(1).atStartOfDay()
                 )

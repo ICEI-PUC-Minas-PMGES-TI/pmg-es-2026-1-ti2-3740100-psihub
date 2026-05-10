@@ -51,11 +51,12 @@ public class ConsultaController {
             @AuthenticationPrincipal AuthenticatedUser user,
             @RequestParam(required = false) StatusConsulta status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
+            @RequestParam(defaultValue = "false") boolean historico
     ) {
         Long pacienteAutenticado = user.isPaciente() ? user.userId() : null;
         Long psicologoAutenticado = user.isPsicologo() ? user.userId() : null;
-        return consultaService.listar(pacienteAutenticado, psicologoAutenticado, status, inicio, fim);
+        return consultaService.listar(pacienteAutenticado, psicologoAutenticado, status, inicio, fim, historico);
     }
 
     @GetMapping("/{consultaId}")

@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -185,18 +186,10 @@ public class AgendaService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido criar horario em data passada");
         }
 
-        // Exact-duplicate check: ignore CANCELADO slots so a previously cancelled slot
-        // at the same time does not prevent re-creation of the slot.
-        if (slotConsultaRepository.existsByPsicologoIdAndInicioEmAndFimEmAndStatusNot(
-                psicologoId, inicio, fim, StatusSlotConsulta.CANCELADO)) {
-            throw new ApiException(HttpStatus.CONFLICT, "Ja existe um horario cadastrado para este periodo");
-        }
-
-        // Overlap check: only RESERVADO and BLOQUEADO slots constitute a real conflict.
-        // An existing DISPONIVEL slot at the same time is NOT a conflict — the exact-duplicate
-        // check above already handles identical slots, and partially-overlapping available
-        // slots must not block manual creation (e.g. blocking a time that has an auto-generated
-        // available slot).
+        // Conflict check: only RESERVADO and BLOQUEADO slots (ativo = true) constitute a real
+        // conflict. DISPONIVEL slots and soft-deleted (ativo = false) records are ignored so that
+        // a previously cancelled slot — or an auto-generated available slot at the same time —
+        // never causes a false positive.
         List<SlotConsulta> conflitantes = slotConsultaRepository.findOverlapping(
                 psicologoId, inicio, fim, STATUSES_CONFLITO_SLOT_MANUAL);
         if (!conflitantes.isEmpty()) {
@@ -335,7 +328,7 @@ public class AgendaService {
     }
 
     private Psicologo buscarPsicologo(Long psicologoId) {
-        return psicologoRepository.findById(psicologoId)
+        return psicologoRepository.findById(Objects.requireNonNull(psicologoId))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
     }
 

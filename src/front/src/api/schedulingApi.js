@@ -46,9 +46,9 @@ export const schedulingApi = {
         });
     },
 
-    listConsultations({ status, inicio, fim, signal }) {
+    listConsultations({ status, inicio, fim, historico, signal }) {
         return apiRequest('/api/consultas', {
-            query: { status, inicio, fim },
+            query: { status, inicio, fim, historico },
             signal,
         });
     },
