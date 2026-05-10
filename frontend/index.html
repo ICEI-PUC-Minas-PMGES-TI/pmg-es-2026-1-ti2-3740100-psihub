@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>PsiHub</title>
+
+  <link rel="stylesheet" href="./css/style.css">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div>
+
+        <div class="logo">
+          <h1>PsiHub</h1>
+          <p>Saúde mental digital</p>
+        </div>
+
+        <nav class="menu">
+
+          <a href="#">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a href="#" class="active">
+            <i class="fa-solid fa-calendar"></i>
+            <span>Agendamento</span>
+          </a>
+
+          <a href="#">
+            <i class="fa-solid fa-user-group"></i>
+            <span>Psicólogos</span>
+          </a>
+
+          <a href="#">
+            <i class="fa-solid fa-comments"></i>
+            <span>Mensagens</span>
+          </a>
+
+          <a href="#">
+            <i class="fa-solid fa-gear"></i>
+            <span>Configurações</span>
+          </a>
+
+        </nav>
+
+      </div>
+
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="content">
+
+      <!-- HEADER -->
+      <header class="header">
+
+        <div class="header-left">
+
+          <button class="toggle-sidebar" id="toggleSidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <div>
+            <h2>Agendamento de Consultas</h2>
+
+            <p>
+              Escolha o psicólogo ideal e agende seu horário.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="header-actions">
+
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+              type="text"
+              placeholder="Buscar psicólogo"
+            >
+          </div>
+
+          <button>
+            Nova Consulta
+          </button>
+
+        </div>
+
+      </header>
+
+      <!-- CARDS -->
+      <!-- LINHA DO TEMPO -->
+
+<section class="timeline-section">
+
+  <!-- PASSO 1 -->
+  <div class="timeline-item" id="stepPsychologist">
+
+    <div class="timeline-circle">
+      1
+    </div>
+
+    <div class="timeline-info">
+
+      <h4>Psicólogo</h4>
+
+      <p>
+        Escolha o profissional
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="timeline-line"></div>
+
+  <!-- PASSO 2 -->
+  <div class="timeline-item" id="stepDate">
+
+    <div class="timeline-circle">
+      2
+    </div>
+
+    <div class="timeline-info">
+
+      <h4>Data</h4>
+
+      <p>
+        Escolha o dia
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="timeline-line"></div>
+
+  <!-- PASSO 3 -->
+  <div class="timeline-item" id="stepTime">
+
+    <div class="timeline-circle">
+      3
+    </div>
+
+    <div class="timeline-info">
+
+      <h4>Horário</h4>
+
+      <p>
+        Escolha o horário
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="timeline-line"></div>
+
+  <!-- PASSO 4 -->
+  <div class="timeline-item" id="stepConfirm">
+
+    <div class="timeline-circle">
+      4
+    </div>
+
+    <div class="timeline-info">
+
+      <h4>Confirmar</h4>
+
+      <p>
+        Finalizar consulta
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+      <!-- GRID -->
+      <section class="main-grid">
+
+        <!-- PSICÓLOGOS -->
+        <div class="psychologists">
+
+          <div class="section-title">
+            <h3>Psicólogos disponíveis</h3>
+          </div>
+
+          <!-- ANA -->
+          <div
+            class="psychologist-card active-card"
+            data-psychologist="Dra. Ana Carolina"
+          >
+
+            <img src="https://i.pravatar.cc/100?img=32">
+
+            <div>
+              <h4>Dra. Ana Carolina</h4>
+
+              <p>
+                Terapia Cognitivo-Comportamental
+              </p>
+
+              <div class="rating">
+                ⭐ 4.9
+              </div>
+            </div>
+
+          </div>
+
+          <!-- JULIANA -->
+          <div
+            class="psychologist-card"
+            data-psychologist="Dra. Juliana Lima"
+          >
+
+            <img src="https://i.pravatar.cc/100?img=47">
+
+            <div>
+              <h4>Dra. Juliana Lima</h4>
+
+              <p>
+                Ansiedade e Estresse
+              </p>
+
+              <div class="rating">
+                ⭐ 4.8
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RAFAEL -->
+          <div
+            class="psychologist-card"
+            data-psychologist="Dr. Rafael Gomes"
+          >
+
+            <img src="https://i.pravatar.cc/100?img=12">
+
+            <div>
+              <h4>Dr. Rafael Gomes</h4>
+
+              <p>
+                Terapia Familiar
+              </p>
+
+              <div class="rating">
+                ⭐ 5.0
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- CALENDÁRIO -->
+        <div class="calendar-container">
+
+          <div class="calendar-header">
+
+            <button
+              class="calendar-btn"
+              id="prevMonth"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <h3 id="monthTitle">
+              Maio 2026
+            </h3>
+
+            <button
+              class="calendar-btn"
+              id="nextMonth"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+          </div>
+
+          <!-- DIAS -->
+          <div class="week-days">
+
+            <span>Dom</span>
+            <span>Seg</span>
+            <span>Ter</span>
+            <span>Qua</span>
+            <span>Qui</span>
+            <span>Sex</span>
+            <span>Sáb</span>
+
+          </div>
+
+          <!-- GRID -->
+          <div
+            class="calendar-grid"
+            id="calendarGrid"
+          ></div>
+
+          <!-- HORÁRIOS -->
+          <div class="section-title horario-title">
+            <h3>Horários disponíveis</h3>
+          </div>
+
+          <div
+            class="time-grid"
+            id="timeGrid"
+          ></div>
+
+        </div>
+
+        <!-- RESUMO -->
+        <div class="summary">
+
+          <div class="section-title">
+            <h3>Resumo da Consulta</h3>
+          </div>
+
+         <div class="summary-card">
+
+  <div class="summary-item">
+
+    <div class="summary-icon">
+      <i class="fa-solid fa-user-doctor"></i>
+    </div>
+
+    <div>
+      <h4>Psicólogo</h4>
+
+      <p id="selectedPsychologist">
+        --
+      </p>
+    </div>
+
+  </div>
+
+  <div class="summary-item">
+
+    <div class="summary-icon">
+      <i class="fa-solid fa-calendar-days"></i>
+    </div>
+
+    <div>
+      <h4>Data</h4>
+
+      <p id="selectedDate">
+        --
+      </p>
+    </div>
+
+  </div>
+
+  <div class="summary-item">
+
+    <div class="summary-icon">
+      <i class="fa-solid fa-clock"></i>
+    </div>
+
+    <div>
+      <h4>Horário</h4>
+
+      <p id="selectedTime">
+        --
+      </p>
+    </div>
+
+  </div>
+
+  <div class="summary-item">
+
+    <div class="summary-icon">
+      <i class="fa-solid fa-video"></i>
+    </div>
+
+    <div>
+
+      <h4>Tipo</h4>
+
+      <select>
+        <option>Online</option>
+        <option>Presencial</option>
+      </select>
+
+    </div>
+
+  </div>
+
+  <div class="summary-item textarea-item">
+
+    <div class="summary-icon">
+      <i class="fa-solid fa-note-sticky"></i>
+    </div>
+
+    <div class="summary-textarea">
+
+      <h4>Observações</h4>
+
+      <textarea
+        placeholder="Digite alguma observação..."
+      ></textarea>
+
+    </div>
+
+  </div>
+
+  <button class="confirm-btn">
+    Confirmar Agendamento
+  </button>
+
+</div>
+
+     </section>
+
+<!-- INFORMAÇÕES -->
+<section class="info-section">
+
+  <div class="info-card">
+
+    <i class="fa-solid fa-circle-info"></i>
+
+    <h3>Como funciona?</h3>
+
+    <p>
+      Escolha um psicólogo, selecione uma data disponível e confirme seu horário.
+    </p>
+
+  </div>
+
+  <div class="info-card">
+
+    <i class="fa-solid fa-calendar-xmark"></i>
+
+    <h3>Política de cancelamento</h3>
+
+    <p>
+      Cancelamentos podem ser realizados com até 24h de antecedência.
+    </p>
+
+  </div>
+
+  <div class="info-card">
+
+    <i class="fa-solid fa-video"></i>
+
+    <h3>Consultas online</h3>
+
+    <p>
+      As consultas online acontecem diretamente pela plataforma.
+    </p>
+
+  </div>
+
+</section>
+
+    </main>
+
+  </div>
+
+  <script src="./js/script.js"></script>
+
+</body>
+</html>
