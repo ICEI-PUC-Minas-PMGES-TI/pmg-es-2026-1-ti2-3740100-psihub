@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarPlus, ChevronLeft, ChevronRight, Download, Edit3, Loader2, Save, Search, Trash2, X } from 'lucide-react';
+import { CalendarPlus, ChevronLeft, ChevronRight, Download, Edit3, Loader2, Save, Search, SlidersHorizontal, Trash2, X } from 'lucide-react';
 import { schedulingApi } from '../../api/schedulingApi.js';
 import { addDays, formatDate, formatTime, toIsoDate } from '../../utils/date.js';
 
@@ -41,6 +41,7 @@ const TYPE_OPTIONS = [
     { value: 'ONLINE', label: 'Online' },
     { value: 'PRESENCIAL', label: 'Presencial' },
 ];
+const GRID_CONSULTATION_STATUSES = new Set(['AGENDADA', 'EM_ANDAMENTO']);
 const DEFAULT_DURATION = 50;
 const CALENDAR_START_HOUR = 7;
 const CALENDAR_END_HOUR = 22;
@@ -73,8 +74,10 @@ export function PsychologistAgendaPage({ onToast }) {
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
+    const [dateFilter, setDateFilter] = useState('');
     const [consultationPage, setConsultationPage] = useState(1);
     const [showHistory, setShowHistory] = useState(false);
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -140,12 +143,14 @@ export function PsychologistAgendaPage({ onToast }) {
     const availabilitySummary = useMemo(() => buildAvailabilitySummary(normalizedRules), [normalizedRules]);
     const weekDays = useMemo(() => buildWeekDays(weekStart), [weekStart]);
     const calendarRows = useMemo(() => buildCalendarRows(CALENDAR_START_HOUR, CALENDAR_END_HOUR, CALENDAR_SLOT_MINUTES), []);
+    const currentWeekStart = startOfWeek(new Date());
+    const isPastWeek = weekStart.getTime() < currentWeekStart.getTime();
+    const disablePreviousWeek = weekStart.getTime() <= currentWeekStart.getTime();
     const weekConsultations = useMemo(() => {
         const start = weekStart;
         const end = addDays(weekStart, 7);
-        const CALENDAR_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO']);
         return consultations.filter((consultation) => {
-            if (!CALENDAR_STATUSES.has(consultation.status)) return false;
+            if (!GRID_CONSULTATION_STATUSES.has(consultation.status)) return false;
             const date = new Date(consultation.inicioEm);
             return date >= start && date < end;
         });
@@ -159,6 +164,7 @@ export function PsychologistAgendaPage({ onToast }) {
                 if (!showHistory && !ACTIVE_STATUSES.has(consultation.status)) return false;
                 if (statusFilter !== 'ALL' && consultation.status !== statusFilter) return false;
                 if (typeFilter !== 'ALL' && consultation.tipoAtendimento !== typeFilter) return false;
+                if (dateFilter && consultation.inicioEm.slice(0, 10) !== dateFilter) return false;
                 if (!normalizedQuery) return true;
                 return normalizeText(consultation.pacienteNome).includes(normalizedQuery);
             })
@@ -166,7 +172,7 @@ export function PsychologistAgendaPage({ onToast }) {
                 const diff = new Date(first.inicioEm) - new Date(second.inicioEm);
                 return showHistory ? -diff : diff;
             });
-    }, [consultations, searchQuery, statusFilter, typeFilter, showHistory]);
+    }, [consultations, searchQuery, statusFilter, typeFilter, dateFilter, showHistory]);
 
     const pagedConsultations = useMemo(() => {
         const startIndex = (consultationPage - 1) * CONSULTATION_PAGE_SIZE;
@@ -191,6 +197,8 @@ export function PsychologistAgendaPage({ onToast }) {
 
     const consultationPages = Math.max(1, Math.ceil(filteredConsultations.length / CONSULTATION_PAGE_SIZE));
     const weekAvailabilityByDay = useMemo(() => buildWeekAvailability(weekDays, normalizedRules), [normalizedRules, weekDays]);
+    const weekDurationByDay = useMemo(() => buildWeekDurations(weekDays, normalizedRules), [normalizedRules, weekDays]);
+    const weekBreakBlocks = useMemo(() => buildWeekBreakBlocks(weekDays, normalizedRules), [normalizedRules, weekDays]);
     const weekConsultationBlocks = useMemo(() => buildWeekBlocks(weekDays, weekConsultations), [weekConsultations, weekDays]);
     const weekBlockedSlots = useMemo(() => {
         const start = weekStart;
@@ -212,7 +220,7 @@ export function PsychologistAgendaPage({ onToast }) {
 
     useEffect(() => {
         setConsultationPage(1);
-    }, [searchQuery, statusFilter, typeFilter, showHistory]);
+    }, [searchQuery, statusFilter, typeFilter, dateFilter, showHistory]);
 
     function refreshAll() {
         setRefreshKey((current) => current + 1);
@@ -227,12 +235,20 @@ export function PsychologistAgendaPage({ onToast }) {
             return;
         }
 
+        const breakValidationMessage = validateAvailabilityBreak(availabilityModal);
+        if (breakValidationMessage) {
+            onToast?.({ type: 'error', message: breakValidationMessage });
+            return;
+        }
+
         setAvailabilitySaving(true);
         try {
             const result = await schedulingApi.saveAvailability({
                 diasSemana: availabilityModal.selectedDays,
                 horaInicio: `${availabilityModal.horaInicio}:00`,
                 horaFim: `${availabilityModal.horaFim}:00`,
+                pausaInicio: availabilityModal.configurarPausa ? `${availabilityModal.pausaInicio}:00` : null,
+                pausaFim: availabilityModal.configurarPausa ? `${availabilityModal.pausaFim}:00` : null,
                 duracaoSlotMinutos: Number(availabilityModal.duracaoSlotMinutos),
                 validoAPartirDe: toIsoDate(new Date()),
                 gerarAte: toIsoDate(addDays(new Date(), 60)),
@@ -248,7 +264,7 @@ export function PsychologistAgendaPage({ onToast }) {
             onToast?.({ type: 'success', message: 'Disponibilidade atualizada.' });
             setAvailabilityModal(null);
             refreshAll();
-        } catch (error) {
+        } catch {
             onToast?.({ type: 'error', message: 'Não foi possível salvar essa disponibilidade.' });
         } finally {
             setAvailabilitySaving(false);
@@ -259,12 +275,20 @@ export function PsychologistAgendaPage({ onToast }) {
         event.preventDefault();
         if (!singleDayAvailabilityModal) return;
 
+        const breakValidationMessage = validateAvailabilityBreak(singleDayAvailabilityModal);
+        if (breakValidationMessage) {
+            onToast?.({ type: 'error', message: breakValidationMessage });
+            return;
+        }
+
         setSingleDayAvailabilitySaving(true);
         try {
             const result = await schedulingApi.saveAvailability({
                 diasSemana: [singleDayAvailabilityModal.dayKey],
                 horaInicio: `${singleDayAvailabilityModal.horaInicio}:00`,
                 horaFim: `${singleDayAvailabilityModal.horaFim}:00`,
+                pausaInicio: singleDayAvailabilityModal.configurarPausa ? `${singleDayAvailabilityModal.pausaInicio}:00` : null,
+                pausaFim: singleDayAvailabilityModal.configurarPausa ? `${singleDayAvailabilityModal.pausaFim}:00` : null,
                 duracaoSlotMinutos: Number(singleDayAvailabilityModal.duracaoSlotMinutos),
                 validoAPartirDe: toIsoDate(new Date()),
                 gerarAte: toIsoDate(addDays(new Date(), 60)),
@@ -280,7 +304,7 @@ export function PsychologistAgendaPage({ onToast }) {
             onToast?.({ type: 'success', message: `Disponibilidade de ${DAY_FULL_LABELS[singleDayAvailabilityModal.dayKey]} atualizada.` });
             setSingleDayAvailabilityModal(null);
             refreshAll();
-        } catch (error) {
+        } catch {
             onToast?.({ type: 'error', message: 'Não foi possível salvar essa disponibilidade.' });
         } finally {
             setSingleDayAvailabilitySaving(false);
@@ -303,7 +327,7 @@ export function PsychologistAgendaPage({ onToast }) {
             onToast?.({ type: 'success', message: 'Consulta agendada com sucesso.' });
             setScheduleConsultationModal(null);
             refreshAll();
-        } catch (error) {
+        } catch {
             onToast?.({ type: 'error', message: 'Não foi possível agendar essa consulta.' });
         } finally {
             setScheduleConsultationSaving(false);
@@ -323,23 +347,10 @@ export function PsychologistAgendaPage({ onToast }) {
             setConsultationModal(null);
             setCancelReason('');
             refreshAll();
-        } catch (error) {
+        } catch {
             onToast?.({ type: 'error', message: 'Não foi possível cancelar essa consulta.' });
         } finally {
             setCancelSubmitting(false);
-        }
-    }
-
-    async function handleRemoveSlot(slot) {
-        const confirmed = window.confirm('Remover este horário da agenda?');
-        if (!confirmed) return;
-
-        try {
-            await schedulingApi.removeMySlot(slot.id);
-            onToast?.({ type: 'success', message: 'Horário removido da agenda.' });
-            refreshAll();
-        } catch (error) {
-            onToast?.({ type: 'error', message: 'Não foi possível remover esse horário.' });
         }
     }
 
@@ -409,7 +420,7 @@ export function PsychologistAgendaPage({ onToast }) {
             onToast?.({ type: 'success', message: 'Bloqueio removido. Horário disponível novamente.' });
             setUnblockSlotModal(null);
             refreshAll();
-        } catch (error) {
+        } catch {
             onToast?.({ type: 'error', message: 'Não foi possível remover o bloqueio.' });
         }
     }
@@ -453,12 +464,6 @@ export function PsychologistAgendaPage({ onToast }) {
                     <h1>Agenda</h1>
                     <p className="agenda-page__subtitle">Gerencie sua disponibilidade e consultas agendadas.</p>
                 </div>
-                <div className="agenda-page__actions">
-                    <button className="secondary-button secondary-button--outline" type="button" onClick={exportFilteredConsultations}>
-                        <Download size={17} />
-                        Exportar
-                    </button>
-                </div>
             </header>
 
             <section className="panel agenda-section">
@@ -473,30 +478,36 @@ export function PsychologistAgendaPage({ onToast }) {
                     </button>
                 </div>
 
-                <div className="availability-grid">
-                    {DAY_ORDER.map((dayKey) => {
-                        const rule = availabilitySummary.find((item) => item.diaSemana === dayKey);
-                        return (
-                            <article className="availability-card" key={dayKey}>
-                                <div className="availability-card__header">
-                                    <strong>{DAY_FULL_LABELS[dayKey]}</strong>
-                                    <button
-                                        className="icon-button"
-                                        type="button"
-                                        onClick={() => setSingleDayAvailabilityModal(defaultSingleDayAvailabilityModal(dayKey, rule))}
-                                        aria-label={`Editar disponibilidade de ${DAY_FULL_LABELS[dayKey]}`}
-                                    >
-                                        <Edit3 size={16} />
-                                    </button>
-                                </div>
-                                <div className={rule?.ativo ? 'availability-card__hours' : 'availability-card__hours availability-card__hours--muted'}>
-                                    {rule?.ativo ? `${formatClock(rule.horaInicio)} – ${formatClock(rule.horaFim)}` : 'Indisponível'}
-                                </div>
-                                <div className="availability-card__meta">Duração: {rule?.duracaoSlotMinutos || DEFAULT_DURATION} min</div>
-                            </article>
-                        );
-                    })}
-                </div>
+                {loadingAvailability ? (
+                    <AvailabilitySkeletonGrid />
+                ) : (
+                    <div className="availability-grid">
+                        {DAY_ORDER.map((dayKey) => {
+                            const rule = availabilitySummary.find((item) => item.diaSemana === dayKey);
+                            return (
+                                <article className="availability-card" key={dayKey}>
+                                    <div className="availability-card__header">
+                                        <strong>{DAY_FULL_LABELS[dayKey]}</strong>
+                                        <button
+                                            className="icon-button"
+                                            type="button"
+                                            onClick={() => setSingleDayAvailabilityModal(defaultSingleDayAvailabilityModal(dayKey, rule))}
+                                            aria-label={`Editar disponibilidade de ${DAY_FULL_LABELS[dayKey]}`}
+                                        >
+                                            <Edit3 size={16} />
+                                        </button>
+                                    </div>
+                                    <div className={rule?.ativo ? 'availability-card__hours' : 'availability-card__hours availability-card__hours--muted'}>
+                                        {rule?.ativo ? `${formatClock(rule.horaInicio)} – ${formatClock(rule.horaFim)}` : 'Indisponível'}
+                                    </div>
+                                    {rule?.ativo && (
+                                        <div className="availability-card__meta">Duração da consulta: {rule.duracaoSlotMinutos || DEFAULT_DURATION} min</div>
+                                    )}
+                                </article>
+                            );
+                        })}
+                    </div>
+                )}
             </section>
 
             <section className="panel agenda-section">
@@ -533,27 +544,52 @@ export function PsychologistAgendaPage({ onToast }) {
                             </button>
                         ))}
                     </div>
-                    <div className="agenda-filter-group">
-                        {TYPE_OPTIONS.map((option) => (
-                            <button
-                                key={option.value}
-                                type="button"
-                                className={typeFilter === option.value ? 'agenda-filter-button agenda-filter-button--active' : 'agenda-filter-button'}
-                                onClick={() => setTypeFilter(option.value)}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
+                    <div className="agenda-search-row">
+                        <label className="agenda-search">
+                            <Search size={16} />
+                            <input
+                                type="search"
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                placeholder="Buscar paciente"
+                            />
+                        </label>
+                        <label className="agenda-date-filter">
+                            <span>Data</span>
+                            <input
+                                type="date"
+                                value={dateFilter}
+                                onChange={(event) => setDateFilter(event.target.value)}
+                                aria-label="Filtrar consultas por data"
+                            />
+                        </label>
+                        <button
+                            className={showMoreFilters ? 'ghost-button agenda-more-filters__trigger agenda-more-filters__trigger--open' : 'ghost-button agenda-more-filters__trigger'}
+                            type="button"
+                            onClick={() => setShowMoreFilters((current) => !current)}
+                            aria-expanded={showMoreFilters}
+                        >
+                            <SlidersHorizontal size={16} />
+                            Mais filtros
+                        </button>
                     </div>
-                    <label className="agenda-search">
-                        <Search size={16} />
-                        <input
-                            type="search"
-                            value={searchQuery}
-                            onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Buscar paciente"
-                        />
-                    </label>
+                    {showMoreFilters && (
+                        <div className="agenda-more-filters" role="group" aria-label="Filtros adicionais">
+                            <span>Tipo de atendimento</span>
+                            <div className="agenda-filter-group">
+                                {TYPE_OPTIONS.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        className={typeFilter === option.value ? 'agenda-filter-button agenda-filter-button--active' : 'agenda-filter-button'}
+                                        onClick={() => setTypeFilter(option.value)}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {loadingConsultations && <LoadingState />}
@@ -620,6 +656,10 @@ export function PsychologistAgendaPage({ onToast }) {
                             <button className="ghost-button" type="button" onClick={() => setConsultationPage((current) => Math.min(consultationPages, current + 1))} disabled={consultationPage >= consultationPages}>
                                 Próxima
                             </button>
+                            <button className="secondary-button secondary-button--outline" type="button" onClick={exportFilteredConsultations}>
+                                <Download size={17} />
+                                Exportar lista filtrada ({filteredConsultations.length} consultas)
+                            </button>
                         </div>
                     </>
                 )}
@@ -632,7 +672,12 @@ export function PsychologistAgendaPage({ onToast }) {
                         <h2>Calendário Semanal de Consultas</h2>
                     </div>
                     <div className="week-nav">
-                        <button className="ghost-button" type="button" onClick={() => setWeekStart((current) => addDays(current, -7))}>
+                        <button
+                            className="ghost-button"
+                            type="button"
+                            onClick={() => setWeekStart((current) => addDays(current, -7))}
+                            disabled={disablePreviousWeek}
+                        >
                             <ChevronLeft size={16} />
                             Semana anterior
                         </button>
@@ -652,8 +697,11 @@ export function PsychologistAgendaPage({ onToast }) {
                         weekDays={weekDays}
                         rows={calendarRows}
                         availabilityByDay={weekAvailabilityByDay}
+                        durationByDay={weekDurationByDay}
                         consultationBlocks={weekConsultationBlocks}
                         blockedBlocks={weekBlockedSlots}
+                        breakBlocks={weekBreakBlocks}
+                        readOnly={isPastWeek}
                         onOpenConsultation={(consultation) => {
                             setConsultationModal(consultation);
                             setCancelReason('');
@@ -687,6 +735,7 @@ export function PsychologistAgendaPage({ onToast }) {
             {availabilityModal && (
                 <AvailabilityEditorModal
                     state={availabilityModal}
+                    activeDayKeys={availabilitySummary.filter((item) => item.ativo).map((item) => item.diaSemana)}
                     onClose={() => setAvailabilityModal(null)}
                     onChange={setAvailabilityModal}
                     onSubmit={handleAvailabilitySave}
@@ -722,7 +771,7 @@ export function PsychologistAgendaPage({ onToast }) {
                         setConsultationModal(null);
                         setCancelReason('');
                     }}
-                    onCancelReasonChange={setCancelReason}
+                    onCancelReasonChange={(value) => setCancelReason(value.slice(0, 300))}
                     onConfirmCancel={handleCancelConsultation}
                     cancelSubmitting={cancelSubmitting}
                 />
@@ -741,104 +790,148 @@ function LoadingState() {
     );
 }
 
-function WeekCalendar({ weekDays, rows, availabilityByDay, consultationBlocks, blockedBlocks, onOpenConsultation, onOpenCellMenu, onOpenBlockedSlot }) {
+function AvailabilitySkeletonGrid() {
     return (
-        <div className="week-calendar">
-            <div className="week-calendar__header">
-                <span className="week-calendar__time-label" />
-                {weekDays.map((date) => {
-                    const isToday = toIsoDate(date) === toIsoDate(new Date());
-                    return (
-                        <div className={isToday ? 'week-calendar__day week-calendar__day--today' : 'week-calendar__day'} key={toIsoDate(date)}>
-                            <strong>{dayHeaderLabel(date)}</strong>
-                            <span>{formatDate(date).slice(0, 5)}</span>
-                        </div>
-                    );
-                })}
-            </div>
-
-            <div className="week-calendar__body">
-                <div className="week-calendar__times">
-                    {rows.map((row) => (
-                        <div className="week-calendar__time-cell" key={row.minutes}>
-                            {row.label}
-                        </div>
-                    ))}
-                </div>
-
-                {weekDays.map((date) => {
-                    const dayKey = toIsoDate(date);
-                    const now = new Date();
-                    const nowDayKey = toIsoDate(now);
-                    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-                    const dayAvailability = availabilityByDay.get(dayKey) || [];
-                    const dayBlocks = consultationBlocks.filter((block) => block.dayKey === dayKey);
-                    const dayBlockedSlots = (blockedBlocks || []).filter((slot) => slot.dayKey === dayKey);
-                    return (
-                        <div className="week-calendar__column" key={dayKey}>
-                            {rows.map((row) => {
-                                const available = isMinuteWithinAvailability(row.minutes, dayAvailability);
-                                const consultation = findBlockAtMinute(dayBlocks, row.minutes);
-                                const blocked = dayBlockedSlots.some((slot) => row.minutes >= slot.startMinutes && row.minutes < slot.startMinutes + slot.durationMinutes);
-                                const isPast = dayKey < nowDayKey || (dayKey === nowDayKey && row.minutes < nowMinutes);
-                                const disabled = !available || Boolean(consultation) || blocked || isPast;
-                                return (
-                                    <button
-                                        key={row.minutes}
-                                        type="button"
-                                        className={available ? 'week-calendar__cell week-calendar__cell--available' : 'week-calendar__cell week-calendar__cell--blocked'}
-                                        disabled={disabled}
-                                        onClick={() => !disabled && onOpenCellMenu(date, row.minutes)}
-                                        title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
-                                    />
-                                );
-                            })}
-
-                            {dayBlocks.map((block) => (
-                                <button
-                                    type="button"
-                                    key={block.id}
-                                    className={`week-calendar__block ${weekCalendarBlockClass(block)}`}
-                                    style={{
-                                        top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
-                                        height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
-                                    }}
-                                    onClick={() => onOpenConsultation(block)}
-                                    title={`${block.pacienteNome} - ${formatTime(block.inicioEm)} - ${formatTime(block.fimEm)}`}
-                                >
-                                    <span className="week-calendar__block-title">{block.pacienteNome}</span>
-                                    <strong>{formatTime(block.inicioEm)} - {formatTime(block.fimEm)}</strong>
-                                    <span className="status-badge status-badge--type">
-                                        {block.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}
-                                    </span>
-                                </button>
-                            ))}
-
-                            {dayBlockedSlots.map((slot) => (
-                                <button
-                                    type="button"
-                                    key={`blocked-${slot.id}`}
-                                    className="week-calendar__block week-calendar__block--blocked-slot"
-                                    style={{
-                                        top: `${((slot.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
-                                        height: `${Math.max(44, Math.ceil(slot.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
-                                    }}
-                                    onClick={() => onOpenBlockedSlot(slot)}
-                                    title={`Horário bloqueado — ${formatTime(slot.inicioEm)} - ${formatTime(slot.fimEm)}`}
-                                >
-                                    <span className="week-calendar__block-title">Bloqueado</span>
-                                    <strong>{formatTime(slot.inicioEm)} - {formatTime(slot.fimEm)}</strong>
-                                </button>
-                            ))}
-                        </div>
-                    );
-                })}
-            </div>
+        <div className="availability-grid" aria-label="Carregando disponibilidade semanal">
+            {DAY_ORDER.map((dayKey) => (
+                <article className="availability-card availability-card--skeleton" key={dayKey}>
+                    <span />
+                    <span />
+                    <span />
+                </article>
+            ))}
         </div>
     );
 }
 
-function AvailabilityEditorModal({ state, onClose, onChange, onSubmit, saving }) {
+function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay, consultationBlocks, blockedBlocks, breakBlocks, readOnly, onOpenConsultation, onOpenCellMenu, onOpenBlockedSlot }) {
+    return (
+        <>
+            <div className="week-calendar__legend" aria-label="Legenda do calendário semanal">
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--available" />Disponível</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--scheduled" />Agendada</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--blocked" />Bloqueado</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--completed" />Concluída</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--cancelled" />Cancelada</span>
+            </div>
+            <div className="week-calendar">
+                <div className="week-calendar__header">
+                    <span className="week-calendar__time-label" />
+                    {weekDays.map((date) => {
+                        const isToday = toIsoDate(date) === toIsoDate(new Date());
+                        return (
+                            <div className={isToday ? 'week-calendar__day week-calendar__day--today' : 'week-calendar__day'} key={toIsoDate(date)}>
+                                <strong>{dayHeaderLabel(date)}</strong>
+                                <span>{formatDate(date).slice(0, 5)}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="week-calendar__body">
+                    <div className="week-calendar__times">
+                        {rows.map((row) => (
+                            <div className="week-calendar__time-cell" key={row.minutes}>
+                                {row.label}
+                            </div>
+                        ))}
+                    </div>
+
+                    {weekDays.map((date) => {
+                        const dayKey = toIsoDate(date);
+                        const now = new Date();
+                        const nowDayKey = toIsoDate(now);
+                        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+                    const dayAvailability = availabilityByDay.get(dayKey) || [];
+                    const slotDuration = durationByDay.get(dayKey) || DEFAULT_DURATION;
+                    const dayBlocks = consultationBlocks.filter((block) => block.dayKey === dayKey);
+                    const dayBlockedSlots = (blockedBlocks || []).filter((slot) => slot.dayKey === dayKey);
+                    const dayBreakBlocks = (breakBlocks || []).filter((block) => block.dayKey === dayKey);
+                    return (
+                        <div className="week-calendar__column" key={dayKey}>
+                            {rows.map((row) => {
+                                const breakBlocked = dayBreakBlocks.some((block) => intervalsOverlap(row.minutes, row.minutes + CALENDAR_SLOT_MINUTES, block.startMinutes, block.startMinutes + block.durationMinutes));
+                                const available = isSlotWithinAvailability(row.minutes, slotDuration, dayAvailability);
+                                const consultation = findBlockAtMinute(dayBlocks, row.minutes);
+                                const blocked = dayBlockedSlots.some((slot) => row.minutes >= slot.startMinutes && row.minutes < slot.startMinutes + slot.durationMinutes);
+                                const isPast = dayKey < nowDayKey || (dayKey === nowDayKey && row.minutes < nowMinutes);
+                                const disabled = readOnly || !available || Boolean(consultation) || blocked || breakBlocked || isPast;
+                                return (
+                                    <button
+                                        key={row.minutes}
+                                        type="button"
+                                        className={available && !breakBlocked ? 'week-calendar__cell week-calendar__cell--available' : 'week-calendar__cell week-calendar__cell--blocked'}
+                                        disabled={disabled}
+                                        onClick={() => !disabled && onOpenCellMenu(date, row.minutes)}
+                                            title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
+                                        />
+                                    );
+                                })}
+
+                                {dayBlocks.map((block) => (
+                                    <button
+                                        type="button"
+                                        key={block.id}
+                                        className={`week-calendar__block ${weekCalendarBlockClass(block)}`}
+                                        style={{
+                                            top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                            height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
+                                        }}
+                                        onClick={() => onOpenConsultation(block)}
+                                        title={`${block.pacienteNome} - ${formatTime(block.inicioEm)} - ${formatTime(block.fimEm)}`}
+                                    >
+                                        <span className="week-calendar__block-title">{block.pacienteNome}</span>
+                                        <strong>{formatTime(block.inicioEm)} - {formatTime(block.fimEm)}</strong>
+                                        <span className="status-badge status-badge--type">
+                                            {block.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}
+                                        </span>
+                                </button>
+                            ))}
+
+                            {dayBreakBlocks.map((block) => (
+                                <div
+                                    key={`break-${block.dayKey}`}
+                                    className="week-calendar__block week-calendar__block--meal-break"
+                                    style={{
+                                        top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                        height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
+                                    }}
+                                    title="Horário reservado para intervalo"
+                                >
+                                    <span className="week-calendar__block-title">🍽️ Intervalo / Refeição</span>
+                                    <strong>{block.startLabel} – {block.endLabel}</strong>
+                                </div>
+                            ))}
+
+                            {dayBlockedSlots.map((slot) => (
+                                    <button
+                                        type="button"
+                                        key={`blocked-${slot.id}`}
+                                        className="week-calendar__block week-calendar__block--blocked-slot"
+                                        disabled={readOnly}
+                                        style={{
+                                            top: `${((slot.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                            height: `${Math.max(44, Math.ceil(slot.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
+                                        }}
+                                        onClick={() => !readOnly && onOpenBlockedSlot(slot)}
+                                        title={`Horário bloqueado — ${formatTime(slot.inicioEm)} - ${formatTime(slot.fimEm)}`}
+                                    >
+                                        <span className="week-calendar__block-title">Bloqueado</span>
+                                        <strong>{formatTime(slot.inicioEm)} - {formatTime(slot.fimEm)}</strong>
+                                    </button>
+                                ))}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </>
+    );
+}
+
+function AvailabilityEditorModal({ state, activeDayKeys, onClose, onChange, onSubmit, saving }) {
+    const affectedDays = state.selectedDays.filter((day) => activeDayKeys.includes(day));
+
     function toggleDay(day) {
         onChange((current) => ({
             ...current,
@@ -896,6 +989,24 @@ function AvailabilityEditorModal({ state, onClose, onChange, onSubmit, saving })
                         />
                     </label>
 
+                    <AvailabilityBreakFields
+                        state={state}
+                        onChange={onChange}
+                        note="O intervalo será aplicado a todos os dias selecionados."
+                    />
+
+                    {affectedDays.length > 0 && (
+                        <div className="availability-warning" role="alert">
+                            <strong>Atenção:</strong>
+                            <span>esta ação substituirá a disponibilidade de</span>
+                            <span className="availability-warning__days">
+                                {affectedDays.map((day) => (
+                                    <mark key={day}>{DAY_FULL_LABELS[day]}</mark>
+                                ))}
+                            </span>
+                        </div>
+                    )}
+
                     <div className="inline-actions inline-actions--spread">
                         <button className="ghost-button" type="button" onClick={onClose}>Cancelar</button>
                         <button className="primary-button primary-button--fit" type="submit" disabled={saving}>
@@ -948,6 +1059,8 @@ function SingleDayAvailabilityModal({ state, onClose, onChange, onSubmit, saving
                         />
                     </label>
 
+                    <AvailabilityBreakFields state={state} onChange={onChange} />
+
                     <div className="inline-actions inline-actions--spread">
                         <button className="ghost-button" type="button" onClick={onClose}>Cancelar</button>
                         <button className="primary-button primary-button--fit" type="submit" disabled={saving}>
@@ -958,6 +1071,57 @@ function SingleDayAvailabilityModal({ state, onClose, onChange, onSubmit, saving
                 </form>
             </div>
         </div>
+    );
+}
+
+function AvailabilityBreakFields({ state, onChange, note }) {
+    function toggleBreak(enabled) {
+        onChange((current) => ({
+            ...current,
+            configurarPausa: enabled,
+            pausaInicio: current.pausaInicio || '12:00',
+            pausaFim: current.pausaFim || '13:00',
+        }));
+    }
+
+    return (
+        <fieldset className="availability-break">
+            <legend>Intervalo / Horário de almoço</legend>
+            <label className="check-card availability-break__toggle">
+                <input
+                    type="checkbox"
+                    checked={Boolean(state.configurarPausa)}
+                    onChange={(event) => toggleBreak(event.target.checked)}
+                />
+                <span>Configurar intervalo</span>
+            </label>
+
+            {state.configurarPausa && (
+                <>
+                    <div className="form-grid">
+                        <label>
+                            Início do intervalo
+                            <input
+                                type="time"
+                                value={state.pausaInicio}
+                                onChange={(event) => onChange((current) => ({ ...current, pausaInicio: event.target.value }))}
+                                required
+                            />
+                        </label>
+                        <label>
+                            Fim do intervalo
+                            <input
+                                type="time"
+                                value={state.pausaFim}
+                                onChange={(event) => onChange((current) => ({ ...current, pausaFim: event.target.value }))}
+                                required
+                            />
+                        </label>
+                    </div>
+                    {note && <p>{note}</p>}
+                </>
+            )}
+        </fieldset>
     );
 }
 
@@ -1149,6 +1313,8 @@ function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, saving 
 
 function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCancelReasonChange, onConfirmCancel, cancelSubmitting }) {
     const canCancel = canCancelConsultation(consultation);
+    const cancelLimitReached = cancelReason.length >= 300;
+    const hasPatientContact = Boolean(consultation.pacienteTelefone || consultation.pacienteEmail);
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
@@ -1176,6 +1342,15 @@ function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCance
                         <dt>Status</dt>
                         <dd>{consultationStatusLabel(consultation.status)}</dd>
                     </div>
+                    {hasPatientContact && (
+                        <div>
+                            <dt>Contato do paciente</dt>
+                            <dd className="details-contact">
+                                {consultation.pacienteTelefone && <span>Telefone: {consultation.pacienteTelefone}</span>}
+                                {consultation.pacienteEmail && <span>E-mail: {consultation.pacienteEmail}</span>}
+                            </dd>
+                        </div>
+                    )}
                     <div>
                         <dt>Observações</dt>
                         <dd>{consultation.observacoes || 'Sem observações.'}</dd>
@@ -1184,9 +1359,19 @@ function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCance
 
                 {canCancel && (
                     <div className="details-cancel">
+                        <p className="details-cancel__notice">O horário será liberado automaticamente e ficará disponível para novos agendamentos.</p>
                         <label>
                             Motivo do cancelamento
-                            <textarea value={cancelReason} onChange={(event) => onCancelReasonChange(event.target.value)} rows="4" placeholder="Informe o motivo do cancelamento" />
+                            <textarea
+                                value={cancelReason}
+                                onChange={(event) => onCancelReasonChange(event.target.value)}
+                                rows="4"
+                                maxLength={300}
+                                placeholder="Informe o motivo do cancelamento"
+                            />
+                            <span className={cancelLimitReached ? 'textarea-counter textarea-counter--limit' : 'textarea-counter'}>
+                                {cancelReason.length}/300 caracteres
+                            </span>
                         </label>
                         <div className="inline-actions inline-actions--spread">
                             <button className="ghost-button" type="button" onClick={onClose}>Fechar</button>
@@ -1220,6 +1405,7 @@ function CellActionMenuModal({ date, minutesFromMidnight, duration, loading, onS
                     </button>
                 </div>
                 <div className="stack-form">
+                    <p className="cell-action-context">Criar horário das {timeLabel} às {endLabel} ({duration} min)</p>
                     <p style={{ color: '#6B7280', fontSize: '14px' }}>O que deseja fazer com este horário?</p>
                     <button className="primary-button" type="button" onClick={onSchedule} disabled={loading === 'schedule'}>
                         {loading === 'schedule' ? <Loader2 className="spin" size={17} /> : <CalendarPlus size={17} />}
@@ -1300,12 +1486,61 @@ function buildWeekAvailability(weekDays, rulesMap) {
     weekDays.forEach((date) => {
         const dayKey = toIsoDate(date);
         const dayRule = rulesMap.get(dayValueFromDate(date));
-        const ranges = dayRule && dayRule.ativo
-            ? [{ start: timeStringToMinutes(dayRule.horaInicio), end: timeStringToMinutes(dayRule.horaFim) }]
-            : [];
+        let ranges = [];
+        if (dayRule && dayRule.ativo) {
+            const start = timeStringToMinutes(dayRule.horaInicio);
+            const end = timeStringToMinutes(dayRule.horaFim);
+            ranges = splitAvailabilityAroundBreak(start, end, dayRule);
+        }
         map.set(dayKey, ranges);
     });
     return map;
+}
+
+function buildWeekDurations(weekDays, rulesMap) {
+    const map = new Map();
+    weekDays.forEach((date) => {
+        const dayRule = rulesMap.get(dayValueFromDate(date));
+        map.set(toIsoDate(date), dayRule?.duracaoSlotMinutos || DEFAULT_DURATION);
+    });
+    return map;
+}
+
+function buildWeekBreakBlocks(weekDays, rulesMap) {
+    return weekDays.flatMap((date) => {
+        const dayRule = rulesMap.get(dayValueFromDate(date));
+        if (!dayRule?.ativo || !hasValidBreak(dayRule)) return [];
+
+        const startMinutes = timeStringToMinutes(dayRule.pausaInicio);
+        const endMinutes = timeStringToMinutes(dayRule.pausaFim);
+        return [{
+            dayKey: toIsoDate(date),
+            startMinutes,
+            durationMinutes: endMinutes - startMinutes,
+            startLabel: minutesToTimeLabel(startMinutes),
+            endLabel: minutesToTimeLabel(endMinutes),
+        }];
+    });
+}
+
+function splitAvailabilityAroundBreak(start, end, rule) {
+    if (!hasValidBreak(rule)) {
+        return [{ start, end }];
+    }
+
+    const breakStart = timeStringToMinutes(rule.pausaInicio);
+    const breakEnd = timeStringToMinutes(rule.pausaFim);
+    const ranges = [];
+
+    if (breakStart > start) {
+        ranges.push({ start, end: Math.min(breakStart, end) });
+    }
+
+    if (breakEnd < end) {
+        ranges.push({ start: Math.max(breakEnd, start), end });
+    }
+
+    return ranges.filter((range) => range.end > range.start);
 }
 
 function buildWeekBlocks(weekDays, consultations) {
@@ -1328,8 +1563,22 @@ function buildWeekBlocks(weekDays, consultations) {
     return blocks;
 }
 
-function isMinuteWithinAvailability(minutes, availabilityRanges) {
-    return availabilityRanges.some((range) => minutes >= range.start && minutes < range.end);
+function isSlotWithinAvailability(minutes, duration, availabilityRanges) {
+    const end = minutes + duration;
+    return availabilityRanges.some((range) => minutes >= range.start && end <= range.end);
+}
+
+function intervalsOverlap(firstStart, firstEnd, secondStart, secondEnd) {
+    return firstStart < secondEnd && firstEnd > secondStart;
+}
+
+function hasValidBreak(rule) {
+    if (!rule?.pausaInicio || !rule?.pausaFim) return false;
+    const start = timeStringToMinutes(rule.pausaInicio);
+    const end = timeStringToMinutes(rule.pausaFim);
+    const serviceStart = timeStringToMinutes(rule.horaInicio);
+    const serviceEnd = timeStringToMinutes(rule.horaFim);
+    return end > start && start >= serviceStart && end <= serviceEnd;
 }
 
 function findBlockAtMinute(dayBlocks, minutes) {
@@ -1365,13 +1614,19 @@ function canCancelConsultation(consultation) {
     return consultation.status === 'AGENDADA' && new Date(consultation.inicioEm).getTime() > Date.now();
 }
 
-function defaultAvailabilityModal(dayKey, rule) {
-    return {
-        selectedDays: [dayKey],
-        horaInicio: rule?.horaInicio ? normalizeClock(rule.horaInicio) : '08:00',
-        horaFim: rule?.horaFim ? normalizeClock(rule.horaFim) : '12:00',
-        duracaoSlotMinutos: rule?.duracaoSlotMinutos || DEFAULT_DURATION,
-    };
+function validateAvailabilityBreak(state) {
+    if (!state.configurarPausa) return null;
+    if (!state.pausaInicio || !state.pausaFim) return 'Informe início e fim do intervalo.';
+
+    const serviceStart = timeStringToMinutes(state.horaInicio);
+    const serviceEnd = timeStringToMinutes(state.horaFim);
+    const breakStart = timeStringToMinutes(state.pausaInicio);
+    const breakEnd = timeStringToMinutes(state.pausaFim);
+
+    if (breakEnd <= breakStart) return 'Fim do intervalo deve ser posterior ao início.';
+    if (breakStart < serviceStart || breakEnd > serviceEnd) return 'Intervalo deve estar dentro do horário de atendimento.';
+
+    return null;
 }
 
 function defaultWeeklyAvailabilityModal(availabilitySummary) {
@@ -1384,6 +1639,9 @@ function defaultWeeklyAvailabilityModal(availabilitySummary) {
         selectedDays,
         horaInicio: firstActiveRule?.horaInicio ? normalizeClock(firstActiveRule.horaInicio) : '08:00',
         horaFim: firstActiveRule?.horaFim ? normalizeClock(firstActiveRule.horaFim) : '12:00',
+        configurarPausa: Boolean(firstActiveRule?.pausaInicio && firstActiveRule?.pausaFim),
+        pausaInicio: firstActiveRule?.pausaInicio ? normalizeClock(firstActiveRule.pausaInicio) : '12:00',
+        pausaFim: firstActiveRule?.pausaFim ? normalizeClock(firstActiveRule.pausaFim) : '13:00',
         duracaoSlotMinutos: firstActiveRule?.duracaoSlotMinutos || DEFAULT_DURATION,
     };
 }
@@ -1393,6 +1651,9 @@ function defaultSingleDayAvailabilityModal(dayKey, rule) {
         dayKey,
         horaInicio: rule?.horaInicio ? normalizeClock(rule.horaInicio) : '08:00',
         horaFim: rule?.horaFim ? normalizeClock(rule.horaFim) : '12:00',
+        configurarPausa: Boolean(rule?.pausaInicio && rule?.pausaFim),
+        pausaInicio: rule?.pausaInicio ? normalizeClock(rule.pausaInicio) : '12:00',
+        pausaFim: rule?.pausaFim ? normalizeClock(rule.pausaFim) : '13:00',
         duracaoSlotMinutos: rule?.duracaoSlotMinutos || DEFAULT_DURATION,
     };
 }
@@ -1436,9 +1697,7 @@ function formatClock(value) {
 
 function startOfWeek(date) {
     const value = new Date(date);
-    const day = value.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    value.setDate(value.getDate() + diff);
+    value.setDate(value.getDate() - value.getDay());
     value.setHours(0, 0, 0, 0);
     return value;
 }

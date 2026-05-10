@@ -1,4 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+/* Nunito (body) — rounded humanist, warm and readable */
+/* Outfit (display) — geometric, modern, trustworthy    */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&display=swap");
 
 :root {
   --color-primary: #7C3AED;
@@ -18,9 +20,27 @@
   --radius-card: 14px;
   --radius-badge: 999px;
   --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06);
-  --font-family: "Inter", sans-serif;
   --color-danger: #DC2626;
   --color-danger-light: #FEE2E2;
+
+  /* --- Tipografia --- */
+  /* Famílias */
+  --font-body:    "Nunito", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Outfit",  "Helvetica Neue", Arial, sans-serif;
+  --font-family: var(--font-body); /* alias de compatibilidade */
+
+  /* Escala de tamanhos (rem, base = 16 px do navegador) */
+  --text-2xs:  0.6875rem; /* 11 px — rótulos micro */
+  --text-xs:   0.75rem;   /* 12 px — legendas, badges */
+  --text-sm:   0.8125rem; /* 13 px — auxiliar, hints */
+  --text-base: 0.875rem;  /* 14 px — corpo principal */
+  --text-md:   1rem;      /* 16 px — destaque de corpo */
+  --text-lg:   1.125rem;  /* 18 px — subtítulos pequenos */
+  --text-xl:   1.25rem;   /* 20 px — títulos de painel */
+  --text-2xl:  1.5rem;    /* 24 px — títulos menores */
+  --text-3xl:  1.75rem;   /* 28 px — títulos de página */
+  --text-4xl:  2rem;      /* 32 px — títulos grandes */
+  --text-5xl:  2.125rem;  /* 34 px — título hero */
 }
 
 * {
@@ -562,6 +582,61 @@ select:focus,
 textarea:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+}
+
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  padding-right: 46px;
+}
+
+.password-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  transform: translateY(-50%);
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.password-field__toggle:hover {
+  background: #F5F3FF;
+  color: var(--color-primary);
+}
+
+.field-hint {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.field-hint--error {
+  color: var(--color-danger);
+}
+
+.auth-forgot-button {
+  width: fit-content;
+  justify-self: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-forgot-button:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
 }
 
 .checkbox-group {
@@ -1264,6 +1339,11 @@ textarea:focus {
   border-bottom: 0;
 }
 
+.details-contact {
+  display: grid;
+  gap: 3px;
+}
+
 .cancel-box {
   display: grid;
   width: min(360px, 38vw);
@@ -1385,6 +1465,85 @@ textarea:focus {
   font-size: 12px;
 }
 
+.availability-card--skeleton span {
+  display: block;
+  height: 18px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #F3F4F6, #FFFFFF, #F3F4F6);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.availability-card--skeleton span:first-child {
+  width: 72%;
+}
+
+.availability-card--skeleton span:nth-child(2) {
+  width: 100%;
+  height: 30px;
+}
+
+.availability-card--skeleton span:last-child {
+  width: 58%;
+}
+
+.availability-warning {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-warning-light);
+  border-radius: 12px;
+  background: #FFFBEB;
+  color: #92400E;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.availability-warning strong {
+  color: #78350F;
+}
+
+.availability-warning__days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.availability-warning mark {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--color-warning-light);
+  color: #78350F;
+  font-weight: 800;
+}
+
+.availability-break {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #FAFAFB;
+}
+
+.availability-break legend {
+  padding: 0 4px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.availability-break__toggle {
+  width: fit-content;
+}
+
+.availability-break p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .agenda-mini-list {
   display: grid;
   gap: 14px;
@@ -1439,6 +1598,11 @@ textarea:focus {
   justify-content: flex-end;
 }
 
+.agenda-table-filters {
+  display: grid;
+  gap: 12px;
+}
+
 .agenda-filter-button {
   min-height: 34px;
   padding: 7px 12px;
@@ -1471,6 +1635,101 @@ textarea:focus {
   height: 38px;
   padding: 0;
   box-shadow: none;
+}
+
+.agenda-search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.agenda-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.agenda-date-filter input {
+  width: 148px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.agenda-more-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #FAFAFB;
+}
+
+.agenda-more-filters > span {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.agenda-more-filters__trigger--open {
+  background: #F5F3FF;
+  color: var(--color-primary);
+}
+
+.week-calendar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.week-calendar__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-calendar__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.week-calendar__legend-dot--available {
+  background: #10B981;
+}
+
+.week-calendar__legend-dot--scheduled {
+  background: #7C3AED;
+}
+
+.week-calendar__legend-dot--blocked {
+  background: #6B7280;
+}
+
+.week-calendar__legend-dot--completed {
+  background: #9CA3AF;
+}
+
+.week-calendar__legend-dot--cancelled {
+  background: #DC2626;
 }
 
 .week-calendar {
@@ -1508,7 +1767,13 @@ textarea:focus {
 }
 
 .week-calendar__day--today {
-  background: var(--color-primary-light);
+  background: #F5F3FF;
+}
+
+.week-calendar__day--today strong,
+.week-calendar__day--today span {
+  color: var(--color-primary-dark);
+  font-weight: 800;
 }
 
 .week-calendar__body {
@@ -1551,11 +1816,11 @@ textarea:focus {
 }
 
 .week-calendar__cell--available {
-  background: #FFFFFF;
+  background: #ECFDF5;
 }
 
 .week-calendar__cell--available:hover:not(:disabled) {
-  background: #ECFDF5;
+  background: #D1FAE5;
 }
 
 .week-calendar__cell--blocked {
@@ -1586,6 +1851,30 @@ textarea:focus {
   font-weight: 800;
 }
 
+.week-calendar__block--scheduled {
+  background: #EDE9FE;
+  border-left: 4px solid #7C3AED;
+  color: #5B21B6;
+}
+
+.week-calendar__block--in-progress {
+  background: #DBEAFE;
+  border-left: 4px solid #3B82F6;
+  color: #1D4ED8;
+}
+
+.week-calendar__block--completed {
+  background: #F3F4F6;
+  border-left: 4px solid #9CA3AF;
+  color: #6B7280;
+}
+
+.week-calendar__block--cancelled {
+  background: #FEE2E2;
+  border-left: 4px solid #DC2626;
+  color: #991B1B;
+}
+
 .week-calendar__block--blocked-slot {
   background: repeating-linear-gradient(
     45deg,
@@ -1599,8 +1888,24 @@ textarea:focus {
   cursor: pointer;
 }
 
+.week-calendar__block--meal-break {
+  background: #FEF3C7;
+  border-left: 4px solid #F59E0B;
+  color: #92400E;
+  pointer-events: none;
+}
+
+.week-calendar__block--meal-break .week-calendar__block-title,
+.week-calendar__block--meal-break strong {
+  color: #92400E;
+}
+
 .week-calendar__block--blocked-slot:hover {
   opacity: 0.8;
+}
+
+.week-calendar__block:disabled {
+  cursor: default;
 }
 
 .modal-panel--compact {
@@ -1678,6 +1983,7 @@ textarea:focus {
 
 .agenda-pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px;
@@ -1699,6 +2005,38 @@ textarea:focus {
 
 .details-cancel textarea {
   min-height: 120px;
+}
+
+.details-cancel__notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 12px;
+  background: #F5F3FF;
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.textarea-counter {
+  justify-self: end;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.textarea-counter--limit {
+  color: var(--color-danger);
+}
+
+.cell-action-context {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #F5F3FF;
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .stack-form {
@@ -1751,6 +2089,11 @@ textarea:focus {
 .toast--error {
   border-color: var(--color-danger-light);
   color: var(--color-danger);
+}
+
+.toast--info {
+  border-color: var(--color-info-light);
+  color: var(--color-info);
 }
 
 .toast__close {

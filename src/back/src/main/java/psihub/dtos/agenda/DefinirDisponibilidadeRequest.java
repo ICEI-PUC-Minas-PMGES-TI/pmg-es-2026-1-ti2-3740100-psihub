@@ -13,6 +13,8 @@ public record DefinirDisponibilidadeRequest(
         @NotEmpty Set<DiaSemana> diasSemana,
         @NotNull LocalTime horaInicio,
         @NotNull LocalTime horaFim,
+        LocalTime pausaInicio,
+        LocalTime pausaFim,
         @Positive Integer duracaoSlotMinutos,
         @NotNull LocalDate validoAPartirDe,
         LocalDate validoAte,

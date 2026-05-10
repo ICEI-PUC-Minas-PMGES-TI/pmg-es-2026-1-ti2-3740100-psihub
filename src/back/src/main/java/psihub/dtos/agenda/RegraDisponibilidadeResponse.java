@@ -12,6 +12,8 @@ public record RegraDisponibilidadeResponse(
         LocalDate validoAte,
         LocalTime horaInicio,
         LocalTime horaFim,
+        LocalTime pausaInicio,
+        LocalTime pausaFim,
         Integer duracaoSlotMinutos,
         Boolean ativo
 ) {

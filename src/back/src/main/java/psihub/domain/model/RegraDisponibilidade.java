@@ -42,6 +42,12 @@ public class RegraDisponibilidade extends BaseEntity {
     @Column(name = "hora_fim", nullable = false)
     private LocalTime horaFim;
 
+    @Column(name = "pausa_inicio")
+    private LocalTime pausaInicio;
+
+    @Column(name = "pausa_fim")
+    private LocalTime pausaFim;
+
     @Column(name = "duracao_slot_minutos", nullable = false)
     private Integer duracaoSlotMinutos;
 
@@ -94,6 +100,22 @@ public class RegraDisponibilidade extends BaseEntity {
 
     public void setHoraFim(LocalTime horaFim) {
         this.horaFim = horaFim;
+    }
+
+    public LocalTime getPausaInicio() {
+        return pausaInicio;
+    }
+
+    public void setPausaInicio(LocalTime pausaInicio) {
+        this.pausaInicio = pausaInicio;
+    }
+
+    public LocalTime getPausaFim() {
+        return pausaFim;
+    }
+
+    public void setPausaFim(LocalTime pausaFim) {
+        this.pausaFim = pausaFim;
     }
 
     public Integer getDuracaoSlotMinutos() {

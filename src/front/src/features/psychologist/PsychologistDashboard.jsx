@@ -599,9 +599,7 @@ function groupSlotsByStartTime(slots) {
 
 function startOfWeek(date) {
     const value = new Date(date);
-    const day = value.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    value.setDate(value.getDate() + diff);
+    value.setDate(value.getDate() - value.getDay());
     value.setHours(0, 0, 0, 0);
     return value;
 }

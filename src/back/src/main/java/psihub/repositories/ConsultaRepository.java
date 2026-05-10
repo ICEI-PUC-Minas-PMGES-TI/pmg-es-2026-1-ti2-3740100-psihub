@@ -36,6 +36,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
             join fetch consulta.agendadoPorUsuario agendadoPor
             where (:pacienteId is null or paciente.id = :pacienteId)
               and (:psicologoId is null or psicologo.id = :psicologoId)
+              and consulta.ativo = true
               and consulta.status in :statuses
               and slot.inicioEm >= :inicio
               and slot.inicioEm < :fim
@@ -47,6 +48,24 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
             @Param("statuses") Collection<StatusConsulta> statuses,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim
+    );
+
+    @Query("""
+            select count(consulta) > 0
+            from Consulta consulta
+            join consulta.slotConsulta slot
+            where consulta.psicologo.id = :psicologoId
+              and consulta.ativo = true
+              and slot.ativo = true
+              and consulta.status not in :ignoredStatuses
+              and slot.inicioEm < :fim
+              and slot.fimEm > :inicio
+            """)
+    boolean existsBlockingOverlap(
+            @Param("psicologoId") Long psicologoId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("ignoredStatuses") Collection<StatusConsulta> ignoredStatuses
     );
 
     Optional<Consulta> findFirstByPacienteIdAndPsicologoIdAndSlotConsultaInicioEmBeforeAndStatusOrderBySlotConsultaInicioEmDesc(

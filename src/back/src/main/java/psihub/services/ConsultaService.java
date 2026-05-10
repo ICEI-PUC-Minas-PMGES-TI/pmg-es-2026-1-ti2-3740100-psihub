@@ -2,6 +2,7 @@ package psihub.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import psihub.domain.enums.DiaSemana;
 import psihub.domain.enums.StatusAcesso;
 import psihub.domain.enums.StatusConsulta;
 import psihub.domain.enums.StatusSlotConsulta;
@@ -17,6 +19,7 @@ import psihub.domain.enums.TipoUsuario;
 import psihub.domain.model.Consulta;
 import psihub.domain.model.Paciente;
 import psihub.domain.model.Psicologo;
+import psihub.domain.model.RegraDisponibilidade;
 import psihub.domain.model.SlotConsulta;
 import psihub.domain.model.Usuario;
 import psihub.dtos.consultas.AgendarConsultaRequest;
@@ -28,6 +31,7 @@ import psihub.mappers.ApiResponseMapper;
 import psihub.repositories.ConsultaRepository;
 import psihub.repositories.PacienteRepository;
 import psihub.repositories.PsicologoRepository;
+import psihub.repositories.RegraDisponibilidadeRepository;
 import psihub.repositories.SlotConsultaRepository;
 import psihub.repositories.UsuarioRepository;
 import org.springframework.lang.NonNull;
@@ -38,6 +42,9 @@ public class ConsultaService {
     private static final Collection<StatusConsulta> ACTIVE_STATUSES = List.of(
             StatusConsulta.AGENDADA, StatusConsulta.CONFIRMADA, StatusConsulta.EM_ANDAMENTO);
 
+    private static final Collection<StatusConsulta> NON_CONFLICTING_STATUSES = List.of(
+            StatusConsulta.CANCELADA, StatusConsulta.CONCLUIDA, StatusConsulta.FALTOU);
+
     private static final Collection<StatusConsulta> ALL_STATUSES =
             Arrays.asList(StatusConsulta.values());
 
@@ -46,6 +53,7 @@ public class ConsultaService {
     private final PsicologoRepository psicologoRepository;
     private final UsuarioRepository usuarioRepository;
     private final SlotConsultaRepository slotConsultaRepository;
+    private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
     private final ApiResponseMapper mapper;
     private final NotificacaoService notificacaoService;
 
@@ -55,6 +63,7 @@ public class ConsultaService {
             PsicologoRepository psicologoRepository,
             UsuarioRepository usuarioRepository,
             SlotConsultaRepository slotConsultaRepository,
+            RegraDisponibilidadeRepository regraDisponibilidadeRepository,
             ApiResponseMapper mapper,
             NotificacaoService notificacaoService
     ) {
@@ -63,6 +72,7 @@ public class ConsultaService {
         this.psicologoRepository = psicologoRepository;
         this.usuarioRepository = usuarioRepository;
         this.slotConsultaRepository = slotConsultaRepository;
+        this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
         this.mapper = mapper;
         this.notificacaoService = notificacaoService;
     }
@@ -279,6 +289,49 @@ public class ConsultaService {
         if (slot.getInicioEm().isBefore(LocalDateTime.now())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido agendar consulta em horario passado");
         }
+
+        if (consultaRepository.existsBlockingOverlap(psicologoId, slot.getInicioEm(), slot.getFimEm(), NON_CONFLICTING_STATUSES)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento");
+        }
+
+        validarSemConflitoComPausa(psicologoId, slot.getInicioEm().toLocalDate(), slot.getInicioEm().toLocalTime(), slot.getFimEm().toLocalTime());
+    }
+
+    private void validarSemConflitoComPausa(Long psicologoId, LocalDate data, LocalTime inicio, LocalTime fim) {
+        regraDisponibilidadeRepository.findByPsicologoIdAndDiaSemanaAndAtivoTrueOrderByIdDesc(psicologoId, toDiaSemana(data))
+                .stream()
+                .filter(regra -> regraVigenteNaData(regra, data))
+                .findFirst()
+                .ifPresent(regra -> {
+                    if (sobrepoePausa(inicio, fim, regra)) {
+                        throw new ApiException(HttpStatus.CONFLICT, "Horario reservado para intervalo");
+                    }
+                });
+    }
+
+    private boolean regraVigenteNaData(RegraDisponibilidade regra, LocalDate data) {
+        return !regra.getValidoAPartirDe().isAfter(data)
+                && (regra.getValidoAte() == null || !regra.getValidoAte().isBefore(data));
+    }
+
+    private boolean sobrepoePausa(LocalTime inicio, LocalTime fim, RegraDisponibilidade regra) {
+        if (regra.getPausaInicio() == null || regra.getPausaFim() == null) {
+            return false;
+        }
+
+        return inicio.isBefore(regra.getPausaFim()) && fim.isAfter(regra.getPausaInicio());
+    }
+
+    private DiaSemana toDiaSemana(LocalDate data) {
+        return switch (data.getDayOfWeek()) {
+            case MONDAY -> DiaSemana.SEGUNDA;
+            case TUESDAY -> DiaSemana.TERCA;
+            case WEDNESDAY -> DiaSemana.QUARTA;
+            case THURSDAY -> DiaSemana.QUINTA;
+            case FRIDAY -> DiaSemana.SEXTA;
+            case SATURDAY -> DiaSemana.SABADO;
+            case SUNDAY -> DiaSemana.DOMINGO;
+        };
     }
 
     private void validarAcessoConsulta(Consulta consulta, Long userId, TipoUsuario tipoUsuario) {

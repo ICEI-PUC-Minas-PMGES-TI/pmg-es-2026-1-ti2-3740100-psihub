@@ -31,6 +31,8 @@ public class ApiResponseMapper {
                 regra.getValidoAte(),
                 regra.getHoraInicio(),
                 regra.getHoraFim(),
+                regra.getPausaInicio(),
+                regra.getPausaFim(),
                 regra.getDuracaoSlotMinutos(),
                 regra.getAtivo()
         );
@@ -62,6 +64,8 @@ public class ApiResponseMapper {
                 consulta.getId(),
                 consulta.getPaciente().getId(),
                 consulta.getPaciente().getUsuario().getNome(),
+                consulta.getPaciente().getUsuario().getEmail(),
+                consulta.getPaciente().getUsuario().getTelefone(),
                 consulta.getPsicologo().getId(),
                 consulta.getPsicologo().getUsuario().getNome(),
                 consulta.getSlotConsulta().getId(),

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, LogIn, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
 import { authApi } from '../../api/authApi.js';
 import { decodeJwtPayload } from '../../utils/auth.js';
 
@@ -14,11 +14,18 @@ export function AuthPage({ onAuthenticated, onToast }) {
     const [mode, setMode] = useState('login');
     const [form, setForm] = useState(initialForm);
     const [submitting, setSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const isRegister = mode === 'register';
+    const passwordTooShort = form.senha.length > 0 && form.senha.length < 8;
 
     async function handleSubmit(event) {
         event.preventDefault();
+
+        if (form.senha.length < 8) {
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -98,20 +105,47 @@ export function AuthPage({ onAuthenticated, onToast }) {
 
                     <label className="field">
                         Senha
-                        <input
-                            type="password"
-                            value={form.senha}
-                            onChange={(event) => updateField('senha', event.target.value)}
-                            minLength={8}
-                            maxLength={120}
-                            required
-                        />
+                        <span className="password-field">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={form.senha}
+                                onChange={(event) => updateField('senha', event.target.value)}
+                                minLength={8}
+                                maxLength={120}
+                                required
+                                aria-invalid={passwordTooShort}
+                                aria-describedby="password-help"
+                            />
+                            <button
+                                className="password-field__toggle"
+                                type="button"
+                                onClick={() => setShowPassword((current) => !current)}
+                                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </span>
+                        <span
+                            id="password-help"
+                            className={passwordTooShort ? 'field-hint field-hint--error' : 'field-hint'}
+                        >
+                            Mínimo 8 caracteres
+                        </span>
                     </label>
 
                     <button className="primary-button" type="submit" disabled={submitting}>
                         {submitting ? <Loader2 className="spin" size={17} /> : isRegister ? <UserPlus size={17} /> : <LogIn size={17} />}
                         {isRegister ? 'Criar conta' : 'Entrar'}
                     </button>
+                    {!isRegister && (
+                        <button
+                            className="auth-forgot-button"
+                            type="button"
+                            onClick={() => onToast?.({ type: 'info', message: 'Em breve você poderá redefinir sua senha por e-mail.' })}
+                        >
+                            Esqueci minha senha
+                        </button>
+                    )}
                 </form>
             </section>
         </main>

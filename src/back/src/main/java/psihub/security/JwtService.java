@@ -84,7 +84,7 @@ public class JwtService {
             throw new JwtValidationException("Token expirado");
         }
 
-        Long userId = readLong(payload.get("userId"));
+        long userId = readLong(payload.get("userId"));
         String email = readString(payload.get("email"));
         TipoUsuario tipo = toTipoUsuario(readString(payload.get("tipo")));
 

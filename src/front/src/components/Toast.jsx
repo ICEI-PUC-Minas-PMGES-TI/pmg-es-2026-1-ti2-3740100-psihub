@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 export function Toast({ toast, onClose }) {
@@ -11,7 +11,7 @@ export function Toast({ toast, onClose }) {
 
   if (!toast) return null;
 
-  const Icon = toast.type === 'error' ? AlertCircle : CheckCircle2;
+  const Icon = toast.type === 'error' ? AlertCircle : toast.type === 'info' ? Info : CheckCircle2;
 
   return (
     <div className={`toast toast--${toast.type || 'success'}`} role="status">

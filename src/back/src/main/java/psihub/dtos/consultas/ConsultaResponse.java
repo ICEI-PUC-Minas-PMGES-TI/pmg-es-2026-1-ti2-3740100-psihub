@@ -9,6 +9,8 @@ public record ConsultaResponse(
         Long id,
         Long pacienteId,
         String pacienteNome,
+        String pacienteEmail,
+        String pacienteTelefone,
         Long psicologoId,
         String psicologoNome,
         Long slotConsultaId,

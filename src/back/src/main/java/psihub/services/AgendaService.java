@@ -62,12 +62,23 @@ public class AgendaService {
      * Statuses used when validating a manually created slot.
      * DISPONIVEL is intentionally excluded: an existing available slot must not block
      * the creation of a manual slot at the same or overlapping time (the exact-duplicate
-     * check handles identical slots separately). Only an already-booked (RESERVADO) or
-     * explicitly blocked (BLOQUEADO) slot constitutes a real conflict.
+     * check handles identical slots separately). Booked intervals are validated through
+     * active consultations, so only explicitly blocked slots constitute a slot-level conflict.
      */
     private static final Collection<StatusSlotConsulta> STATUSES_CONFLITO_SLOT_MANUAL = EnumSet.of(
-            StatusSlotConsulta.RESERVADO,
             StatusSlotConsulta.BLOQUEADO
+    );
+
+    private static final Collection<StatusConsulta> STATUS_CONSULTA_BLOQUEANTES = EnumSet.of(
+            StatusConsulta.AGENDADA,
+            StatusConsulta.CONFIRMADA,
+            StatusConsulta.EM_ANDAMENTO
+    );
+
+    private static final Collection<StatusConsulta> STATUS_CONSULTA_SEM_CONFLITO = EnumSet.of(
+            StatusConsulta.CANCELADA,
+            StatusConsulta.CONCLUIDA,
+            StatusConsulta.FALTOU
     );
 
     private final PsicologoRepository psicologoRepository;
@@ -97,6 +108,7 @@ public class AgendaService {
     public DisponibilidadeResponse definirDisponibilidade(Long psicologoId, DefinirDisponibilidadeRequest request) {
         Psicologo psicologo = buscarPsicologoAtivo(psicologoId);
         validarPeriodo(request.horaInicio(), request.horaFim());
+        validarPausa(request.horaInicio(), request.horaFim(), request.pausaInicio(), request.pausaFim());
         validarVigencia(request.validoAPartirDe(), request.validoAte());
 
         int duracao = request.duracaoSlotMinutos() == null ? DURACAO_PADRAO_MINUTOS : request.duracaoSlotMinutos();
@@ -146,12 +158,11 @@ public class AgendaService {
         Map<Long, Consulta> consultasPorSlot = consultaRepository.findByFiltros(
                 null,
                 psicologoId,
-                null,
+                STATUS_CONSULTA_BLOQUEANTES,
                 inicioFiltro,
                 fimFiltro
             )
             .stream()
-            .filter(consulta -> consulta.getStatus() != StatusConsulta.CANCELADA)
             .collect(Collectors.toMap(
                 consulta -> consulta.getSlotConsulta().getId(),
                 Function.identity(),
@@ -186,10 +197,17 @@ public class AgendaService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido criar horario em data passada");
         }
 
-        // Conflict check: only RESERVADO and BLOQUEADO slots (ativo = true) constitute a real
-        // conflict. DISPONIVEL slots and soft-deleted (ativo = false) records are ignored so that
-        // a previously cancelled slot — or an auto-generated available slot at the same time —
-        // never causes a false positive.
+        validarSemConflitoComPausa(psicologoId, request.data(), request.horaInicio(), request.horaFim());
+
+        SlotConsulta slotExistente = slotConsultaRepository
+                .findByPsicologoIdAndInicioEmAndFimEm(psicologoId, inicio, fim)
+                .orElse(null);
+        if (slotExistente != null && slotExistente.getStatus() == StatusSlotConsulta.DISPONIVEL) {
+            return mapper.toResponse(slotExistente);
+        }
+
+        // Slot-level conflicts cover explicit blocks. Booked intervals are checked against
+        // active consultations below so cancelled, concluded and missed consultations are ignored.
         List<SlotConsulta> conflitantes = slotConsultaRepository.findOverlapping(
                 psicologoId, inicio, fim, STATUSES_CONFLITO_SLOT_MANUAL);
         if (!conflitantes.isEmpty()) {
@@ -204,6 +222,10 @@ public class AgendaService {
                                     s.getId(), s.getInicioEm(), s.getFimEm(), s.getStatus()))
                             .collect(Collectors.joining("; ")));
             throw new ApiException(HttpStatus.CONFLICT, "O horario informado conflita com outro horario da agenda");
+        }
+
+        if (consultaRepository.existsBlockingOverlap(psicologoId, inicio, fim, STATUS_CONSULTA_SEM_CONFLITO)) {
+            throw new ApiException(HttpStatus.CONFLICT, "O horario informado conflita com uma consulta ativa");
         }
 
         SlotConsulta slot = new SlotConsulta();
@@ -288,6 +310,8 @@ public class AgendaService {
         regra.setValidoAte(request.validoAte());
         regra.setHoraInicio(request.horaInicio());
         regra.setHoraFim(request.horaFim());
+        regra.setPausaInicio(request.pausaInicio());
+        regra.setPausaFim(request.pausaFim());
         regra.setDuracaoSlotMinutos(duracao);
         regra.setAtivo(true);
         return regra;
@@ -310,6 +334,7 @@ public class AgendaService {
             LocalDateTime fim = inicio.plusMinutes(regra.getDuracaoSlotMinutos());
 
             if (!inicio.isBefore(agora)
+                    && !sobrepoePausa(cursor, cursor.plusMinutes(regra.getDuracaoSlotMinutos()), regra)
                     && !slotConsultaRepository.existsByPsicologoIdAndInicioEmAndFimEm(regra.getPsicologo().getId(), inicio, fim)
                     && !slotConsultaRepository.existsOverlap(regra.getPsicologo().getId(), inicio, fim, STATUSES_COM_CONFLITO)) {
                 SlotConsulta slot = new SlotConsulta();
@@ -355,6 +380,49 @@ public class AgendaService {
         if (!fim.isAfter(inicio)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Horario de fim deve ser posterior ao horario de inicio");
         }
+    }
+
+    private void validarPausa(LocalTime horaInicio, LocalTime horaFim, LocalTime pausaInicio, LocalTime pausaFim) {
+        if (pausaInicio == null && pausaFim == null) {
+            return;
+        }
+
+        if (pausaInicio == null || pausaFim == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Informe inicio e fim do intervalo");
+        }
+
+        if (!pausaFim.isAfter(pausaInicio)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Fim do intervalo deve ser posterior ao inicio");
+        }
+
+        if (pausaInicio.isBefore(horaInicio) || pausaFim.isAfter(horaFim)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Intervalo deve estar dentro do horario de atendimento");
+        }
+    }
+
+    private void validarSemConflitoComPausa(Long psicologoId, LocalDate data, LocalTime inicio, LocalTime fim) {
+        regraDisponibilidadeRepository.findByPsicologoIdAndDiaSemanaAndAtivoTrueOrderByIdDesc(psicologoId, toDiaSemana(data.getDayOfWeek()))
+                .stream()
+                .filter(regra -> regraVigenteNaData(regra, data))
+                .findFirst()
+                .ifPresent(regra -> {
+                    if (sobrepoePausa(inicio, fim, regra)) {
+                        throw new ApiException(HttpStatus.CONFLICT, "Horario reservado para intervalo");
+                    }
+                });
+    }
+
+    private boolean regraVigenteNaData(RegraDisponibilidade regra, LocalDate data) {
+        return !regra.getValidoAPartirDe().isAfter(data)
+                && (regra.getValidoAte() == null || !regra.getValidoAte().isBefore(data));
+    }
+
+    private boolean sobrepoePausa(LocalTime inicio, LocalTime fim, RegraDisponibilidade regra) {
+        if (regra.getPausaInicio() == null || regra.getPausaFim() == null) {
+            return false;
+        }
+
+        return inicio.isBefore(regra.getPausaFim()) && fim.isAfter(regra.getPausaInicio());
     }
 
     private void validarVigencia(LocalDate inicio, LocalDate fim) {
