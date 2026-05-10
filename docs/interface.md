@@ -28,11 +28,13 @@ Tela da atividade 2
 
 Tela do Processo de secção
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/4850a491-8364-410b-8e17-13174fddf902" />
+web application/stitch/projects/3883057540415093762/screens/d7377eec4e5e4f0898168f5c83ee3542
 
 Tela da atividade 1
 
-_Descrição da tela relativa à atividade 2._
+Tela de Agendamento de consultas
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/0f77182c-ab7f-4b01-8326-0b5171940d74" />
 
 Tela da atividade 2
 
