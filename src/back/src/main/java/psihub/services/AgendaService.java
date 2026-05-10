@@ -277,6 +277,7 @@ public class AgendaService {
             throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel remover um horario com consulta agendada");
         }
 
+        slot.setAtivo(false);
         slot.setStatus(StatusSlotConsulta.CANCELADO);
         return mapper.toResponse(slot);
     }

@@ -12,8 +12,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("ativo = true")
 @Table(name = "excecoes_disponibilidade")
 public class ExcecaoDisponibilidade extends BaseEntity {
 

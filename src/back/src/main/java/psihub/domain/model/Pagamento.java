@@ -13,8 +13,10 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("ativo = true")
 @Table(name = "pagamentos")
 public class Pagamento extends BaseEntity {
 

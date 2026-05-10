@@ -8,8 +8,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("ativo = true")
 @Table(name = "registros_emocionais")
 public class RegistroEmocional extends BaseEntity {
 

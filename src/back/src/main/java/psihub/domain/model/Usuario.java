@@ -12,8 +12,10 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("ativo = true")
 @Table(name = "usuarios")
 public class Usuario extends BaseEntity {
 
@@ -35,9 +37,6 @@ public class Usuario extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 20)
     private TipoUsuario tipoUsuario;
-
-    @Column(nullable = false)
-    private Boolean ativo = true;
 
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Psicologo psicologo;
@@ -94,14 +93,6 @@ public class Usuario extends BaseEntity {
 
     public void setTipoUsuario(TipoUsuario tipoUsuario) {
         this.tipoUsuario = tipoUsuario;
-    }
-
-    public Boolean getAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
     }
 
     public Psicologo getPsicologo() {

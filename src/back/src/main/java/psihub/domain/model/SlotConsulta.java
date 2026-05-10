@@ -14,8 +14,10 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("ativo = true")
 @Table(name = "slots_consulta")
 public class SlotConsulta extends BaseEntity {
 

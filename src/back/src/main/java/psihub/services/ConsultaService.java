@@ -189,6 +189,7 @@ public class ConsultaService {
             return mapper.toResponse(consulta);
         }
 
+        consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         consulta.setMotivoCancelamento(request == null ? null : request.motivoCancelamento());
         consulta.getSlotConsulta().setStatus(StatusSlotConsulta.DISPONIVEL);
@@ -214,6 +215,7 @@ public class ConsultaService {
             return mapper.toResponse(consulta);
         }
 
+        consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         consulta.setMotivoCancelamento(request == null ? null : sanitizeOptional(request.motivoCancelamento()));
         consulta.getSlotConsulta().setStatus(StatusSlotConsulta.DISPONIVEL);

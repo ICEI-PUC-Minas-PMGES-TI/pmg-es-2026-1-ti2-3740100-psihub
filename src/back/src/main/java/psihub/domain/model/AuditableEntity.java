@@ -17,11 +17,22 @@ public abstract class AuditableEntity {
     @Column(name = "atualizado_em", nullable = false)
     private LocalDateTime atualizadoEm;
 
+    @Column(nullable = false)
+    private Boolean ativo = true;
+
     public LocalDateTime getCriadoEm() {
         return criadoEm;
     }
 
     public LocalDateTime getAtualizadoEm() {
         return atualizadoEm;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }
