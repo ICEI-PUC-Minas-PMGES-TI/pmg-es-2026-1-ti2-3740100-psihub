@@ -139,3 +139,4 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 
 > **Regra de negócio:** O sistema deve notificar o psicólogo sobre o cancelamento da consulta.
 
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/ebe80d2c-04e7-400f-90dd-08a4d9117a1a" />
