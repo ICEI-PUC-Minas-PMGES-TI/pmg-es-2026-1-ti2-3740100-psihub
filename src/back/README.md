@@ -1,6 +1,6 @@
 # Backend PsiHub
 
-Backend em Java 21 com Spring Boot 3, Spring Data JPA/Hibernate, Flyway e MySQL 8.
+Backend em Java 25 com Spring Boot 3, Spring Data JPA/Hibernate, Flyway e MySQL 8.
 
 O backend implementa APIs para:
 
@@ -12,7 +12,7 @@ O backend implementa APIs para:
 
 ## Requisitos
 
-- JDK 21
+- JDK 25
 - Docker, opcional para subir MySQL e backend em containers
 
 O projeto usa Maven Wrapper. Nao e necessario instalar Maven globalmente.
@@ -76,7 +76,7 @@ Linux/macOS:
 ./mvnw -q -DskipTests compile
 ```
 
-Se a validacao falhar com mensagem de compilador ausente, confira se o `JAVA_HOME` aponta para um JDK 21. JRE nao e suficiente.
+Se a validacao falhar com mensagem de compilador ausente, confira se o `JAVA_HOME` aponta para um JDK 25. JRE nao e suficiente.
 
 ## Configuracao
 

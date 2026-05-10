@@ -27,7 +27,7 @@ function Stop-DevJobs {
     }
 }
 
-function Test-Jdk21 {
+function Test-Jdk25 {
     $candidates = @()
     $javac = Get-Command javac -ErrorAction SilentlyContinue
     if ($javac) {
@@ -43,7 +43,7 @@ function Test-Jdk21 {
 
     foreach ($candidate in $candidates) {
         $versionOutput = (& $candidate -version 2>&1 | Out-String).Trim()
-        if ($versionOutput -match "javac\s+21(\.|$)") {
+        if ($versionOutput -match "javac\s+25(\.|$)") {
             return $true
         }
     }
@@ -77,12 +77,12 @@ try {
         }
     }
 
-    $hasJdk21 = Test-Jdk21
-    if ($UseLocalBackend -and -not $hasJdk21) {
-        throw "JDK 21 nao encontrado. Instale/configure o JDK 21 ou rode sem -UseLocalBackend para usar Docker."
+    $hasJdk25 = Test-Jdk25
+    if ($UseLocalBackend -and -not $hasJdk25) {
+        throw "JDK 25 nao encontrado. Instale/configure o JDK 25 ou rode sem -UseLocalBackend para usar Docker."
     }
 
-    if ($hasJdk21 -or $UseLocalBackend) {
+    if ($hasJdk25 -or $UseLocalBackend) {
         $backendMode = "local"
         Write-Step "Iniciando backend local em http://localhost:8080"
         $jobs += Start-Job -Name "backend" -ScriptBlock {
@@ -92,7 +92,7 @@ try {
         } -ArgumentList $backendPath
     } elseif ($dockerAvailable) {
         $backendMode = "docker"
-        Write-Host "[PsiHub] JDK 21 nao encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
+        Write-Host "[PsiHub] JDK 25 nao encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
         Write-Step "Iniciando backend Docker em http://localhost:8080"
         Push-Location $backendPath
         docker compose up -d --build backend
@@ -104,7 +104,7 @@ try {
             docker compose logs -f backend
         } -ArgumentList $backendPath
     } else {
-        throw "JDK 21 nao encontrado e Docker indisponivel. Instale o JDK 21 ou habilite Docker."
+        throw "JDK 25 nao encontrado e Docker indisponivel. Instale o JDK 25 ou habilite Docker."
     }
 
     Write-Step "Iniciando frontend em http://localhost:5173"

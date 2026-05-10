@@ -19,14 +19,14 @@ As entidades foram relacionadas por meio de chaves primárias e estrangeiras, ga
 
 | **Dimensao**                  | **Tecnologia**            | **Uso no projeto**                                                       |
 | ----------------------------- | ------------------------- | ------------------------------------------------------------------------ |
-| Linguagem Back-end            | Java 21                   | Implementacao da API e regras de negocio                                 |
+| Linguagem Back-end            | Java 25                   | Implementacao da API e regras de negocio                                 |
 | Framework Back-end            | Spring Boot 3             | Estrutura principal da aplicacao server-side                             |
 | Gerenciamento de dependencias | Maven Wrapper + Maven     | Build, execucao e organizacao das dependencias                           |
 | Persistencia de dados         | Spring Data JPA/Hibernate | Mapeamento das entidades Java para o modelo relacional                   |
 | Migracoes de banco            | Flyway                    | Versionamento e criacao automatizada do schema do banco de dados         |
 | Banco de Dados                | MySQL 8                   | Armazenamento relacional dos dados clinicos, agenda e financeiro         |
 | Ambiente local                | Docker Compose            | Subida do banco MySQL e do backend Java para desenvolvimento             |
-| Containerizacao               | Dockerfile multi-stage    | Build do backend com JDK 21 e execucao em runtime Java 21                |
+| Containerizacao               | Dockerfile multi-stage    | Build do backend com JDK 25 e execucao em runtime Java 25                |
 | Configuracao                  | Variaveis de ambiente     | Uso de DB_URL, DB_USERNAME, DB_PASSWORD e SERVER_PORT                    |
 | Client de banco               | DataSource + MySqlClient  | Centralizacao da verificacao de disponibilidade e metadados do MySQL     |
 | Validacao                     | Jakarta Bean Validation   | Base para validacao de entradas e regras de campos da API                |
