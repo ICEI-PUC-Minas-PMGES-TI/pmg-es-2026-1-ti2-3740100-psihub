@@ -7,7 +7,7 @@ COPY mvnw mvnw
 COPY mvnw.cmd mvnw.cmd
 COPY pom.xml pom.xml
 
-RUN chmod +x mvnw && ./mvnw -q -DskipTests dependency:go-offline
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw -q -DskipTests dependency:go-offline
 
 COPY src src
 
