@@ -71,7 +71,7 @@ function Test-DockerAccess {
             $global:PSNativeCommandUseErrorActionPreference = $false
         }
 
-        docker info 1>$null 2>$null
+        docker ps 1>$null 2>$null
         return $LASTEXITCODE -eq 0
     } catch {
         return $false
