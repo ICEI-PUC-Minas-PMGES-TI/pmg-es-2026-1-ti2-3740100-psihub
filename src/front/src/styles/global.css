@@ -25,22 +25,34 @@
 
   /* --- Tipografia --- */
   /* Famílias */
-  --font-body:    "Nunito", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Outfit",  "Helvetica Neue", Arial, sans-serif;
-  --font-family: var(--font-body); /* alias de compatibilidade */
+  --font-body: "Nunito", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
+  --font-family: var(--font-body);
+  /* alias de compatibilidade */
 
   /* Escala de tamanhos (rem, base = 16 px do navegador) */
-  --text-2xs:  0.6875rem; /* 11 px — rótulos micro */
-  --text-xs:   0.75rem;   /* 12 px — legendas, badges */
-  --text-sm:   0.8125rem; /* 13 px — auxiliar, hints */
-  --text-base: 0.875rem;  /* 14 px — corpo principal */
-  --text-md:   1rem;      /* 16 px — destaque de corpo */
-  --text-lg:   1.125rem;  /* 18 px — subtítulos pequenos */
-  --text-xl:   1.25rem;   /* 20 px — títulos de painel */
-  --text-2xl:  1.5rem;    /* 24 px — títulos menores */
-  --text-3xl:  1.75rem;   /* 28 px — títulos de página */
-  --text-4xl:  2rem;      /* 32 px — títulos grandes */
-  --text-5xl:  2.125rem;  /* 34 px — título hero */
+  --text-2xs: 0.6875rem;
+  /* 11 px — rótulos micro */
+  --text-xs: 0.75rem;
+  /* 12 px — legendas, badges */
+  --text-sm: 0.8125rem;
+  /* 13 px — auxiliar, hints */
+  --text-base: 0.875rem;
+  /* 14 px — corpo principal */
+  --text-md: 1rem;
+  /* 16 px — destaque de corpo */
+  --text-lg: 1.125rem;
+  /* 18 px — subtítulos pequenos */
+  --text-xl: 1.25rem;
+  /* 20 px — títulos de painel */
+  --text-2xl: 1.5rem;
+  /* 24 px — títulos menores */
+  --text-3xl: 1.75rem;
+  /* 28 px — títulos de página */
+  --text-4xl: 2rem;
+  /* 32 px — títulos grandes */
+  --text-5xl: 2.125rem;
+  /* 34 px — título hero */
 }
 
 * {
@@ -190,7 +202,7 @@ button:disabled {
   border-top: 1px solid var(--color-border);
 }
 
-.sidebar__admin > span {
+.sidebar__admin>span {
   display: block;
   margin-bottom: 8px;
   color: var(--color-primary);
@@ -651,7 +663,7 @@ textarea:focus {
   font-weight: 700;
 }
 
-.checkbox-group > div {
+.checkbox-group>div {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
@@ -1679,7 +1691,7 @@ textarea:focus {
   background: #FAFAFB;
 }
 
-.agenda-more-filters > span {
+.agenda-more-filters>span {
   color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 800;
@@ -1876,13 +1888,11 @@ textarea:focus {
 }
 
 .week-calendar__block--blocked-slot {
-  background: repeating-linear-gradient(
-    45deg,
-    #f3f4f6,
-    #f3f4f6 4px,
-    #e5e7eb 4px,
-    #e5e7eb 8px
-  );
+  background: repeating-linear-gradient(45deg,
+      #f3f4f6,
+      #f3f4f6 4px,
+      #e5e7eb 4px,
+      #e5e7eb 8px);
   border-color: #9CA3AF;
   color: #6B7280;
   cursor: pointer;
@@ -2247,5 +2257,84 @@ textarea:focus {
     left: 6px;
     right: 6px;
     padding: 8px 10px;
+  }
+}
+
+
+.psychologist-home {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-hero {
+  padding: 28px;
+}
+
+.dashboard-subtitle {
+  margin-top: 6px;
+  color: #6b7280;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.stat-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-card strong {
+  font-size: 2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.3fr 1fr;
+  gap: 20px;
+}
+
+.dashboard-box {
+  padding: 20px;
+}
+
+.dashboard-item,
+.dashboard-notification {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.dashboard-item span,
+.dashboard-notification span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.shortcut-button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: 0.2s;
+}
+
+.shortcut-button:hover {
+  background: #f5f3ff;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }

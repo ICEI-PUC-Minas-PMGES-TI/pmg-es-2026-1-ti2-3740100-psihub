@@ -5,6 +5,7 @@ import { PatientDashboard } from './features/patient/PatientDashboard.jsx';
 import { PsychologistAgendaPage } from './features/psychologist/PsychologistAgendaPage.jsx';
 import { Toast } from './components/Toast.jsx';
 import { clearAuthSession, getStoredAuthSession, storeAuthSession } from './utils/auth.js';
+import { PsychologistDashboard } from './features/psychologist/PsychologistDashboard.jsx';
 
 export default function App() {
     const [auth, setAuth] = useState(() => getStoredAuthSession());
@@ -12,23 +13,34 @@ export default function App() {
     const [toast, setToast] = useState(null);
 
     const role = auth?.tipo;
+
+    // Define os itens de menu com base no tipo de usuário
     const menuItems = useMemo(() => {
+
         if (role === 'psicologo') {
-            return [{ key: 'agenda', label: 'Agenda' }];
+            // Menu do psicólogo
+            return [
+                { key: 'dashboard', label: 'Dashboard' },
+                { key: 'agenda', label: 'Agenda' },
+            ];
         }
 
         return [
+            // Menu do paciente
             { key: 'schedule', label: 'Agendar consulta' },
             { key: 'appointments', label: 'Minhas consultas' },
         ];
     }, [role]);
 
+
+    // Função para lidar com autenticação bem-sucedida
     function handleAuthenticated(session) {
         storeAuthSession(session);
         setAuth(session);
         setActiveView(getInitialView(session.tipo));
     }
 
+    // Função para lidar com logout
     function handleLogout() {
         clearAuthSession();
         setAuth(null);
@@ -36,6 +48,8 @@ export default function App() {
     }
 
     if (!auth) {
+
+        // Se não estiver autenticado, mostra a página de login
         return (
             <>
                 <AuthPage onAuthenticated={handleAuthenticated} onToast={setToast} />
@@ -54,9 +68,25 @@ export default function App() {
                 onNavigate={setActiveView}
                 onLogout={handleLogout}
             >
+
                 {role === 'psicologo' ? (
-                    <PsychologistAgendaPage onToast={setToast} />
+
+                    <>
+                        {activeView === 'agenda' && (
+                            <PsychologistAgendaPage
+                                onToast={setToast}
+                            />
+                        )}
+
+                        {activeView === 'dashboard' && (
+                            <PsychologistDashboard
+                                onToast={setToast}
+                            />
+                        )}
+                    </>
+
                 ) : (
+
                     <PatientDashboard
                         activeView={activeView}
                         patientName={auth.user.nome}
@@ -71,8 +101,14 @@ export default function App() {
     );
 }
 
+// DEFINE A TELA INICIAL
+
 function getInitialView(role) {
+
+    // Tela inicial do psicólogo
     if (role === 'psicologo') return 'agenda';
+
+    // Tela inicial do paciente
     if (role === 'paciente') return 'schedule';
     return null;
 }
