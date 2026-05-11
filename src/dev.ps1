@@ -60,16 +60,47 @@ function Test-DockerAccess {
         return $false
     }
 
-    docker info 1>$null 2>$null
-    return $LASTEXITCODE -eq 0
+    $nativeErrorPrefVar = Get-Variable -Name PSNativeCommandUseErrorActionPreference -Scope Global -ErrorAction SilentlyContinue
+    $previousNativeErrorPref = $null
+
+    try {
+        # In PowerShell 7+, native stderr can be promoted to ErrorRecord when ErrorActionPreference is Stop.
+        # Disable this just for the docker probe so warnings do not abort the script.
+        if ($nativeErrorPrefVar) {
+            $previousNativeErrorPref = $global:PSNativeCommandUseErrorActionPreference
+            $global:PSNativeCommandUseErrorActionPreference = $false
+        }
+
+        docker info 1>$null 2>$null
+        return $LASTEXITCODE -eq 0
+    } catch {
+        return $false
+    } finally {
+        if ($nativeErrorPrefVar) {
+            $global:PSNativeCommandUseErrorActionPreference = $previousNativeErrorPref
+        }
+    }
 }
 
 function Get-DockerAccessHelp {
-    return @"
+        if ($IsWindows -or $env:OS -eq "Windows_NT") {
+                return @"
+Docker foi encontrado, mas sem acesso ao daemon.
+No Windows, verifique:
+    1) O Docker Desktop esta aberto e em execucao.
+    2) O contexto padrao esta ativo:
+         docker context use default
+    3) Se necessario, reinicie o Docker Desktop e o terminal.
+Como alternativa temporaria, execute o terminal como Administrador.
+"@
+        }
+
+        $linuxUser = if ($env:USER) { $env:USER } else { "<seu-usuario>" }
+        return @"
 Docker foi encontrado, mas sem permissao para acessar o daemon.
 No Linux, execute:
-  sudo systemctl enable --now docker
-  sudo usermod -aG docker $USER
+    sudo systemctl enable --now docker
+    sudo usermod -aG docker $linuxUser
 Depois, encerre e abra o terminal novamente (ou rode: newgrp docker).
 Como alternativa temporaria, rode o script com sudo.
 "@
