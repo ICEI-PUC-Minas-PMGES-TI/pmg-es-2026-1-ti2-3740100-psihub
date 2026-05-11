@@ -55,6 +55,38 @@ function Test-Docker {
     return [bool](Get-Command docker -ErrorAction SilentlyContinue)
 }
 
+function Test-DockerAccess {
+    if (-not (Test-Docker)) {
+        return $false
+    }
+
+    docker info 1>$null 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Get-DockerAccessHelp {
+    return @"
+Docker foi encontrado, mas sem permissao para acessar o daemon.
+No Linux, execute:
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker $USER
+Depois, encerre e abra o terminal novamente (ou rode: newgrp docker).
+Como alternativa temporaria, rode o script com sudo.
+"@
+}
+
+function Invoke-CheckedCommand {
+    param(
+        [scriptblock]$Command,
+        [string]$ErrorMessage
+    )
+
+    & $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw $ErrorMessage
+    }
+}
+
 try {
     if (-not (Test-Path (Join-Path $backendPath "mvnw.cmd"))) {
         throw "Backend nao encontrado em $backendPath"
@@ -67,10 +99,14 @@ try {
     $dockerAvailable = Test-Docker
 
     if (-not $SkipDb) {
+        if ($dockerAvailable -and -not (Test-DockerAccess)) {
+            throw (Get-DockerAccessHelp)
+        }
+
         if ($dockerAvailable) {
             Write-Step "Subindo MySQL com Docker Compose..."
             Push-Location $backendPath
-            docker compose up -d mysql
+            Invoke-CheckedCommand -Command { docker compose up -d mysql } -ErrorMessage "Falha ao subir o MySQL com Docker Compose."
             Pop-Location
         } else {
             Write-Host "[PsiHub] Docker nao encontrado. Vou assumir que o MySQL ja esta rodando em localhost:3306." -ForegroundColor Yellow
@@ -91,11 +127,15 @@ try {
             .\mvnw.cmd spring-boot:run
         } -ArgumentList $backendPath
     } elseif ($dockerAvailable) {
+        if (-not (Test-DockerAccess)) {
+            throw (Get-DockerAccessHelp)
+        }
+
         $backendMode = "docker"
         Write-Host "[PsiHub] JDK 25 nao encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
         Write-Step "Iniciando backend Docker em http://localhost:8080"
         Push-Location $backendPath
-        docker compose up -d --build backend
+        Invoke-CheckedCommand -Command { docker compose up -d --build backend } -ErrorMessage "Falha ao iniciar o backend Docker."
         Pop-Location
 
         $jobs += Start-Job -Name "backend" -ScriptBlock {
