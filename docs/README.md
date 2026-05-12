@@ -8,8 +8,6 @@
 
 *Yago Garzon Chaves, yago.chaves@sga.pucminas.br*
 
-*Davi D'Assuncao Coelho, davi.assuncao@sga.pucminas.br*
-
 ---
 
 Professores:
