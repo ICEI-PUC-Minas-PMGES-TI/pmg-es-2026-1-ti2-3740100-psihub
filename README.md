@@ -10,7 +10,6 @@ Ao unificar esses recursos, o PsiHub busca oferecer ao psicólogo uma visão ana
 * Gustavo Fitipaldi Moreira
 * Gabriel Eduardo de Oliveira Martins
 * Yago Garzon Chaves
-* Davi D'Assuncao Coelho
 
 ## Professor
 
