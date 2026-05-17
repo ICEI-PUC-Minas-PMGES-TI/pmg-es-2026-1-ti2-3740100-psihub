@@ -36,14 +36,23 @@ public class SecurityConfig {
                                 securityErrorWriter.writeForbidden(response, "Voce nao tem permissao para acessar esta area"))
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/register",
+                                "/auth/registro",
+                                "/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/registro",
+                                "/api/auth/login"
+                        ).permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots-publicos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots/disponiveis").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/pacientes/me/**").hasRole("PACIENTE")
                         .requestMatchers("/api/psicologos/me/**").hasRole("PSICOLOGO")
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/disponiveis").hasRole("PACIENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots-publicos").hasRole("PACIENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots/disponiveis").hasRole("PACIENTE")
                         .requestMatchers("/api/consultas/**").hasAnyRole("PACIENTE", "PSICOLOGO")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()

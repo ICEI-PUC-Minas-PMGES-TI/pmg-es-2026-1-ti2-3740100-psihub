@@ -9,10 +9,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
@@ -101,6 +104,28 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 message,
                 List.of(new ApiErrorDetail(exception.getName(), message, "TYPE_MISMATCH"))
+        );
+    }
+
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
+    public ResponseEntity<ApiResponse<Object>> handleNotFound(Exception exception) {
+        String message = "Recurso nao encontrado";
+        return build(
+                HttpStatus.NOT_FOUND,
+                message,
+                List.of(ApiErrorDetail.of(message, "NOT_FOUND"))
+        );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception
+    ) {
+        String message = "Metodo HTTP nao permitido para este recurso";
+        return build(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                message,
+                List.of(ApiErrorDetail.of(message, "METHOD_NOT_ALLOWED"))
         );
     }
 

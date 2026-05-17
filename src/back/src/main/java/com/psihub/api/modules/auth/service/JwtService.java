@@ -52,9 +52,15 @@ public class JwtService {
         header.put("typ", "JWT");
 
         Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sub", String.valueOf(usuario.getId()));
         payload.put("userId", usuario.getId());
         payload.put("email", usuario.getEmail());
         payload.put("tipo", toPayloadTipo(usuario.getTipoUsuario()));
+        if (usuario.getTipoUsuario() == TipoUsuario.PACIENTE) {
+            payload.put("pacienteId", usuario.getId());
+        } else if (usuario.getTipoUsuario() == TipoUsuario.PSICOLOGO) {
+            payload.put("psicologoId", usuario.getId());
+        }
         payload.put("iat", now.getEpochSecond());
         payload.put("exp", now.plusSeconds(expirationSeconds).getEpochSecond());
 
@@ -85,7 +91,7 @@ public class JwtService {
             throw new JwtValidationException("Token expirado");
         }
 
-        long userId = readLong(payload.get("userId"));
+        long userId = payload.containsKey("userId") ? readLong(payload.get("userId")) : readLong(payload.get("sub"));
         String email = readString(payload.get("email"));
         TipoUsuario tipo = toTipoUsuario(readString(payload.get("tipo")));
 

@@ -1,5 +1,6 @@
 package com.psihub.api.modules.agenda.controller;
 
+import com.psihub.api.modules.agenda.dto.AgendaCompletaResponse;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
 import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
@@ -13,6 +14,8 @@ import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -69,6 +72,46 @@ public class AgendaController {
         return agendaService.listarRegras(user.userId());
     }
 
+    @GetMapping("/me/agenda/slots")
+    public AgendaCompletaResponse listarMinhaAgenda(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(required = false) String inicio,
+            @RequestParam(required = false) String fim
+    ) {
+        LocalDateTime inicioPeriodo = parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
+        LocalDateTime fimPeriodo = parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
+        return agendaService.listarAgendaCompleta(user.userId(), inicioPeriodo, fimPeriodo);
+    }
+
+    @PostMapping("/me/agenda/slots")
+    public void criarSlotManualRemovido() {
+        throw new ApiException(
+                HttpStatus.GONE,
+                "Criacao manual de slots foi removida. Configure regras de disponibilidade ou excecoes de agenda."
+        );
+    }
+
+    @GetMapping("/{psicologoId}/agenda/slots/disponiveis")
+    public List<HorarioDisponivelDTO> listarSlotsDisponiveis(
+            @PathVariable Long psicologoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+    ) {
+        return agendaService.listarDisponibilidade(psicologoId, data, data);
+    }
+
+    @GetMapping("/{psicologoId}/agenda/slots-publicos")
+    public List<HorarioDisponivelDTO> listarSlotsPublicos(
+            @PathVariable Long psicologoId,
+            @RequestParam String inicio,
+            @RequestParam String fim
+    ) {
+        return agendaService.listarDisponibilidade(
+                psicologoId,
+                parseRequiredDateTime(inicio, "inicio", false),
+                parseRequiredDateTime(fim, "fim", true)
+        );
+    }
+
     @GetMapping("/{psicologoId}/agenda/disponibilidades/slots")
     public List<HorarioDisponivelDTO> listarDisponibilidadesSlots(
             @PathVariable Long psicologoId,
@@ -103,5 +146,31 @@ public class AgendaController {
             throw new ApiException(HttpStatus.FORBIDDEN, "Voce nao tem permissao para acessar esta agenda");
         }
     }
-}
 
+    private LocalDateTime parseDateTimeOrDefault(String value, LocalDateTime defaultValue, boolean fim) {
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+        return parseDateTime(value, fim);
+    }
+
+    private LocalDateTime parseRequiredDateTime(String value, String nomeParametro, boolean fim) {
+        if (value == null || value.isBlank()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro obrigatorio ausente: " + nomeParametro);
+        }
+        return parseDateTime(value, fim);
+    }
+
+    private LocalDateTime parseDateTime(String value, boolean fim) {
+        try {
+            return LocalDateTime.parse(value.trim());
+        } catch (DateTimeParseException ignored) {
+            try {
+                LocalDate data = LocalDate.parse(value.trim());
+                return fim ? data.plusDays(1).atStartOfDay() : data.atStartOfDay();
+            } catch (DateTimeParseException exception) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro de data/hora invalido");
+            }
+        }
+    }
+}

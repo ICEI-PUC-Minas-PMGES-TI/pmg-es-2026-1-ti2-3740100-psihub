@@ -1,5 +1,6 @@
 package com.psihub.api.modules.agenda.service;
 
+import com.psihub.api.modules.agenda.dto.AgendaCompletaResponse;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
 import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
@@ -10,6 +11,7 @@ import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
 import com.psihub.api.modules.agenda.entity.TipoExcecaoDisponibilidade;
 import com.psihub.api.modules.agenda.repository.ExcecaoDisponibilidadeRepository;
 import com.psihub.api.modules.agenda.repository.RegraDisponibilidadeRepository;
+import com.psihub.api.modules.consultas.dto.ConsultaResponse;
 import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.consultas.repository.ConsultaRepository;
 import com.psihub.api.modules.pacientes.service.PacienteService;
@@ -104,7 +106,9 @@ public class AgendaService {
 
     @Transactional(readOnly = true)
     public List<HorarioDisponivelDTO> listarDisponibilidade(Long psicologoId, LocalDate de, LocalDate ate) {
-        buscarPsicologo(psicologoId);
+        if (!psicologoExiste(psicologoId)) {
+            return List.of();
+        }
 
         LocalDate inicio = de == null ? LocalDate.now() : de;
         LocalDate fim = ate == null ? inicio.plusDays(DIAS_GERACAO_PADRAO) : ate;
@@ -192,6 +196,39 @@ public class AgendaService {
     }
 
     @Transactional(readOnly = true)
+    public List<HorarioDisponivelDTO> listarDisponibilidade(Long psicologoId, LocalDateTime inicio, LocalDateTime fim) {
+        validarIntervaloDataHora(inicio, fim);
+        LocalDate dataFinal = fim.minusNanos(1).toLocalDate();
+
+        return listarDisponibilidade(psicologoId, inicio.toLocalDate(), dataFinal)
+                .stream()
+                .filter(horario -> !horario.inicio().isBefore(inicio) && !horario.fim().isAfter(fim))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AgendaCompletaResponse listarAgendaCompleta(Long psicologoId, LocalDateTime inicio, LocalDateTime fim) {
+        validarIntervaloDataHora(inicio, fim);
+        if (!psicologoExiste(psicologoId)) {
+            return new AgendaCompletaResponse(List.of(), List.of());
+        }
+
+        List<HorarioDisponivelDTO> horariosDisponiveis = listarDisponibilidade(psicologoId, inicio, fim);
+        List<ConsultaResponse> consultas = consultaRepository.findByFiltros(
+                        null,
+                        psicologoId,
+                        STATUS_CONSULTA_BLOQUEANTES,
+                        inicio,
+                        fim
+                )
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        return new AgendaCompletaResponse(horariosDisponiveis, consultas);
+    }
+
+    @Transactional(readOnly = true)
     public List<PacienteResumoResponse> listarPacientesVinculados(Long psicologoId, String nome) {
         buscarPsicologo(psicologoId);
         String filtroNome = (nome == null || nome.isBlank()) ? null : ("%" + nome.trim().toLowerCase() + "%");
@@ -225,13 +262,18 @@ public class AgendaService {
             LocalDate data,
             LocalTime horaInicio,
             LocalTime horaFim,
-            int duracaoMinutos,
+            Integer duracaoMinutos,
             RegraDisponibilidade regra,
             List<ExcecaoDisponibilidade> excecoesDoDia,
             List<Consulta> consultas,
             List<HorarioDisponivelDTO> disponibilidade,
             Set<String> chavesGeradas
     ) {
+        if (horaInicio == null || horaFim == null || duracaoMinutos == null || duracaoMinutos <= 0
+                || !horaFim.isAfter(horaInicio)) {
+            return;
+        }
+
         LocalDateTime agora = LocalDateTime.now();
         LocalTime cursor = horaInicio;
 
@@ -246,6 +288,7 @@ public class AgendaService {
                     .filter(excecao -> excecao.getTipo() != TipoExcecaoDisponibilidade.JANELA_EXTRA)
                 .anyMatch(excecao -> sobrepoeExcecao(inicioSlotHora, fimSlotHora, excecao));
             boolean ocupadoPorConsulta = consultas.stream()
+                    .filter(consulta -> consulta.getInicioEm() != null && consulta.getFimEm() != null)
                     .anyMatch(consulta -> sobrepoeIntervalo(inicioSlot, fimSlot, consulta.getInicioEm(), consulta.getFimEm()));
 
             if (!inicioSlot.isBefore(agora) && !sobrepoePausa && !bloqueadoPorExcecao && !ocupadoPorConsulta) {
@@ -261,6 +304,22 @@ public class AgendaService {
 
     private Psicologo buscarPsicologo(Long psicologoId) {
         return psicologoService.buscarPorId(psicologoId);
+    }
+
+    private boolean psicologoExiste(Long psicologoId) {
+        if (psicologoId == null) {
+            return false;
+        }
+
+        try {
+            buscarPsicologo(psicologoId);
+            return true;
+        } catch (ApiException exception) {
+            if (exception.getStatus() == HttpStatus.NOT_FOUND) {
+                return false;
+            }
+            throw exception;
+        }
     }
 
     private Psicologo buscarPsicologoAtivo(Long psicologoId) {
@@ -309,7 +368,7 @@ public class AgendaService {
     }
 
     private boolean regraVigenteNaData(RegraDisponibilidade regra, LocalDate data) {
-        return !regra.getValidoAPartirDe().isAfter(data)
+        return (regra.getValidoAPartirDe() == null || !regra.getValidoAPartirDe().isAfter(data))
                 && (regra.getValidoAte() == null || !regra.getValidoAte().isBefore(data));
     }
 
@@ -328,12 +387,16 @@ public class AgendaService {
     }
 
     private void validarIntervaloDataHora(LocalDateTime inicio, LocalDateTime fim) {
-        if (!fim.isAfter(inicio)) {
+        if (inicio == null || fim == null || !fim.isAfter(inicio)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Fim do periodo deve ser posterior ao inicio");
         }
     }
 
     private boolean sobrepoeExcecao(LocalTime inicio, LocalTime fim, ExcecaoDisponibilidade excecao) {
+        if (excecao.getTipo() == TipoExcecaoDisponibilidade.FOLGA) {
+            return true;
+        }
+
         if (excecao.getHoraInicio() == null || excecao.getHoraFim() == null) {
             return true;
         }
@@ -347,6 +410,10 @@ public class AgendaService {
             LocalDateTime inicioB,
             LocalDateTime fimB
     ) {
+        if (inicioA == null || fimA == null || inicioB == null || fimB == null) {
+            return false;
+        }
+
         return inicioA.isBefore(fimB) && fimA.isAfter(inicioB);
     }
 
@@ -362,4 +429,3 @@ public class AgendaService {
         };
     }
 }
-
