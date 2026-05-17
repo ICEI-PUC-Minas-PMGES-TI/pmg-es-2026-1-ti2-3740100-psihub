@@ -10,7 +10,10 @@ import {
     STATUS_OPTIONS,
     STATUS_OPTIONS_ACTIVE,
     TYPE_OPTIONS,
+} from '@/modules/psicologos/hooks/agenda/agenda.constants';
+import {
     canCancelConsultation,
+    consultationStatusLabel,
     dayHeaderLabel,
     defaultSingleDayAvailabilityModal,
     defaultWeeklyAvailabilityModal,
@@ -21,11 +24,10 @@ import {
     minutesToTimeLabel,
     startOfWeek,
     statusBadgeClass,
-    consultationStatusLabel,
-    useAgenda,
-    usePatientSearchField,
     weekCalendarBlockClass,
-} from '@/modules/psicologos/hooks/useAgenda';
+} from '@/modules/psicologos/hooks/agenda/agenda.utils';
+import { usePatientSearchField } from '@/modules/psicologos/hooks/agenda/usePatientSearchField';
+import { useAgenda } from '@/modules/psicologos/hooks/useAgenda';
 
 export function PsychologistAgendaPage({ onToast }) {
     const {
