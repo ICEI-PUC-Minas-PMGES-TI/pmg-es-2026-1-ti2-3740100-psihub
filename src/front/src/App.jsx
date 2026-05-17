@@ -1,21 +1,21 @@
 import { useMemo, useState } from 'react';
-import { AppShell } from './components/AppShell.jsx';
-import { AdminPsychologistsPage } from './features/admin/AdminPsychologistsPage.jsx';
-import { AuthPage } from './features/auth/AuthPage.jsx';
-import { PatientDashboard } from './features/patient/PatientDashboard.jsx';
-import { PatientEmotionPage } from './features/patient/PatientEmotionPage.jsx';
-import { PatientProfilePage } from './features/patient/PatientProfilePage.jsx';
-import { PsychologistAgendaPage } from './features/psychologist/PsychologistAgendaPage.jsx';
-import { PsychologistDashboard } from './features/psychologist/PsychologistDashboard.jsx';
-import { PsychologistProfilePage } from './features/psychologist/PsychologistProfilePage.jsx';
-import { PatientsManagementPage } from './features/psychologist/PatientsManagementPage.jsx';
-import { ReportsPage } from './features/psychologist/ReportsPage.jsx';
-import { Toast } from './components/Toast.jsx';
+import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
+import { AuthPage } from '@/pages/Auth';
+import { PatientDashboard } from '@/pages/PatientDashboard';
+import { PatientEmotionPage } from '@/pages/PatientEmotion';
+import { PatientProfilePage } from '@/pages/PatientProfile';
+import { PatientsManagementPage } from '@/pages/PatientsManagement';
+import { PsychologistAgendaPage } from '@/pages/PsychologistAgenda';
+import { PsychologistDashboard } from '@/pages/PsychologistDashboard';
+import { PsychologistProfilePage } from '@/pages/PsychologistProfile';
+import { ReportsPage } from '@/pages/Reports';
+import { AppShell } from '@/shared/components/AppShell';
+import { Toast } from '@/shared/components/Toast';
 import {
     clearAuthSession,
     getStoredAuthSession,
     storeAuthSession,
-} from './utils/auth.js';
+} from '@/modules/auth';
 
 export default function App() {
     const [auth, setAuth] = useState(() => getStoredAuthSession());

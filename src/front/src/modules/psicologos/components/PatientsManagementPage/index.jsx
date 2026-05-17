@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Loader2, Search, X } from 'lucide-react';
-import { clinicalApi } from '../../api/clinicalApi.js';
-import { schedulingApi } from '../../api/schedulingApi.js';
+import { clinicalApi } from '@/services/clinical.service';
+import { schedulingApi } from '@/services/scheduling.service';
 
 export function PatientsManagementPage({ onToast }) {
     const [patients, setPatients] = useState([]);

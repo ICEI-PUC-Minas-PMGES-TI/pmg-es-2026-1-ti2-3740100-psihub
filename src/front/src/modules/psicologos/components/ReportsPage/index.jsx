@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
-import { clinicalApi } from '../../api/clinicalApi.js';
-import { schedulingApi } from '../../api/schedulingApi.js';
+import { clinicalApi } from '@/services/clinical.service';
+import { schedulingApi } from '@/services/scheduling.service';
 
 export function ReportsPage({ onToast }) {
     const [patients, setPatients] = useState([]);

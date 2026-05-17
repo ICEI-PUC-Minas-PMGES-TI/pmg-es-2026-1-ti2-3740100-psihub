@@ -1,17 +1,22 @@
-import { CalendarDays, LogOut, ShieldCheck } from 'lucide-react';
+import { BarChart2, CalendarCheck, CalendarDays, ClipboardList, HeartPulse, LogOut, ShieldCheck, User, UserRoundCheck, Users } from 'lucide-react';
 
-export function Sidebar({
-    activeView,
-    adminSection,
-    areaLabel,
-    collapsed,
-    menuItems,
-    onLogout,
-    onNavigate,
-    profileLine,
-    userName,
-}) {
-    const initials = getInitials(userName);
+const icons = {
+    agenda: CalendarDays,
+    dashboard: ClipboardList,
+    schedule: UserRoundCheck,
+    appointments: CalendarCheck,
+    patients: Users,
+    reports: BarChart2,
+    emotions: HeartPulse,
+    'patient-profile': User,
+    'psychologist-profile': User,
+    'admin-psychologists': ShieldCheck,
+};
+
+export function Sidebar({ collapsed, role, user, menuItems, activeView, onNavigate, onLogout }) {
+    const roleLabel = role === 'admin' ? 'Administracao' : role === 'psicologo' ? 'Gestao do Psicologo' : 'Area do Paciente';
+    const initials = getInitials(user?.nome);
+    const profileLine = user?.crp ? `${user.cargo} - ${user.crp}` : user?.cargo;
 
     return (
         <aside className={collapsed ? 'sidebar sidebar--collapsed' : 'sidebar'} aria-label="Menu principal">
@@ -22,14 +27,14 @@ export function Sidebar({
                 {!collapsed && (
                     <div>
                         <strong>PsiHub</strong>
-                        <span>{areaLabel}</span>
+                        <span>{roleLabel}</span>
                     </div>
                 )}
             </div>
 
             <nav className="sidebar__nav">
                 {menuItems.map((item) => {
-                    const Icon = item.icon || CalendarDays;
+                    const Icon = icons[item.key] || CalendarDays;
                     const active = item.key === activeView;
 
                     return (
@@ -48,12 +53,12 @@ export function Sidebar({
                 })}
             </nav>
 
-            {adminSection && !collapsed && (
-                <section className="sidebar__admin" aria-label={adminSection.label}>
-                    <span>{adminSection.label}</span>
-                    <button className="sidebar__admin-item" type="button">
-                        {adminSection.icon ? <adminSection.icon size={18} /> : <ShieldCheck size={18} />}
-                        <span>{adminSection.actionLabel}</span>
+            {role === 'admin' && !collapsed && (
+                <section className="sidebar__admin" aria-label="Administracao">
+                    <span>Acesso exclusivo do administrador</span>
+                    <button className="sidebar__admin-item" type="button" onClick={() => onNavigate('admin-psychologists')}>
+                        <ShieldCheck size={18} />
+                        <span>Gerenciar acessos</span>
                     </button>
                 </section>
             )}
@@ -66,7 +71,7 @@ export function Sidebar({
                     </div>
                     {!collapsed && (
                         <div>
-                            <strong>{userName}</strong>
+                            <strong>{user?.nome}</strong>
                             <span>{profileLine}</span>
                         </div>
                     )}

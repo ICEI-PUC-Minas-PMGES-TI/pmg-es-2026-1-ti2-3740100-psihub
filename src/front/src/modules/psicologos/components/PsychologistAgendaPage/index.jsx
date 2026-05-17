@@ -25,7 +25,7 @@ import {
     useAgenda,
     usePatientSearchField,
     weekCalendarBlockClass,
-} from '../../hooks/useAgenda.js';
+} from '@/modules/psicologos/hooks/useAgenda';
 
 export function PsychologistAgendaPage({ onToast }) {
     const {

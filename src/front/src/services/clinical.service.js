@@ -1,4 +1,4 @@
-import { apiRequest } from './http.js';
+import { apiRequest } from './http.service.js';
 
 export const clinicalApi = {
     getPsychologistProfile(signal) {

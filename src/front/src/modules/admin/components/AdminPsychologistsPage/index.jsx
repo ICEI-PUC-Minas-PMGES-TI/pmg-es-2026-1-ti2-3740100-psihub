@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
-import { clinicalApi } from '../../api/clinicalApi.js';
+import { clinicalApi } from '@/services/clinical.service';
 
 export function AdminPsychologistsPage({ onToast }) {
     const [status, setStatus] = useState('');

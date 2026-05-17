@@ -40,6 +40,7 @@ export function useAuthSession() {
 }
 
 function getInitialView(role) {
+    if (role === 'admin') return 'admin-psychologists';
     if (role === 'psicologo') return 'agenda';
     if (role === 'paciente') return 'schedule';
     return null;

@@ -1,12 +1,12 @@
 # PsiHub Frontend
 
-Aplicacao React/Vite do PsiHub para autenticacao, area do paciente, area do psicologo, agenda e consultas.
+Frontend React/Vite do PsiHub. A aplicacao atende os fluxos de autenticacao, area do paciente, area do psicologo, agenda de consultas, registros emocionais, relatorios e administracao de acesso de psicologos.
 
-## Requisitos
+## Pre-requisitos
 
-- Node.js 22 recomendado
+- Node.js 22 ou versao compativel com Vite 6
 - npm
-- Backend PsiHub disponivel localmente ou em uma URL configurada
+- Backend PsiHub rodando localmente ou URL remota configurada
 
 ## Instalacao
 
@@ -14,7 +14,7 @@ Aplicacao React/Vite do PsiHub para autenticacao, area do paciente, area do psic
 npm install
 ```
 
-## Como Rodar
+## Como rodar em desenvolvimento
 
 ```bash
 npm run dev
@@ -22,57 +22,51 @@ npm run dev
 
 Por padrao, o Vite sobe em `http://localhost:5173` e encaminha chamadas `/api` para `http://localhost:8080`.
 
-Para alterar o backend usado pelo proxy:
-
-```bash
-VITE_BACKEND_PROXY_TARGET=http://localhost:8081 npm run dev
-```
-
-No PowerShell:
+Para trocar o backend usado pelo proxy:
 
 ```powershell
 $env:VITE_BACKEND_PROXY_TARGET="http://localhost:8081"; npm run dev
 ```
 
-Se quiser chamar uma API absoluta sem proxy, configure:
+Para chamar uma API absoluta sem depender do proxy:
 
-```bash
-VITE_API_BASE_URL=http://localhost:8080 npm run dev
+```powershell
+$env:VITE_API_BASE_URL="http://localhost:8080"; npm run dev
 ```
 
 ## Scripts
 
 | Comando | Finalidade |
 |---|---|
-| `npm run dev` | Inicia o servidor Vite |
-| `npm run build` | Gera build de producao |
+| `npm run dev` | Inicia o servidor Vite em modo desenvolvimento |
+| `npm run build` | Gera build de producao em `dist/` |
 | `npm run preview` | Serve o build localmente |
 | `npm run lint` | Executa ESLint |
 
-## Estrutura
+## Estrutura de pastas
 
 ```text
 src/
-  pages/      montagem de telas, sem regra de negocio
-  modules/    dominios de negocio do frontend
-  shared/     componentes, hooks e utils reutilizaveis
-  services/   chamadas HTTP e cliente de API
+  pages/      wrappers de rota; montam modulos e repassam props
+  modules/    codigo por dominio de negocio
+  shared/     componentes, hooks e utils sem regra de dominio
+  services/   toda comunicacao HTTP
   store/      reservado para estado global futuro
   assets/     estilos globais, imagens e icones estaticos
 ```
 
-## Regra Principal
+## Regras essenciais
 
-Use sempre a hierarquia:
+- Importe dominios por barrel: `import { PatientDashboard } from '@/modules/pacientes'`.
+- Nao importe internals de outro modulo.
+- Nao use `fetch` ou `axios` fora de `src/services/`.
+- `shared/` nao pode importar `modules/`, `services/` ou `store/`.
+- `pages/` nao deve conter regra de negocio.
+- Use o alias `@/` para imports entre camadas.
 
-```text
-pages -> modules -> shared / services / store
+## Validacao antes de entregar codigo
+
+```bash
+npm run lint
+npm run build
 ```
-
-`shared/` nao pode importar `modules/` nem `services/`. Componentes nao devem chamar `fetch` diretamente; chamadas HTTP ficam em `services/`.
-
-## Documentacao
-
-- `ARCHITECTURE.md`: principios e regras da arquitetura
-- `CONTRIBUTING.md`: como adicionar features sem quebrar a estrutura
-- `MODULE_MAP.md`: mapa operacional dos modulos atuais

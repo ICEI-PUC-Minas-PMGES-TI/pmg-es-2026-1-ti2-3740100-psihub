@@ -1,5 +1,5 @@
 import { Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
-import { useAuthForm } from '../../hooks/useAuthForm.js';
+import { useAuthForm } from '@/modules/auth/hooks/useAuthForm';
 
 export function AuthPage({ onAuthenticated, onToast }) {
     const {

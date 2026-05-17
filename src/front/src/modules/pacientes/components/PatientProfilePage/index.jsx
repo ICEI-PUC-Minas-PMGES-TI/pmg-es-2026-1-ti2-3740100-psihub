@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { clinicalApi } from '../../api/clinicalApi.js';
+import { clinicalApi } from '@/services/clinical.service';
 
 const emptyProfile = {
     nome: '',
