@@ -6,6 +6,11 @@ O processo se inicia com o psicólogo definindo sua disponibilidade de horários
 
 Uma melhoria importante em relação a modelos tradicionais é a automatização do processo, eliminando a necessidade de contato manual (como mensagens ou ligações), reduzindo erros e conflitos de horário.
 
+-=-| Modelo BPMN - Agendamento de Consulta ( Psicólogo ) |-=-
+
+<img width="4712" height="2758" alt="image" src="https://github.com/user-attachments/assets/4187e75d-9f3d-4ac0-a6c2-f1cafebe0ba8" />
+
+
 ![Modelo BPMN do Processo 5 – Agendamento de Consulta](images/agendamento-de-consulta.svg "Modelo BPMN do Processo 5.")
 
 ---
