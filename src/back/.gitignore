@@ -4,9 +4,6 @@ target/
 *.jar
 *.war
 
-# Ambiente
-.env
-
 # IDEs
 .idea/
 *.iml
