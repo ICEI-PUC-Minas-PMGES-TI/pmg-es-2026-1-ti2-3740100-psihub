@@ -1,0 +1,13 @@
+target/
+*.log
+*.class
+*.jar
+*.war
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Sistema
+.DS_Store

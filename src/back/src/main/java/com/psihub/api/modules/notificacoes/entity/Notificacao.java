@@ -1,0 +1,63 @@
+package com.psihub.api.modules.notificacoes.entity;
+
+import com.psihub.api.modules.auth.entity.Usuario;
+import com.psihub.api.shared.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.SQLRestriction;
+
+@Entity
+@SQLRestriction("ativo = true")
+@Table(name = "notificacoes")
+public class Notificacao extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    @Column(nullable = false, length = 120)
+    private String titulo;
+
+    @Column(nullable = false, length = 500)
+    private String mensagem;
+
+    @Column(nullable = false)
+    private Boolean lida = false;
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getMensagem() {
+        return mensagem;
+    }
+
+    public void setMensagem(String mensagem) {
+        this.mensagem = mensagem;
+    }
+
+    public Boolean getLida() {
+        return lida;
+    }
+
+    public void setLida(Boolean lida) {
+        this.lida = lida;
+    }
+}
+

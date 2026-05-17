@@ -1,0 +1,27 @@
+cff-version: 1.0.1
+message: Please cite this software using these metadata.
+title: 
+authors:
+  - family-names: Dutra
+    given-names: Hugo
+  - family-names: Fitipaldi
+    given-names: Gustavo
+  - family-names: Martins
+    given-names: Gabriel
+  - family-names: Chaves
+    given-names: Yago
+  - name-suffix: Professora
+    affiliation: PUC Minas
+    family-names: Alonso Veloso
+    given-names: Eveline 
+  - name-suffix: Professora
+    affiliation: PUC Minas
+    family-names: Baroni De Carvalho
+    given-names: Juliana Amaral 
+keywords:
+  - 
+  - 
+repository-code: 
+license: CC-BY-4.0
+version: 1.0.0
+date-released:
