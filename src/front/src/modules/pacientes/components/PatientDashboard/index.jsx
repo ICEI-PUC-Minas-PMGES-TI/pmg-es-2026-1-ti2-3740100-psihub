@@ -24,6 +24,14 @@ const statusLabels = {
     FALTOU: 'Faltou',
 };
 
+function getSlotInicio(slot) {
+    return slot?.inicioEm || slot?.inicio || null;
+}
+
+function getSlotKey(slot) {
+    return slot?.id ?? getSlotInicio(slot);
+}
+
 export function PatientDashboard({ activeView, patientName, onNavigate, onToast }) {
     const [step, setStep] = useState('search');
     const [psychologists, setPsychologists] = useState([]);
@@ -46,8 +54,8 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
     const availableDateKeys = useMemo(() => {
         return new Set(
             monthSlots
-                .filter((slot) => slot.status === 'DISPONIVEL' && new Date(slot.inicioEm).getTime() > Date.now())
-                .map((slot) => slot.inicioEm.slice(0, 10)),
+                .filter((slot) => slot.status === 'DISPONIVEL' && new Date(getSlotInicio(slot)).getTime() > Date.now())
+                .map((slot) => getSlotInicio(slot).slice(0, 10)),
         );
     }, [monthSlots]);
 
@@ -102,7 +110,7 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
             data: selectedDateKey,
             signal: controller.signal,
         })
-            .then((data) => setDaySlots((data || []).filter((slot) => new Date(slot.inicioEm).getTime() > Date.now())))
+            .then((data) => setDaySlots((data || []).filter((slot) => new Date(getSlotInicio(slot)).getTime() > Date.now())))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
                     onToast({ type: 'error', message: 'Não foi possível carregar os horários.' });
@@ -160,7 +168,7 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
         try {
             await schedulingApi.scheduleConsultation({
                 psicologoId: selectedPsychologist.id,
-                slotConsultaId: selectedSlot.id,
+                inicioEm: getSlotInicio(selectedSlot),
                 tipoAtendimento,
                 observacoes: observacoes.trim() || null,
             });
@@ -383,13 +391,13 @@ function AgendaView({
                     <div className="slot-grid">
                         {daySlots.map((slot) => (
                             <button
-                                className={selectedSlot?.id === slot.id ? 'slot-button slot-button--selected' : 'slot-button'}
+                                className={getSlotKey(selectedSlot) === getSlotKey(slot) ? 'slot-button slot-button--selected' : 'slot-button'}
                                 type="button"
-                                key={slot.id}
+                                key={getSlotKey(slot)}
                                 onClick={() => onSlotSelect(slot)}
                             >
                                 <Clock size={16} />
-                                {formatTime(slot.inicioEm)}
+                                {formatTime(getSlotInicio(slot))}
                             </button>
                         ))}
                     </div>
@@ -430,7 +438,7 @@ function ConfirmView({
             <dl className="summary-list">
                 <div><dt>Paciente</dt><dd>{patientName}</dd></div>
                 <div><dt>Psicólogo</dt><dd>{psychologist.nome}</dd></div>
-                <div><dt>Data e horário</dt><dd>{formatDateTime(slot.inicioEm)}</dd></div>
+                <div><dt>Data e horário</dt><dd>{formatDateTime(getSlotInicio(slot))}</dd></div>
             </dl>
 
             <label className="field">
@@ -462,7 +470,7 @@ function SuccessView({ psychologist, slot, onHome }) {
         <section className="panel narrow-panel success-panel">
             <CalendarCheck size={42} />
             <h2>Consulta agendada com sucesso</h2>
-            <p>{formatDateTime(slot.inicioEm)} com {psychologist.nome}</p>
+            <p>{formatDateTime(getSlotInicio(slot))} com {psychologist.nome}</p>
             <button className="primary-button primary-button--fit" type="button" onClick={onHome}>Voltar ao início</button>
         </section>
     );

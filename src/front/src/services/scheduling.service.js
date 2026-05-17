@@ -74,14 +74,14 @@ export const schedulingApi = {
         });
     },
 
-    removeMySlot(slotId) {
-        return apiRequest(`/api/psicologos/me/agenda/slots/${slotId}/cancelar`, {
+    removeMySlot(horarioId) {
+        return apiRequest(`/api/psicologos/me/agenda/slots/${horarioId}/cancelar`, {
             method: 'PATCH',
         });
     },
 
-    blockMySlot(slotId) {
-        return apiRequest(`/api/psicologos/me/agenda/slots/${slotId}/bloquear`, {
+    blockMySlot(horarioId) {
+        return apiRequest(`/api/psicologos/me/agenda/slots/${horarioId}/bloquear`, {
             method: 'PATCH',
             body: {},
         });

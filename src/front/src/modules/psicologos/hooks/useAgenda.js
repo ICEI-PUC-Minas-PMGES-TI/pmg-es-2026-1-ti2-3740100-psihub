@@ -318,7 +318,7 @@ export function useAgenda({ onToast }) {
         try {
             await schedulingApi.scheduleConsultationAsPsychologist({
                 pacienteId: Number(scheduleConsultationModal.pacienteId),
-                slotConsultaId: scheduleConsultationModal.slotId,
+                inicioEm: scheduleConsultationModal.inicioEm,
                 tipoAtendimento: scheduleConsultationModal.tipoAtendimento,
                 observacoes: scheduleConsultationModal.observacoes || null,
             });
@@ -367,14 +367,10 @@ export function useAgenda({ onToast }) {
 
         setCellActionMenu((current) => ({ ...current, loading: 'schedule' }));
         try {
-            const slot = await schedulingApi.createManualSlot({
-                data: toIsoDate(date),
-                horaInicio: `${start}:00`,
-                horaFim: `${end}:00`,
-            });
             setCellActionMenu(null);
             setScheduleConsultationModal({
-                slotId: slot.id,
+                inicioEm: `${toIsoDate(date)}T${start}:00`,
+                fimEm: `${toIsoDate(date)}T${end}:00`,
                 data: toIsoDate(date),
                 horaInicio: start,
                 horaFim: end,
