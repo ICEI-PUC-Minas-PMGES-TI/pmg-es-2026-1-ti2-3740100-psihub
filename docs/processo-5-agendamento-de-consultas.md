@@ -16,9 +16,6 @@ Uma melhoria importante em relação a modelos tradicionais é a automatização
 <img width="1436" height="480" alt="image" src="https://github.com/user-attachments/assets/b3d9257c-92b9-439e-a302-5fb10100fd12" />
 
 
-
-![Modelo BPMN do Processo 5 – Agendamento de Consulta](images/agendamento-de-consulta.svg "Modelo BPMN do Processo 5.")
-
 ---
 
 #### Detalhamento das atividades
