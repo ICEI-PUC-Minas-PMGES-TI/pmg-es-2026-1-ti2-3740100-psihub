@@ -1,35 +1,33 @@
 import { useMemo, useState } from 'react';
+import { CalendarCheck, CalendarDays, LockKeyhole, ShieldCheck, UserRoundCheck } from 'lucide-react';
 
-import { AppShell } from './components/AppShell.jsx';
-import { Toast } from './components/Toast.jsx';
+import { AppShell } from '@/shared/components/AppShell';
+import { Toast } from '@/shared/components/Toast';
 
-import { AuthPage } from './features/auth/AuthPage.jsx';
-import { LandingPage } from './features/auth/LandingPage.jsx';
+import { AuthPage } from '@/pages/Auth';
+import { LandingPage } from '@/pages/Landing';
 
-import { PatientDashboard } from './features/patient/PatientDashboard.jsx';
+import { PatientDashboard } from '@/pages/PatientDashboard';
 
-import { PsychologistAgendaPage } from './features/psychologist/PsychologistAgendaPage.jsx';
-import { PsychologistDashboard } from './features/psychologist/PsychologistDashboard.jsx';
+import { PsychologistAgendaPage } from '@/pages/PsychologistAgenda';
+import { PsychologistDashboard } from '@/pages/PsychologistDashboard';
 
-import {
-    clearAuthSession,
-    getStoredAuthSession,
-    storeAuthSession
-} from './utils/auth.js';
+import { useAuthSession } from '@/modules/auth';
 
 export default function App() {
 
-    const [auth, setAuth] = useState(() => getStoredAuthSession());
-
-    const [showAuth, setShowAuth] = useState(false);
-
-    const [activeView, setActiveView] = useState(() =>
-        getInitialView(getStoredAuthSession()?.tipo)
-    );
+    const {
+        activeView,
+        auth,
+        handleAuthenticated,
+        handleLogout,
+        role,
+        setActiveView,
+        setShowAuth,
+        showAuth,
+    } = useAuthSession();
 
     const [toast, setToast] = useState(null);
-
-    const role = auth?.tipo;
 
     // MENU
     const menuItems = useMemo(() => {
@@ -37,39 +35,23 @@ export default function App() {
         if (role === 'psicologo') {
 
             return [
-                { key: 'dashboard', label: 'Dashboard' },
-                { key: 'agenda', label: 'Agenda' },
+                { key: 'dashboard', label: 'Dashboard', icon: CalendarDays },
+                { key: 'agenda', label: 'Agenda', icon: CalendarDays },
             ];
         }
 
         return [
-            { key: 'schedule', label: 'Agendar consulta' },
-            { key: 'appointments', label: 'Minhas consultas' },
+            { key: 'schedule', label: 'Agendar consulta', icon: UserRoundCheck },
+            { key: 'appointments', label: 'Minhas consultas', icon: CalendarCheck },
         ];
 
     }, [role]);
 
-    // LOGIN
-    function handleAuthenticated(session) {
-
-        storeAuthSession(session);
-
-        setAuth(session);
-
-        setActiveView(getInitialView(session.tipo));
-    }
-
-    // LOGOUT
-    function handleLogout() {
-
-        clearAuthSession();
-
-        setAuth(null);
-
-        setShowAuth(false);
-
-        setActiveView(null);
-    }
+    const areaLabel = role === 'psicologo' ? 'Gestão do Psicólogo' : 'Área do Paciente';
+    const topBarSubtitle = role === 'psicologo'
+        ? 'Gerencie sua disponibilidade, consultas e rotina clínica.'
+        : 'Agende consultas e acompanhe seus próximos atendimentos.';
+    const profileLine = auth?.user?.crp ? `${auth.user.cargo} · ${auth.user.crp}` : auth?.user?.cargo;
 
     // LANDING PAGE
     if (!auth && !showAuth) {
@@ -111,12 +93,24 @@ export default function App() {
     return (
         <>
             <AppShell
-                user={auth.user}
-                role={role}
-                menuItems={menuItems}
                 activeView={activeView}
+                adminSection={role === 'admin' ? {
+                    icon: ShieldCheck,
+                    label: 'Acesso exclusivo do administrador',
+                    actionLabel: 'Gerenciar acessos',
+                } : null}
+                areaLabel={areaLabel}
+                menuItems={menuItems}
                 onNavigate={setActiveView}
                 onLogout={handleLogout}
+                profileLine={profileLine}
+                securityBanner={{
+                    icon: <LockKeyhole size={22} />,
+                    label: 'Ambiente seguro',
+                    message: 'Seus dados clínicos são protegidos e acessados apenas por perfis autorizados.',
+                }}
+                topBarSubtitle={topBarSubtitle}
+                userName={auth.user.nome}
             >
 
                 {role === 'psicologo' ? (
@@ -152,14 +146,4 @@ export default function App() {
             />
         </>
     );
-}
-
-// TELA INICIAL
-function getInitialView(role) {
-
-    if (role === 'psicologo') return 'agenda';
-
-    if (role === 'paciente') return 'schedule';
-
-    return null;
 }

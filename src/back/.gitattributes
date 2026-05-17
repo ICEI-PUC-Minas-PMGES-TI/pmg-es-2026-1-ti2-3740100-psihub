@@ -1,0 +1,14 @@
+# Garante que arquivos Java e recursos sejam gravados sem BOM e com LF
+*.java      text eol=lf
+*.xml       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.properties text eol=lf
+*.sql       text eol=lf
+
+# Scripts shell devem ter LF (necessário para execução no Linux/Docker)
+mvnw        text eol=lf
+
+# Binários — sem conversão de EOL
+*.jar       binary
+*.class     binary

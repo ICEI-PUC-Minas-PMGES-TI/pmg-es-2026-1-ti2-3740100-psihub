@@ -1,5 +1,0 @@
-# Auto detect text files and perform LF normalization
-* text=auto
-
-src/back/mvnw text eol=lf
-src/back/mvnw.cmd text eol=crlf

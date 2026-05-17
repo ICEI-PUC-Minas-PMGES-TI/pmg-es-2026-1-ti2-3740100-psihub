@@ -1,0 +1,70 @@
+import { useState } from 'react';
+import { authApi } from '@/services/auth.service';
+import { decodeJwtPayload } from '@/modules/auth/utils/auth.utils';
+
+const initialForm = {
+    nome: '',
+    email: '',
+    senha: '',
+    tipo: 'paciente',
+};
+
+export function useAuthForm({ onAuthenticated, onToast }) {
+    const [mode, setMode] = useState('login');
+    const [form, setForm] = useState(initialForm);
+    const [submitting, setSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const isRegister = mode === 'register';
+    const passwordTooShort = form.senha.length > 0 && form.senha.length < 8;
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+
+        if (form.senha.length < 8) {
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            const payload = isRegister
+                ? { nome: form.nome, email: form.email, senha: form.senha, tipo: form.tipo }
+                : { email: form.email, senha: form.senha };
+            const response = isRegister ? await authApi.register(payload) : await authApi.login(payload);
+            const tokenPayload = decodeJwtPayload(response.token);
+
+            onAuthenticated({
+                token: response.token,
+                user: response.user,
+                tipo: tokenPayload.tipo,
+            });
+        } catch (error) {
+            onToast({ type: 'error', message: friendlyError(error, isRegister) });
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    function updateField(field, value) {
+        setForm((current) => ({ ...current, [field]: value }));
+    }
+
+    return {
+        form,
+        handleSubmit,
+        isRegister,
+        passwordTooShort,
+        setMode,
+        setShowPassword,
+        showPassword,
+        submitting,
+        updateField,
+    };
+}
+
+function friendlyError(error, isRegister) {
+    if (error?.status === 401) return 'E-mail ou senha não conferem.';
+    if (error?.status === 409) return 'Já existe uma conta com este e-mail.';
+    return isRegister ? 'Não foi possível criar sua conta agora.' : 'Não foi possível entrar agora.';
+}

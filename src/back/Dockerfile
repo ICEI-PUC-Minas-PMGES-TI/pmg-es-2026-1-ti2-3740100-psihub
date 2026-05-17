@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM eclipse-temurin:25-jdk-jammy AS build
 
 WORKDIR /workspace
@@ -7,11 +8,17 @@ COPY mvnw mvnw
 COPY mvnw.cmd mvnw.cmd
 COPY pom.xml pom.xml
 
-RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw -q -DskipTests dependency:go-offline
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -q -DskipTests dependency:go-offline
 
 COPY src src
 
-RUN ./mvnw -q -DskipTests package
+RUN find src -name "*.java" -exec sed -i '1s/^\xef\xbb\xbf//' {} +
+
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -q -DskipTests package
 
 FROM eclipse-temurin:25-jre-jammy
 
