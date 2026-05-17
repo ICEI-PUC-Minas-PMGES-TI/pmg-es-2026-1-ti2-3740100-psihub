@@ -21,6 +21,7 @@ CREATE TABLE psicologos (
     valor_consulta DECIMAL(10, 2) NOT NULL,
     status_acesso VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     motivo_revogacao VARCHAR(300),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_psicologos PRIMARY KEY (id),
@@ -34,6 +35,7 @@ CREATE TABLE pacientes (
     id BIGINT NOT NULL,
     data_nascimento DATE NOT NULL,
     observacoes_iniciais VARCHAR(300),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_pacientes PRIMARY KEY (id),
@@ -44,6 +46,7 @@ CREATE TABLE especialidades_psicologo (
     id BIGINT NOT NULL AUTO_INCREMENT,
     psicologo_id BIGINT NOT NULL,
     nome VARCHAR(100) NOT NULL,
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_especialidades_psicologo PRIMARY KEY (id),
@@ -58,6 +61,7 @@ CREATE TABLE vinculo_psicologo_paciente (
     status VARCHAR(20) NOT NULL DEFAULT 'SOLICITADO',
     solicitado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     respondido_em DATETIME(6),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_vinculo_psicologo_paciente PRIMARY KEY (id),
@@ -75,6 +79,8 @@ CREATE TABLE regras_disponibilidade (
     valido_ate DATE,
     hora_inicio TIME NOT NULL,
     hora_fim TIME NOT NULL,
+    pausa_inicio TIME,
+    pausa_fim TIME,
     duracao_slot_minutos INT NOT NULL,
     ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
@@ -84,6 +90,16 @@ CREATE TABLE regras_disponibilidade (
     CONSTRAINT ck_regras_dia CHECK (dia_semana IN ('SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO')),
     CONSTRAINT ck_regras_vigencia CHECK (valido_ate IS NULL OR valido_ate >= valido_a_partir_de),
     CONSTRAINT ck_regras_horario CHECK (hora_fim > hora_inicio),
+    CONSTRAINT ck_regras_pausa CHECK (
+        (pausa_inicio IS NULL AND pausa_fim IS NULL)
+        OR (
+            pausa_inicio IS NOT NULL
+            AND pausa_fim IS NOT NULL
+            AND pausa_fim > pausa_inicio
+            AND pausa_inicio >= hora_inicio
+            AND pausa_fim <= hora_fim
+        )
+    ),
     CONSTRAINT ck_regras_duracao CHECK (duracao_slot_minutos > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -95,6 +111,7 @@ CREATE TABLE excecoes_disponibilidade (
     hora_inicio TIME,
     hora_fim TIME,
     motivo VARCHAR(300),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_excecoes_disponibilidade PRIMARY KEY (id),
@@ -103,28 +120,12 @@ CREATE TABLE excecoes_disponibilidade (
     CONSTRAINT ck_excecoes_horario CHECK (hora_inicio IS NULL OR hora_fim IS NULL OR hora_fim > hora_inicio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE slots_consulta (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    psicologo_id BIGINT NOT NULL,
-    regra_disponibilidade_id BIGINT,
-    inicio_em DATETIME(6) NOT NULL,
-    fim_em DATETIME(6) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'DISPONIVEL',
-    criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    CONSTRAINT pk_slots_consulta PRIMARY KEY (id),
-    CONSTRAINT fk_slots_consulta_psicologos FOREIGN KEY (psicologo_id) REFERENCES psicologos (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_slots_consulta_regras FOREIGN KEY (regra_disponibilidade_id) REFERENCES regras_disponibilidade (id) ON DELETE SET NULL,
-    CONSTRAINT uk_slots_consulta_periodo UNIQUE (psicologo_id, inicio_em, fim_em),
-    CONSTRAINT ck_slots_status CHECK (status IN ('DISPONIVEL', 'RESERVADO', 'BLOQUEADO', 'CANCELADO')),
-    CONSTRAINT ck_slots_periodo CHECK (fim_em > inicio_em)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE consultas (
     id BIGINT NOT NULL AUTO_INCREMENT,
     paciente_id BIGINT NOT NULL,
     psicologo_id BIGINT NOT NULL,
-    slot_consulta_id BIGINT NOT NULL,
+    inicio_em DATETIME(6),
+    fim_em DATETIME(6),
     agendado_por_usuario_id BIGINT NOT NULL,
     iniciado_em DATETIME(6),
     finalizado_em DATETIME(6),
@@ -132,14 +133,13 @@ CREATE TABLE consultas (
     status VARCHAR(20) NOT NULL DEFAULT 'AGENDADA',
     observacoes VARCHAR(300),
     motivo_cancelamento VARCHAR(300),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_consultas PRIMARY KEY (id),
     CONSTRAINT fk_consultas_pacientes FOREIGN KEY (paciente_id) REFERENCES pacientes (id) ON DELETE RESTRICT,
     CONSTRAINT fk_consultas_psicologos FOREIGN KEY (psicologo_id) REFERENCES psicologos (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_consultas_slots FOREIGN KEY (slot_consulta_id) REFERENCES slots_consulta (id) ON DELETE RESTRICT,
     CONSTRAINT fk_consultas_agendado_por FOREIGN KEY (agendado_por_usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT,
-    CONSTRAINT uk_consultas_slot UNIQUE (slot_consulta_id),
     CONSTRAINT ck_consultas_tipo CHECK (tipo_atendimento IN ('ONLINE', 'PRESENCIAL')),
     CONSTRAINT ck_consultas_status CHECK (status IN ('AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO', 'CONCLUIDA', 'CANCELADA', 'FALTOU')),
     CONSTRAINT ck_consultas_periodo CHECK (iniciado_em IS NULL OR finalizado_em IS NULL OR finalizado_em > iniciado_em)
@@ -158,6 +158,7 @@ CREATE TABLE prontuarios_sessao (
     incluir_linha_tempo BIT(1) NOT NULL DEFAULT b'1',
     temas_sessao TEXT,
     intervencoes TEXT,
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_prontuarios_sessao PRIMARY KEY (id),
@@ -175,6 +176,7 @@ CREATE TABLE registros_emocionais (
     emocoes TEXT,
     registrado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     editavel_ate DATETIME(6) NOT NULL,
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_registros_emocionais PRIMARY KEY (id),
@@ -190,6 +192,7 @@ CREATE TABLE pagamentos (
     forma_pagamento VARCHAR(20) NOT NULL,
     status_pagamento VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     pago_em DATETIME(6),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_pagamentos PRIMARY KEY (id),
@@ -206,6 +209,7 @@ CREATE TABLE recibos (
     numero_recibo VARCHAR(60) NOT NULL,
     arquivo_url VARCHAR(500) NOT NULL,
     emitido_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    ativo BIT(1) NOT NULL DEFAULT b'1',
     criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT pk_recibos PRIMARY KEY (id),
@@ -214,13 +218,26 @@ CREATE TABLE recibos (
     CONSTRAINT uk_recibos_numero UNIQUE (numero_recibo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE notificacoes (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    usuario_id BIGINT NOT NULL,
+    titulo VARCHAR(120) NOT NULL,
+    mensagem VARCHAR(500) NOT NULL,
+    lida BIT(1) NOT NULL DEFAULT b'0',
+    ativo BIT(1) NOT NULL DEFAULT b'1',
+    criado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    atualizado_em DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT pk_notificacoes PRIMARY KEY (id),
+    CONSTRAINT fk_notificacoes_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE INDEX idx_psicologos_status ON psicologos (status_acesso);
 CREATE INDEX idx_vinculo_psicologo_status ON vinculo_psicologo_paciente (psicologo_id, status);
 CREATE INDEX idx_vinculo_paciente_status ON vinculo_psicologo_paciente (paciente_id, status);
 CREATE INDEX idx_regras_psicologo_dia ON regras_disponibilidade (psicologo_id, dia_semana, ativo);
 CREATE INDEX idx_excecoes_psicologo_data ON excecoes_disponibilidade (psicologo_id, data);
-CREATE INDEX idx_slots_psicologo_inicio_status ON slots_consulta (psicologo_id, inicio_em, status);
 CREATE INDEX idx_consultas_paciente_status ON consultas (paciente_id, status);
 CREATE INDEX idx_consultas_psicologo_status ON consultas (psicologo_id, status);
 CREATE INDEX idx_registros_paciente_registrado ON registros_emocionais (paciente_id, registrado_em);
 CREATE INDEX idx_pagamentos_status ON pagamentos (status_pagamento);
+CREATE INDEX idx_notificacoes_usuario_lida ON notificacoes (usuario_id, lida, criado_em);

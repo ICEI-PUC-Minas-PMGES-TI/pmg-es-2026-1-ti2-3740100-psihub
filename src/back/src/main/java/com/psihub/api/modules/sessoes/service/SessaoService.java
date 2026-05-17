@@ -234,7 +234,7 @@ public class SessaoService {
     }
 
     private ResumoEmocionalResponse montarResumoEmocional(Consulta consulta) {
-        LocalDateTime fimPeriodo = consulta.getSlotConsulta().getInicioEm();
+        LocalDateTime fimPeriodo = consulta.getInicioEm();
         LocalDateTime inicioPeriodo = consultaService
                 .buscarConsultaAnteriorConcluida(
                         consulta.getPaciente().getId(),
@@ -242,7 +242,7 @@ public class SessaoService {
                         fimPeriodo
                 )
                 .map(anterior -> anterior.getFinalizadoEm() == null
-                        ? anterior.getSlotConsulta().getFimEm()
+                    ? anterior.getFimEm()
                         : anterior.getFinalizadoEm())
                 .orElse(fimPeriodo.minusDays(30));
 
@@ -297,7 +297,7 @@ public class SessaoService {
     private void validarConsultaPodeIniciar(Consulta consulta) {
         validarConsultaEditavel(consulta);
 
-        if (consulta.getSlotConsulta().getInicioEm().toLocalDate().isAfter(LocalDate.now())) {
+        if (consulta.getInicioEm().toLocalDate().isAfter(LocalDate.now())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido iniciar sessao de consulta futura");
         }
 

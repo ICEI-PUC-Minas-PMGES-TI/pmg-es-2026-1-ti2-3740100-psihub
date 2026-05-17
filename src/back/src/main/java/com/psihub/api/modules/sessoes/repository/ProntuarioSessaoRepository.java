@@ -20,7 +20,6 @@ public interface ProntuarioSessaoRepository extends JpaRepository<ProntuarioSess
             join fetch paciente.usuario pacienteUsuario
             join fetch consulta.psicologo psicologo
             join fetch psicologo.usuario psicologoUsuario
-            join fetch consulta.slotConsulta slot
             where prontuario.id = :id
             """)
     Optional<ProntuarioSessao> findDetailedById(@Param("id") Long id);
@@ -33,14 +32,13 @@ public interface ProntuarioSessaoRepository extends JpaRepository<ProntuarioSess
             join fetch paciente.usuario pacienteUsuario
             join fetch consulta.psicologo psicologo
             join fetch psicologo.usuario psicologoUsuario
-            join fetch consulta.slotConsulta slot
             where paciente.id = :pacienteId
               and psicologo.id = :psicologoId
               and prontuario.incluirLinhaTempo = true
-              and slot.inicioEm >= :inicio
-              and slot.inicioEm < :fim
+              and consulta.inicioEm >= :inicio
+              and consulta.inicioEm < :fim
               and (:tema is null or lower(prontuario.temasSessao) like lower(concat('%', :tema, '%')))
-            order by slot.inicioEm asc
+            order by consulta.inicioEm asc
             """)
     List<ProntuarioSessao> findLinhaTempo(
             @Param("pacienteId") Long pacienteId,

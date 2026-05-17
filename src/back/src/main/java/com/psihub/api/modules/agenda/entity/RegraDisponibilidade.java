@@ -10,12 +10,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
@@ -51,9 +48,6 @@ public class RegraDisponibilidade extends BaseEntity {
 
     @Column(name = "duracao_slot_minutos", nullable = false)
     private Integer duracaoSlotMinutos;
-
-    @OneToMany(mappedBy = "regraDisponibilidade")
-    private List<SlotConsulta> slotsConsulta = new ArrayList<>();
 
     public Psicologo getPsicologo() {
         return psicologo;
@@ -125,14 +119,6 @@ public class RegraDisponibilidade extends BaseEntity {
 
     public void setDuracaoSlotMinutos(Integer duracaoSlotMinutos) {
         this.duracaoSlotMinutos = duracaoSlotMinutos;
-    }
-
-    public List<SlotConsulta> getSlotsConsulta() {
-        return slotsConsulta;
-    }
-
-    public void setSlotsConsulta(List<SlotConsulta> slotsConsulta) {
-        this.slotsConsulta = slotsConsulta;
     }
 }
 

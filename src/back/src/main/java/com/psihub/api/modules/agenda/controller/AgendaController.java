@@ -1,28 +1,23 @@
 package com.psihub.api.modules.agenda.controller;
 
-import com.psihub.api.modules.agenda.dto.BloquearSlotRequest;
-import com.psihub.api.modules.agenda.dto.CriarSlotManualRequest;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
+import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
 import com.psihub.api.modules.agenda.dto.PacienteResumoResponse;
 import com.psihub.api.modules.agenda.dto.RegraDisponibilidadeResponse;
-import com.psihub.api.modules.agenda.dto.SlotConsultaResponse;
 import com.psihub.api.modules.agenda.service.AgendaService;
 import com.psihub.api.modules.consultas.dto.AgendarPorPsicologoRequest;
 import com.psihub.api.modules.consultas.dto.ConsultaResponse;
 import com.psihub.api.modules.consultas.service.ConsultaService;
-import com.psihub.api.shared.enums.StatusSlotConsulta;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,57 +69,13 @@ public class AgendaController {
         return agendaService.listarRegras(user.userId());
     }
 
-    @PostMapping("/me/agenda/slots")
-    @ResponseStatus(HttpStatus.CREATED)
-    public SlotConsultaResponse criarMeuSlotManual(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @Valid @RequestBody CriarSlotManualRequest request
-    ) {
-        return agendaService.criarSlotManual(user.userId(), request);
-    }
-
-    @GetMapping("/me/agenda/slots")
-    public List<SlotConsultaResponse> listarMeusSlots(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fim,
-            @RequestParam(required = false) StatusSlotConsulta status
-    ) {
-        return agendaService.listarMeusSlots(user.userId(), inicio, fim, status);
-    }
-
-    @PatchMapping("/me/agenda/slots/{slotId}/bloquear")
-    public SlotConsultaResponse bloquearMeuSlot(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long slotId,
-            @Valid @RequestBody(required = false) BloquearSlotRequest request
-    ) {
-        return agendaService.bloquearSlot(user.userId(), slotId, request == null ? new BloquearSlotRequest(null) : request);
-    }
-
-    @PatchMapping("/me/agenda/slots/{slotId}/cancelar")
-    public SlotConsultaResponse cancelarMeuSlot(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long slotId
-    ) {
-        return agendaService.cancelarSlot(user.userId(), slotId);
-    }
-
-    @GetMapping("/{psicologoId}/agenda/slots/disponiveis")
-    public List<SlotConsultaResponse> listarSlotsDisponiveis(
+    @GetMapping("/{psicologoId}/agenda/disponibilidades/slots")
+    public List<HorarioDisponivelDTO> listarDisponibilidadesSlots(
             @PathVariable Long psicologoId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate de,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ate
     ) {
-        return agendaService.listarSlotsDisponiveis(psicologoId, data);
-    }
-
-    @GetMapping("/{psicologoId}/agenda/slots-publicos")
-    public List<SlotConsultaResponse> listarSlotsPublicos(
-            @PathVariable Long psicologoId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fim
-    ) {
-        return agendaService.listarSlots(psicologoId, inicio, fim, null);
+        return agendaService.listarDisponibilidade(psicologoId, de, ate);
     }
 
     @PostMapping("/{psicologoId}/disponibilidades")
@@ -145,50 +96,6 @@ public class AgendaController {
     ) {
         validarPsicologoAutenticado(user, psicologoId);
         return agendaService.listarRegras(user.userId());
-    }
-
-    @PostMapping("/{psicologoId}/agenda/slots")
-    @ResponseStatus(HttpStatus.CREATED)
-    public SlotConsultaResponse criarSlotManualLegado(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long psicologoId,
-            @Valid @RequestBody CriarSlotManualRequest request
-    ) {
-        validarPsicologoAutenticado(user, psicologoId);
-        return agendaService.criarSlotManual(user.userId(), request);
-    }
-
-    @GetMapping("/{psicologoId}/agenda/slots")
-    public List<SlotConsultaResponse> listarSlotsLegado(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long psicologoId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fim,
-            @RequestParam(required = false) StatusSlotConsulta status
-    ) {
-        validarPsicologoAutenticado(user, psicologoId);
-        return agendaService.listarMeusSlots(user.userId(), inicio, fim, status);
-    }
-
-    @PatchMapping("/{psicologoId}/agenda/slots/{slotId}/bloquear")
-    public SlotConsultaResponse bloquearSlotLegado(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long psicologoId,
-            @PathVariable Long slotId,
-            @Valid @RequestBody(required = false) BloquearSlotRequest request
-    ) {
-        validarPsicologoAutenticado(user, psicologoId);
-        return agendaService.bloquearSlot(user.userId(), slotId, request == null ? new BloquearSlotRequest(null) : request);
-    }
-
-    @PatchMapping("/{psicologoId}/agenda/slots/{slotId}/cancelar")
-    public SlotConsultaResponse cancelarSlotLegado(
-            @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long psicologoId,
-            @PathVariable Long slotId
-    ) {
-        validarPsicologoAutenticado(user, psicologoId);
-        return agendaService.cancelarSlot(user.userId(), slotId);
     }
 
     private void validarPsicologoAutenticado(AuthenticatedUser user, Long psicologoId) {

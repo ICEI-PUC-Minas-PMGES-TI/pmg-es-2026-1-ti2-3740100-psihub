@@ -1,6 +1,5 @@
 package com.psihub.api.modules.consultas.entity;
 
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
 import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.financeiro.entity.Pagamento;
 import com.psihub.api.modules.pacientes.entity.Paciente;
@@ -34,9 +33,11 @@ public class Consulta extends BaseEntity {
     @JoinColumn(name = "psicologo_id", nullable = false)
     private Psicologo psicologo;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "slot_consulta_id", nullable = false)
-    private SlotConsulta slotConsulta;
+    @Column(name = "inicio_em")
+    private LocalDateTime inicioEm;
+
+    @Column(name = "fim_em")
+    private LocalDateTime fimEm;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agendado_por_usuario_id", nullable = false)
@@ -84,12 +85,20 @@ public class Consulta extends BaseEntity {
         this.psicologo = psicologo;
     }
 
-    public SlotConsulta getSlotConsulta() {
-        return slotConsulta;
+    public LocalDateTime getInicioEm() {
+        return inicioEm;
     }
 
-    public void setSlotConsulta(SlotConsulta slotConsulta) {
-        this.slotConsulta = slotConsulta;
+    public void setInicioEm(LocalDateTime inicioEm) {
+        this.inicioEm = inicioEm;
+    }
+
+    public LocalDateTime getFimEm() {
+        return fimEm;
+    }
+
+    public void setFimEm(LocalDateTime fimEm) {
+        this.fimEm = fimEm;
     }
 
     public Usuario getAgendadoPorUsuario() {

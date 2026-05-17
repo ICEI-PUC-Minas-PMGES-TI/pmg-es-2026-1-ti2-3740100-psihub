@@ -21,7 +21,7 @@ public class NotificacaoService {
     public void notificarCancelamentoParaPsicologo(Consulta consulta) {
         Usuario psicologo = consulta.getPsicologo().getUsuario();
         String pacienteNome = consulta.getPaciente().getUsuario().getNome();
-        String horario = consulta.getSlotConsulta().getInicioEm().format(DATE_TIME_FORMATTER);
+        String horario = consulta.getInicioEm().format(DATE_TIME_FORMATTER);
         criar(
                 psicologo,
                 "Consulta cancelada",
@@ -32,7 +32,7 @@ public class NotificacaoService {
     public void notificarCancelamentoParaPaciente(Consulta consulta) {
         Usuario paciente = consulta.getPaciente().getUsuario();
         String psicologoNome = consulta.getPsicologo().getUsuario().getNome();
-        String horario = consulta.getSlotConsulta().getInicioEm().format(DATE_TIME_FORMATTER);
+        String horario = consulta.getInicioEm().format(DATE_TIME_FORMATTER);
         criar(
                 paciente,
                 "Consulta cancelada",

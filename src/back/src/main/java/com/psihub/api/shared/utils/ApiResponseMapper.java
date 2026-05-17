@@ -1,9 +1,7 @@
 package com.psihub.api.shared.utils;
 
 import com.psihub.api.modules.agenda.dto.RegraDisponibilidadeResponse;
-import com.psihub.api.modules.agenda.dto.SlotConsultaResponse;
 import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
 import com.psihub.api.modules.consultas.dto.ConsultaResponse;
 import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.registros.entity.RegistroEmocional;
@@ -39,27 +37,6 @@ public class ApiResponseMapper {
         );
     }
 
-    public SlotConsultaResponse toResponse(SlotConsulta slot) {
-        return toResponse(slot, null);
-    }
-
-    public SlotConsultaResponse toResponse(SlotConsulta slot, Consulta consulta) {
-        Long regraId = slot.getRegraDisponibilidade() == null ? null : slot.getRegraDisponibilidade().getId();
-        return new SlotConsultaResponse(
-                slot.getId(),
-                slot.getPsicologo().getId(),
-                regraId,
-                slot.getInicioEm(),
-                slot.getFimEm(),
-                slot.getStatus(),
-                consulta == null ? null : consulta.getPaciente().getUsuario().getNome(),
-                consulta == null ? null : consulta.getTipoAtendimento(),
-                consulta == null ? null : consulta.getStatus(),
-                consulta == null ? null : consulta.getObservacoes(),
-                consulta == null ? null : consulta.getMotivoCancelamento()
-        );
-    }
-
     public ConsultaResponse toResponse(Consulta consulta) {
         return new ConsultaResponse(
                 consulta.getId(),
@@ -69,10 +46,8 @@ public class ApiResponseMapper {
                 consulta.getPaciente().getUsuario().getTelefone(),
                 consulta.getPsicologo().getId(),
                 consulta.getPsicologo().getUsuario().getNome(),
-                consulta.getSlotConsulta().getId(),
-                consulta.getSlotConsulta().getInicioEm(),
-                consulta.getSlotConsulta().getFimEm(),
-                consulta.getSlotConsulta().getStatus(),
+                consulta.getInicioEm(),
+                consulta.getFimEm(),
                 consulta.getTipoAtendimento(),
                 consulta.getStatus(),
                 consulta.getObservacoes(),
@@ -121,8 +96,8 @@ public class ApiResponseMapper {
         return new LinhaTempoSessaoResponse(
                 prontuario.getId(),
                 consulta.getId(),
-                consulta.getSlotConsulta().getInicioEm(),
-                consulta.getSlotConsulta().getFimEm(),
+                consulta.getInicioEm(),
+                consulta.getFimEm(),
                 jsonListMapper.fromJson(prontuario.getTemasSessao()),
                 prontuario.getNivelProgresso(),
                 prontuario.getNivelEngajamento(),

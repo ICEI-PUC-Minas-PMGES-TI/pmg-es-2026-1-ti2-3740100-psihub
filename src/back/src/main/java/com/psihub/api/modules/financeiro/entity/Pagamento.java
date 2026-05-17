@@ -1,8 +1,6 @@
 package com.psihub.api.modules.financeiro.entity;
 
 import com.psihub.api.modules.consultas.entity.Consulta;
-import com.psihub.api.modules.financeiro.entity.FormaPagamento;
-import com.psihub.api.modules.financeiro.entity.StatusPagamento;
 import com.psihub.api.shared.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

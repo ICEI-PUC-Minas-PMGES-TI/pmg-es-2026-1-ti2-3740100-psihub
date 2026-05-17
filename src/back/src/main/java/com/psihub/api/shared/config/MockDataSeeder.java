@@ -1,9 +1,7 @@
 package com.psihub.api.shared.config;
 
 import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
 import com.psihub.api.modules.agenda.repository.RegraDisponibilidadeRepository;
-import com.psihub.api.modules.agenda.repository.SlotConsultaRepository;
 import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.auth.repository.UsuarioRepository;
 import com.psihub.api.modules.consultas.entity.Consulta;
@@ -20,16 +18,13 @@ import com.psihub.api.modules.vinculos.repository.VinculoPsicologoPacienteReposi
 import com.psihub.api.shared.enums.DiaSemana;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
-import com.psihub.api.shared.enums.StatusSlotConsulta;
 import com.psihub.api.shared.enums.TipoAtendimento;
 import com.psihub.api.shared.enums.TipoUsuario;
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
@@ -43,7 +38,6 @@ public class MockDataSeeder implements ApplicationRunner {
 
     private static final String SEED_PASSWORD = "senha123";
     private static final int SLOT_DURATION_MINUTES = 50;
-    private static final int DAYS_TO_GENERATE = 30;
 
     private final Environment environment;
     private final PasswordEncoder passwordEncoder;
@@ -52,7 +46,6 @@ public class MockDataSeeder implements ApplicationRunner {
     private final PacienteRepository pacienteRepository;
     private final EspecialidadePsicologoRepository especialidadePsicologoRepository;
     private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
-    private final SlotConsultaRepository slotConsultaRepository;
     private final ConsultaRepository consultaRepository;
     private final VinculoPsicologoPacienteRepository vinculoRepository;
 
@@ -64,7 +57,6 @@ public class MockDataSeeder implements ApplicationRunner {
             PacienteRepository pacienteRepository,
             EspecialidadePsicologoRepository especialidadePsicologoRepository,
             RegraDisponibilidadeRepository regraDisponibilidadeRepository,
-            SlotConsultaRepository slotConsultaRepository,
             ConsultaRepository consultaRepository,
             VinculoPsicologoPacienteRepository vinculoRepository
     ) {
@@ -75,7 +67,6 @@ public class MockDataSeeder implements ApplicationRunner {
         this.pacienteRepository = pacienteRepository;
         this.especialidadePsicologoRepository = especialidadePsicologoRepository;
         this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
-        this.slotConsultaRepository = slotConsultaRepository;
         this.consultaRepository = consultaRepository;
         this.vinculoRepository = vinculoRepository;
     }
@@ -128,21 +119,18 @@ public class MockDataSeeder implements ApplicationRunner {
         createAcceptedLink(fernanda, carlos);
         createAcceptedLink(joao, carlos);
 
-        List<RegraDisponibilidade> anaRules = createAvailability(
+        createAvailability(
                 ana,
                 List.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA),
                 LocalTime.of(9, 0),
                 LocalTime.of(17, 0)
         );
-        List<RegraDisponibilidade> carlosRules = createAvailability(
+        createAvailability(
                 carlos,
                 List.of(DiaSemana.TERCA, DiaSemana.QUINTA),
                 LocalTime.of(10, 0),
                 LocalTime.of(18, 0)
         );
-
-        generateFutureAvailableSlots(ana, anaRules);
-        generateFutureAvailableSlots(carlos, carlosRules);
 
         LocalDate today = LocalDate.now();
         createConsultation(joao, ana, today.plusDays(1).atTime(9, 0), TipoAtendimento.ONLINE, StatusConsulta.AGENDADA);
@@ -229,32 +217,6 @@ public class MockDataSeeder implements ApplicationRunner {
                 .toList();
     }
 
-    private void generateFutureAvailableSlots(Psicologo psychologist, List<RegraDisponibilidade> rules) {
-        Map<DiaSemana, RegraDisponibilidade> rulesByDay = rules.stream()
-                .collect(java.util.stream.Collectors.toMap(RegraDisponibilidade::getDiaSemana, rule -> rule));
-        LocalDate today = LocalDate.now();
-
-        for (int offset = 0; offset <= DAYS_TO_GENERATE; offset++) {
-            LocalDate date = today.plusDays(offset);
-            RegraDisponibilidade rule = rulesByDay.get(toDiaSemana(date.getDayOfWeek()));
-            if (rule == null) {
-                continue;
-            }
-
-            LocalTime cursor = rule.getHoraInicio();
-            while (!cursor.plusMinutes(SLOT_DURATION_MINUTES).isAfter(rule.getHoraFim())) {
-                LocalDateTime start = date.atTime(cursor);
-                LocalDateTime end = start.plusMinutes(SLOT_DURATION_MINUTES);
-
-                if (start.isAfter(LocalDateTime.now())) {
-                    createSlot(psychologist, rule, start, end, StatusSlotConsulta.DISPONIVEL);
-                }
-
-                cursor = cursor.plusMinutes(SLOT_DURATION_MINUTES);
-            }
-        }
-    }
-
     private Consulta createConsultation(
             Paciente patient,
             Psicologo psychologist,
@@ -262,18 +224,11 @@ public class MockDataSeeder implements ApplicationRunner {
             TipoAtendimento serviceType,
             StatusConsulta status
     ) {
-        SlotConsulta slot = createSlot(
-                psychologist,
-                null,
-                start,
-                start.plusMinutes(SLOT_DURATION_MINUTES),
-                StatusSlotConsulta.RESERVADO
-        );
-
         Consulta consultation = new Consulta();
         consultation.setPaciente(patient);
         consultation.setPsicologo(psychologist);
-        consultation.setSlotConsulta(slot);
+        consultation.setInicioEm(start);
+        consultation.setFimEm(start.plusMinutes(SLOT_DURATION_MINUTES));
         consultation.setAgendadoPorUsuario(patient.getUsuario());
         consultation.setTipoAtendimento(serviceType);
         consultation.setStatus(status);
@@ -287,42 +242,6 @@ public class MockDataSeeder implements ApplicationRunner {
         return consultaRepository.save(consultation);
     }
 
-    private SlotConsulta createSlot(
-            Psicologo psychologist,
-            RegraDisponibilidade rule,
-            LocalDateTime start,
-            LocalDateTime end,
-            StatusSlotConsulta status
-    ) {
-        return slotConsultaRepository.findByPsicologoIdAndInicioEmAndFimEm(psychologist.getId(), start, end)
-                .map(existingSlot -> {
-                    if (status == StatusSlotConsulta.RESERVADO) {
-                        existingSlot.setStatus(StatusSlotConsulta.RESERVADO);
-                    }
-                    if (existingSlot.getRegraDisponibilidade() == null && rule != null) {
-                        existingSlot.setRegraDisponibilidade(rule);
-                    }
-                    return existingSlot;
-                })
-                .orElseGet(() -> createNewSlot(psychologist, rule, start, end, status));
-    }
-
-    private SlotConsulta createNewSlot(
-            Psicologo psychologist,
-            RegraDisponibilidade rule,
-            LocalDateTime start,
-            LocalDateTime end,
-            StatusSlotConsulta status
-    ) {
-        SlotConsulta slot = new SlotConsulta();
-        slot.setPsicologo(psychologist);
-        slot.setRegraDisponibilidade(rule);
-        slot.setInicioEm(start);
-        slot.setFimEm(end);
-        slot.setStatus(status);
-        return slotConsultaRepository.save(slot);
-    }
-
     private boolean isProduction() {
         String nodeEnv = System.getenv("NODE_ENV");
         if ("production".equalsIgnoreCase(nodeEnv)) {
@@ -333,16 +252,4 @@ public class MockDataSeeder implements ApplicationRunner {
                 .anyMatch(profile -> "production".equalsIgnoreCase(profile) || "prod".equalsIgnoreCase(profile));
     }
 
-    private DiaSemana toDiaSemana(DayOfWeek dayOfWeek) {
-        return switch (dayOfWeek) {
-            case MONDAY -> DiaSemana.SEGUNDA;
-            case TUESDAY -> DiaSemana.TERCA;
-            case WEDNESDAY -> DiaSemana.QUARTA;
-            case THURSDAY -> DiaSemana.QUINTA;
-            case FRIDAY -> DiaSemana.SEXTA;
-            case SATURDAY -> DiaSemana.SABADO;
-            case SUNDAY -> DiaSemana.DOMINGO;
-        };
-    }
 }
-

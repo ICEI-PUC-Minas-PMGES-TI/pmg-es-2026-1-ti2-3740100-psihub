@@ -1,40 +1,38 @@
 package com.psihub.api.modules.agenda.service;
 
-import com.psihub.api.modules.agenda.dto.BloquearSlotRequest;
-import com.psihub.api.modules.agenda.dto.CriarSlotManualRequest;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
+import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
 import com.psihub.api.modules.agenda.dto.PacienteResumoResponse;
 import com.psihub.api.modules.agenda.dto.RegraDisponibilidadeResponse;
-import com.psihub.api.modules.agenda.dto.SlotConsultaResponse;
+import com.psihub.api.modules.agenda.entity.ExcecaoDisponibilidade;
 import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
+import com.psihub.api.modules.agenda.entity.TipoExcecaoDisponibilidade;
+import com.psihub.api.modules.agenda.repository.ExcecaoDisponibilidadeRepository;
 import com.psihub.api.modules.agenda.repository.RegraDisponibilidadeRepository;
-import com.psihub.api.modules.agenda.repository.SlotConsultaRepository;
 import com.psihub.api.modules.consultas.entity.Consulta;
-import com.psihub.api.modules.consultas.service.ConsultaService;
+import com.psihub.api.modules.consultas.repository.ConsultaRepository;
 import com.psihub.api.modules.pacientes.service.PacienteService;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
 import com.psihub.api.modules.psicologos.service.PsicologoService;
 import com.psihub.api.shared.enums.DiaSemana;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
-import com.psihub.api.shared.enums.StatusSlotConsulta;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.ApiResponseMapper;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.function.Function;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,31 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AgendaService {
 
-    private static final Logger log = LoggerFactory.getLogger(AgendaService.class);
-
     private static final int DURACAO_PADRAO_MINUTOS = 50;
     private static final int DIAS_GERACAO_PADRAO = 30;
-
-    /**
-     * Statuses used when auto-generating slots from availability rules.
-     * DISPONIVEL is included to avoid creating duplicate available slots.
-     */
-    private static final Collection<StatusSlotConsulta> STATUSES_COM_CONFLITO = EnumSet.of(
-            StatusSlotConsulta.DISPONIVEL,
-            StatusSlotConsulta.RESERVADO,
-            StatusSlotConsulta.BLOQUEADO
-    );
-
-    /**
-     * Statuses used when validating a manually created slot.
-     * DISPONIVEL is intentionally excluded: an existing available slot must not block
-     * the creation of a manual slot at the same or overlapping time (the exact-duplicate
-     * check handles identical slots separately). Booked intervals are validated through
-     * active consultations, so only explicitly blocked slots constitute a slot-level conflict.
-     */
-    private static final Collection<StatusSlotConsulta> STATUSES_CONFLITO_SLOT_MANUAL = EnumSet.of(
-            StatusSlotConsulta.BLOQUEADO
-    );
 
     private static final Collection<StatusConsulta> STATUS_CONSULTA_BLOQUEANTES = EnumSet.of(
             StatusConsulta.AGENDADA,
@@ -74,31 +49,25 @@ public class AgendaService {
             StatusConsulta.EM_ANDAMENTO
     );
 
-    private static final Collection<StatusConsulta> STATUS_CONSULTA_SEM_CONFLITO = EnumSet.of(
-            StatusConsulta.CANCELADA,
-            StatusConsulta.CONCLUIDA,
-            StatusConsulta.FALTOU
-    );
-
     private final PsicologoService psicologoService;
     private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
-    private final SlotConsultaRepository slotConsultaRepository;
-    private final ConsultaService consultaService;
+    private final ExcecaoDisponibilidadeRepository excecaoDisponibilidadeRepository;
+    private final ConsultaRepository consultaRepository;
     private final PacienteService pacienteService;
     private final ApiResponseMapper mapper;
 
     public AgendaService(
             PsicologoService psicologoService,
             RegraDisponibilidadeRepository regraDisponibilidadeRepository,
-            SlotConsultaRepository slotConsultaRepository,
-            ConsultaService consultaService,
+        ExcecaoDisponibilidadeRepository excecaoDisponibilidadeRepository,
+        ConsultaRepository consultaRepository,
             PacienteService pacienteService,
             ApiResponseMapper mapper
     ) {
         this.psicologoService = psicologoService;
         this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
-        this.slotConsultaRepository = slotConsultaRepository;
-        this.consultaService = consultaService;
+    this.excecaoDisponibilidadeRepository = excecaoDisponibilidadeRepository;
+    this.consultaRepository = consultaRepository;
         this.pacienteService = pacienteService;
         this.mapper = mapper;
     }
@@ -111,9 +80,6 @@ public class AgendaService {
         validarVigencia(request.validoAPartirDe(), request.validoAte());
 
         int duracao = request.duracaoSlotMinutos() == null ? DURACAO_PADRAO_MINUTOS : request.duracaoSlotMinutos();
-        LocalDate gerarInicio = maiorData(request.validoAPartirDe(), LocalDate.now());
-        LocalDate gerarFim = definirFimGeracao(request);
-
         List<RegraDisponibilidade> regras = request.diasSemana()
                 .stream()
                 .sorted(Comparator.comparing(DiaSemana::name))
@@ -121,15 +87,9 @@ public class AgendaService {
                 .map(regraDisponibilidadeRepository::save)
                 .toList();
 
-        List<SlotConsulta> slotsCriados = gerarFim.isBefore(gerarInicio)
-                ? List.of()
-                : regras.stream()
-                        .flatMap(regra -> gerarSlots(regra, gerarInicio, gerarFim).stream())
-                        .toList();
-
         return new DisponibilidadeResponse(
                 regras.stream().map(mapper::toResponse).toList(),
-                slotsCriados.stream().map(mapper::toResponse).toList()
+            List.of()
         );
     }
 
@@ -143,33 +103,91 @@ public class AgendaService {
     }
 
     @Transactional(readOnly = true)
-    public List<SlotConsultaResponse> listarMeusSlots(
-            Long psicologoId,
-            LocalDateTime inicio,
-            LocalDateTime fim,
-            StatusSlotConsulta status
-    ) {
+    public List<HorarioDisponivelDTO> listarDisponibilidade(Long psicologoId, LocalDate de, LocalDate ate) {
         buscarPsicologo(psicologoId);
-        LocalDateTime inicioFiltro = inicio == null ? LocalDate.now().atStartOfDay() : inicio;
-        LocalDateTime fimFiltro = fim == null ? inicioFiltro.plusDays(30) : fim;
-        validarIntervaloDataHora(inicioFiltro, fimFiltro);
 
-        Map<Long, Consulta> consultasPorSlot = consultaService.buscarConsultasPorPsicologoEPeriodo(
+        LocalDate inicio = de == null ? LocalDate.now() : de;
+        LocalDate fim = ate == null ? inicio.plusDays(DIAS_GERACAO_PADRAO) : ate;
+        if (fim.isBefore(inicio)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Data final deve ser posterior ou igual a inicial");
+        }
+
+        LocalDateTime inicioPeriodo = inicio.atStartOfDay();
+        LocalDateTime fimPeriodo = fim.plusDays(1).atStartOfDay();
+        validarIntervaloDataHora(inicioPeriodo, fimPeriodo);
+
+        List<RegraDisponibilidade> regras = regraDisponibilidadeRepository
+                .findByPsicologoIdAndAtivoTrueOrderByDiaSemanaAscHoraInicioAsc(psicologoId);
+
+        Map<LocalDate, List<ExcecaoDisponibilidade>> excecoesPorData = excecaoDisponibilidadeRepository
+                .findByPsicologoIdAndDataBetweenAndAtivoTrue(psicologoId, inicio, fim)
+                .stream()
+                .collect(Collectors.groupingBy(ExcecaoDisponibilidade::getData));
+
+        List<Consulta> consultas = consultaRepository.findByFiltros(
+                null,
                 psicologoId,
                 STATUS_CONSULTA_BLOQUEANTES,
-                inicioFiltro,
-                fimFiltro
-            )
-            .stream()
-            .collect(Collectors.toMap(
-                consulta -> consulta.getSlotConsulta().getId(),
-                Function.identity(),
-                (first, second) -> second.getId() > first.getId() ? second : first
-            ));
+                inicioPeriodo,
+                fimPeriodo
+        );
 
-        return slotConsultaRepository.findAgenda(psicologoId, inicioFiltro, fimFiltro, status)
-                .stream()
-                .map(slot -> mapper.toResponse(slot, consultasPorSlot.get(slot.getId())))
+        List<HorarioDisponivelDTO> disponibilidade = new ArrayList<>();
+        Set<String> chavesGeradas = new HashSet<>();
+
+        for (LocalDate data = inicio; !data.isAfter(fim); data = data.plusDays(1)) {
+            LocalDate dataAtual = data;
+            List<RegraDisponibilidade> regrasDoDia = regras.stream()
+                .filter(regra -> regra.getDiaSemana() == toDiaSemana(dataAtual.getDayOfWeek()))
+                .filter(regra -> regraVigenteNaData(regra, dataAtual))
+                    .toList();
+
+            List<ExcecaoDisponibilidade> excecoesDoDia = excecoesPorData.getOrDefault(dataAtual, List.of());
+
+            for (RegraDisponibilidade regra : regrasDoDia) {
+                adicionarSlotsDoIntervalo(
+                dataAtual,
+                        regra.getHoraInicio(),
+                        regra.getHoraFim(),
+                        regra.getDuracaoSlotMinutos(),
+                        regra,
+                        excecoesDoDia,
+                        consultas,
+                        disponibilidade,
+                        chavesGeradas
+                );
+            }
+
+            for (ExcecaoDisponibilidade excecao : excecoesDoDia) {
+                if (excecao.getTipo() != TipoExcecaoDisponibilidade.JANELA_EXTRA) {
+                    continue;
+                }
+
+                if (excecao.getHoraInicio() == null || excecao.getHoraFim() == null
+                        || !excecao.getHoraFim().isAfter(excecao.getHoraInicio())) {
+                    continue;
+                }
+
+                int duracao = regrasDoDia.isEmpty()
+                        ? DURACAO_PADRAO_MINUTOS
+                        : regrasDoDia.get(0).getDuracaoSlotMinutos();
+
+                adicionarSlotsDoIntervalo(
+                    dataAtual,
+                        excecao.getHoraInicio(),
+                        excecao.getHoraFim(),
+                        duracao,
+                        null,
+                        excecoesDoDia,
+                        consultas,
+                        disponibilidade,
+                        chavesGeradas
+                );
+            }
+        }
+
+        return disponibilidade.stream()
+                .sorted(Comparator.comparing(HorarioDisponivelDTO::inicio))
                 .toList();
     }
 
@@ -181,118 +199,6 @@ public class AgendaService {
                 .stream()
                 .map(paciente -> new PacienteResumoResponse(paciente.getId(), paciente.getUsuario().getNome()))
                 .toList();
-    }
-
-    @Transactional
-    public SlotConsultaResponse criarSlotManual(Long psicologoId, CriarSlotManualRequest request) {
-        Psicologo psicologo = buscarPsicologoAtivo(psicologoId);
-        validarPeriodo(request.horaInicio(), request.horaFim());
-
-        LocalDateTime inicio = request.data().atTime(request.horaInicio());
-        LocalDateTime fim = request.data().atTime(request.horaFim());
-
-        if (inicio.isBefore(LocalDateTime.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido criar horario em data passada");
-        }
-
-        validarSemConflitoComPausa(psicologoId, request.data(), request.horaInicio(), request.horaFim());
-
-        SlotConsulta slotExistente = slotConsultaRepository
-                .findByPsicologoIdAndInicioEmAndFimEm(psicologoId, inicio, fim)
-                .orElse(null);
-        if (slotExistente != null && slotExistente.getStatus() == StatusSlotConsulta.DISPONIVEL) {
-            return mapper.toResponse(slotExistente);
-        }
-
-        // Slot-level conflicts cover explicit blocks. Booked intervals are checked against
-        // active consultations below so cancelled, concluded and missed consultations are ignored.
-        List<SlotConsulta> conflitantes = slotConsultaRepository.findOverlapping(
-                psicologoId, inicio, fim, STATUSES_CONFLITO_SLOT_MANUAL);
-        if (!conflitantes.isEmpty()) {
-            log.warn(
-                    "[AgendaService] Conflito detectado ao criar slot manual para psicologo {}. "
-                    + "Novo intervalo: {} - {}. Slots conflitantes: {}",
-                    psicologoId,
-                    inicio,
-                    fim,
-                    conflitantes.stream()
-                            .map(s -> String.format("id=%d inicio=%s fim=%s status=%s",
-                                    s.getId(), s.getInicioEm(), s.getFimEm(), s.getStatus()))
-                            .collect(Collectors.joining("; ")));
-            throw new ApiException(HttpStatus.CONFLICT, "O horario informado conflita com outro horario da agenda");
-        }
-
-        if (consultaService.existeConflitoDeHorario(psicologoId, inicio, fim, STATUS_CONSULTA_SEM_CONFLITO)) {
-            throw new ApiException(HttpStatus.CONFLICT, "O horario informado conflita com uma consulta ativa");
-        }
-
-        SlotConsulta slot = new SlotConsulta();
-        slot.setPsicologo(psicologo);
-        slot.setInicioEm(inicio);
-        slot.setFimEm(fim);
-        slot.setStatus(StatusSlotConsulta.DISPONIVEL);
-
-        return mapper.toResponse(slotConsultaRepository.save(slot));
-    }
-
-    @Transactional(readOnly = true)
-    public List<SlotConsultaResponse> listarSlots(
-            Long psicologoId,
-            LocalDateTime inicio,
-            LocalDateTime fim,
-            StatusSlotConsulta status
-    ) {
-        buscarPsicologo(psicologoId);
-        LocalDateTime inicioFiltro = inicio == null ? LocalDate.now().atStartOfDay() : inicio;
-        LocalDateTime fimFiltro = fim == null ? inicioFiltro.plusDays(30) : fim;
-        validarIntervaloDataHora(inicioFiltro, fimFiltro);
-
-        return slotConsultaRepository.findAgenda(psicologoId, inicioFiltro, fimFiltro, status)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<SlotConsultaResponse> listarSlotsDisponiveis(Long psicologoId, LocalDate data) {
-        LocalDate dataFiltro = data == null ? LocalDate.now() : data;
-        return listarSlots(
-                psicologoId,
-                dataFiltro.atStartOfDay(),
-                dataFiltro.plusDays(1).atStartOfDay(),
-                StatusSlotConsulta.DISPONIVEL
-        );
-    }
-
-    @Transactional
-    public SlotConsultaResponse bloquearSlot(Long psicologoId, Long slotId, BloquearSlotRequest request) {
-        buscarPsicologoAtivo(psicologoId);
-        SlotConsulta slot = buscarSlotDoPsicologo(slotId, psicologoId);
-
-        if (slot.getStatus() == StatusSlotConsulta.RESERVADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel bloquear um horario reservado");
-        }
-
-        if (slot.getStatus() == StatusSlotConsulta.CANCELADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel bloquear um horario cancelado");
-        }
-
-        slot.setStatus(StatusSlotConsulta.BLOQUEADO);
-        return mapper.toResponse(slot);
-    }
-
-    @Transactional
-    public SlotConsultaResponse cancelarSlot(Long psicologoId, Long slotId) {
-        buscarPsicologoAtivo(psicologoId);
-        SlotConsulta slot = buscarSlotDoPsicologo(slotId, psicologoId);
-
-        if (slot.getStatus() == StatusSlotConsulta.RESERVADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel remover um horario com consulta agendada");
-        }
-
-        slot.setAtivo(false);
-        slot.setStatus(StatusSlotConsulta.CANCELADO);
-        return mapper.toResponse(slot);
     }
 
     private RegraDisponibilidade criarRegra(
@@ -315,39 +221,42 @@ public class AgendaService {
         return regra;
     }
 
-    private List<SlotConsulta> gerarSlots(RegraDisponibilidade regra, LocalDate gerarInicio, LocalDate gerarFim) {
-        return gerarInicio.datesUntil(gerarFim.plusDays(1))
-                .filter(data -> toDiaSemana(data.getDayOfWeek()) == regra.getDiaSemana())
-                .flatMap(data -> gerarSlotsDaData(regra, data).stream())
-                .toList();
-    }
-
-    private List<SlotConsulta> gerarSlotsDaData(RegraDisponibilidade regra, LocalDate data) {
+    private void adicionarSlotsDoIntervalo(
+            LocalDate data,
+            LocalTime horaInicio,
+            LocalTime horaFim,
+            int duracaoMinutos,
+            RegraDisponibilidade regra,
+            List<ExcecaoDisponibilidade> excecoesDoDia,
+            List<Consulta> consultas,
+            List<HorarioDisponivelDTO> disponibilidade,
+            Set<String> chavesGeradas
+    ) {
         LocalDateTime agora = LocalDateTime.now();
-        LocalTime cursor = regra.getHoraInicio();
-        List<SlotConsulta> slots = new java.util.ArrayList<>();
+        LocalTime cursor = horaInicio;
 
-        while (!cursor.plusMinutes(regra.getDuracaoSlotMinutos()).isAfter(regra.getHoraFim())) {
-            LocalDateTime inicio = data.atTime(cursor);
-            LocalDateTime fim = inicio.plusMinutes(regra.getDuracaoSlotMinutos());
+        while (!cursor.plusMinutes(duracaoMinutos).isAfter(horaFim)) {
+            LocalTime inicioSlotHora = cursor;
+            LocalTime fimSlotHora = inicioSlotHora.plusMinutes(duracaoMinutos);
+            LocalDateTime inicioSlot = data.atTime(inicioSlotHora);
+            LocalDateTime fimSlot = data.atTime(fimSlotHora);
 
-            if (!inicio.isBefore(agora)
-                    && !sobrepoePausa(cursor, cursor.plusMinutes(regra.getDuracaoSlotMinutos()), regra)
-                    && !slotConsultaRepository.existsByPsicologoIdAndInicioEmAndFimEm(regra.getPsicologo().getId(), inicio, fim)
-                    && !slotConsultaRepository.existsOverlap(regra.getPsicologo().getId(), inicio, fim, STATUSES_COM_CONFLITO)) {
-                SlotConsulta slot = new SlotConsulta();
-                slot.setPsicologo(regra.getPsicologo());
-                slot.setRegraDisponibilidade(regra);
-                slot.setInicioEm(inicio);
-                slot.setFimEm(fim);
-                slot.setStatus(StatusSlotConsulta.DISPONIVEL);
-                slots.add(slotConsultaRepository.save(slot));
+            boolean sobrepoePausa = regra != null && sobrepoePausa(inicioSlotHora, fimSlotHora, regra);
+            boolean bloqueadoPorExcecao = excecoesDoDia.stream()
+                    .filter(excecao -> excecao.getTipo() != TipoExcecaoDisponibilidade.JANELA_EXTRA)
+                .anyMatch(excecao -> sobrepoeExcecao(inicioSlotHora, fimSlotHora, excecao));
+            boolean ocupadoPorConsulta = consultas.stream()
+                    .anyMatch(consulta -> sobrepoeIntervalo(inicioSlot, fimSlot, consulta.getInicioEm(), consulta.getFimEm()));
+
+            if (!inicioSlot.isBefore(agora) && !sobrepoePausa && !bloqueadoPorExcecao && !ocupadoPorConsulta) {
+                String chave = inicioSlot + "|" + fimSlot;
+                if (chavesGeradas.add(chave)) {
+                    disponibilidade.add(new HorarioDisponivelDTO(inicioSlot, fimSlot));
+                }
             }
 
-            cursor = cursor.plusMinutes(regra.getDuracaoSlotMinutos());
+            cursor = cursor.plusMinutes(duracaoMinutos);
         }
-
-        return slots;
     }
 
     private Psicologo buscarPsicologo(Long psicologoId) {
@@ -360,17 +269,6 @@ public class AgendaService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
         }
         return psicologo;
-    }
-
-    private SlotConsulta buscarSlotDoPsicologo(Long slotId, Long psicologoId) {
-        SlotConsulta slot = slotConsultaRepository.findByIdForUpdate(slotId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Horario nao encontrado"));
-
-        if (!slot.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Horario nao pertence ao psicologo informado");
-        }
-
-        return slot;
     }
 
     private void validarPeriodo(LocalTime inicio, LocalTime fim) {
@@ -397,6 +295,7 @@ public class AgendaService {
         }
     }
 
+    @SuppressWarnings("unused")
     private void validarSemConflitoComPausa(Long psicologoId, LocalDate data, LocalTime inicio, LocalTime fim) {
         regraDisponibilidadeRepository.findByPsicologoIdAndDiaSemanaAndAtivoTrueOrderByIdDesc(psicologoId, toDiaSemana(data.getDayOfWeek()))
                 .stream()
@@ -434,27 +333,21 @@ public class AgendaService {
         }
     }
 
-    private LocalDate definirFimGeracao(DefinirDisponibilidadeRequest request) {
-        LocalDate limite = request.gerarAte();
-        if (limite == null) {
-            limite = request.validoAte() == null
-                    ? request.validoAPartirDe().plusDays(DIAS_GERACAO_PADRAO)
-                    : request.validoAte();
+    private boolean sobrepoeExcecao(LocalTime inicio, LocalTime fim, ExcecaoDisponibilidade excecao) {
+        if (excecao.getHoraInicio() == null || excecao.getHoraFim() == null) {
+            return true;
         }
 
-        if (request.validoAte() != null && limite.isAfter(request.validoAte())) {
-            limite = request.validoAte();
-        }
-
-        if (limite.isBefore(request.validoAPartirDe())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Data limite de geracao deve respeitar a vigencia");
-        }
-
-        return limite;
+        return inicio.isBefore(excecao.getHoraFim()) && fim.isAfter(excecao.getHoraInicio());
     }
 
-    private LocalDate maiorData(LocalDate primeira, LocalDate segunda) {
-        return primeira.isAfter(segunda) ? primeira : segunda;
+    private boolean sobrepoeIntervalo(
+            LocalDateTime inicioA,
+            LocalDateTime fimA,
+            LocalDateTime inicioB,
+            LocalDateTime fimB
+    ) {
+        return inicioA.isBefore(fimB) && fimA.isAfter(inicioB);
     }
 
     private DiaSemana toDiaSemana(DayOfWeek dayOfWeek) {

@@ -2,7 +2,6 @@ package com.psihub.api.modules.psicologos.entity;
 
 import com.psihub.api.modules.agenda.entity.ExcecaoDisponibilidade;
 import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
 import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.vinculos.entity.VinculoPsicologoPaciente;
@@ -64,9 +63,6 @@ public class Psicologo extends AuditableEntity {
 
     @OneToMany(mappedBy = "psicologo")
     private List<ExcecaoDisponibilidade> excecoesDisponibilidade = new ArrayList<>();
-
-    @OneToMany(mappedBy = "psicologo")
-    private List<SlotConsulta> slotsConsulta = new ArrayList<>();
 
     @OneToMany(mappedBy = "psicologo")
     private List<Consulta> consultas = new ArrayList<>();
@@ -153,14 +149,6 @@ public class Psicologo extends AuditableEntity {
 
     public void setExcecoesDisponibilidade(List<ExcecaoDisponibilidade> excecoesDisponibilidade) {
         this.excecoesDisponibilidade = excecoesDisponibilidade;
-    }
-
-    public List<SlotConsulta> getSlotsConsulta() {
-        return slotsConsulta;
-    }
-
-    public void setSlotsConsulta(List<SlotConsulta> slotsConsulta) {
-        this.slotsConsulta = slotsConsulta;
     }
 
     public List<Consulta> getConsultas() {

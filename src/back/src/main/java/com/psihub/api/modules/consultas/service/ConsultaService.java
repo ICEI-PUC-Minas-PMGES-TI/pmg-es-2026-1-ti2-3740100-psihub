@@ -1,7 +1,7 @@
 package com.psihub.api.modules.consultas.service;
 
-import com.psihub.api.modules.agenda.entity.SlotConsulta;
-import com.psihub.api.modules.agenda.service.SlotConsultaService;
+import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
+import com.psihub.api.modules.agenda.service.AgendaService;
 import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.auth.service.AuthService;
 import com.psihub.api.modules.consultas.dto.AgendarConsultaRequest;
@@ -18,7 +18,6 @@ import com.psihub.api.modules.psicologos.service.PsicologoService;
 import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
-import com.psihub.api.shared.enums.StatusSlotConsulta;
 import com.psihub.api.shared.enums.TipoAtendimento;
 import com.psihub.api.shared.enums.TipoUsuario;
 import com.psihub.api.shared.exception.ApiException;
@@ -50,8 +49,8 @@ public class ConsultaService {
     private final ConsultaRepository consultaRepository;
     private final PacienteService pacienteService;
     private final PsicologoService psicologoService;
+    private final AgendaService agendaService;
     private final AuthService authService;
-    private final SlotConsultaService slotConsultaService;
     private final ApiResponseMapper mapper;
     private final NotificacaoService notificacaoService;
     private final VinculoService vinculoService;
@@ -60,8 +59,8 @@ public class ConsultaService {
             ConsultaRepository consultaRepository,
             PacienteService pacienteService,
             PsicologoService psicologoService,
+            AgendaService agendaService,
             AuthService authService,
-            SlotConsultaService slotConsultaService,
             ApiResponseMapper mapper,
             NotificacaoService notificacaoService,
             VinculoService vinculoService
@@ -69,8 +68,8 @@ public class ConsultaService {
         this.consultaRepository = consultaRepository;
         this.pacienteService = pacienteService;
         this.psicologoService = psicologoService;
+        this.agendaService = agendaService;
         this.authService = authService;
-        this.slotConsultaService = slotConsultaService;
         this.mapper = mapper;
         this.notificacaoService = notificacaoService;
         this.vinculoService = vinculoService;
@@ -81,22 +80,24 @@ public class ConsultaService {
         Paciente paciente = pacienteService.buscarPorId(pacienteId);
         Psicologo psicologo = psicologoService.buscarPorId(Objects.requireNonNull(request.psicologoId()));
         Usuario agendadoPor = authService.buscarUsuarioPorId(pacienteId);
-        SlotConsulta slot = slotConsultaService.buscarParaReserva(Objects.requireNonNull(request.slotConsultaId()));
+        LocalDateTime inicioEm = Objects.requireNonNull(request.inicioEm());
 
         validarPsicologoAtivo(psicologo);
-        validarSlotDisponivel(slot, psicologo.getId());
+        IntervaloConsulta intervalo = resolverIntervaloDisponivel(psicologo.getId(), inicioEm, request.fimEm());
+        validarHorarioNoPassado(intervalo.inicioEm());
+        validarSemConflitoComLock(psicologo.getId(), intervalo.inicioEm(), intervalo.fimEm());
         vinculoService.garantirSolicitado(paciente.getId(), psicologo.getId());
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);
         consulta.setPsicologo(psicologo);
-        consulta.setSlotConsulta(slot);
+        consulta.setInicioEm(intervalo.inicioEm());
+        consulta.setFimEm(intervalo.fimEm());
         consulta.setAgendadoPorUsuario(agendadoPor);
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setObservacoes(sanitizeOptional(request.observacoes()));
 
-        slot.setStatus(StatusSlotConsulta.RESERVADO);
         return mapper.toResponse(consultaRepository.save(consulta));
     }
 
@@ -105,22 +106,24 @@ public class ConsultaService {
         Psicologo psicologo = psicologoService.buscarPorId(psicologoId);
         Paciente paciente = pacienteService.buscarPorId(Objects.requireNonNull(request.pacienteId()));
         Usuario agendadoPor = authService.buscarUsuarioPorId(psicologoId);
-        SlotConsulta slot = slotConsultaService.buscarParaReserva(Objects.requireNonNull(request.slotConsultaId()));
+        LocalDateTime inicioEm = Objects.requireNonNull(request.inicioEm());
 
         validarPsicologoAtivo(psicologo);
-        validarSlotDisponivel(slot, psicologoId);
+        IntervaloConsulta intervalo = resolverIntervaloDisponivel(psicologoId, inicioEm, request.fimEm());
+        validarHorarioNoPassado(intervalo.inicioEm());
+        validarSemConflitoComLock(psicologoId, intervalo.inicioEm(), intervalo.fimEm());
         vinculoService.garantirAceito(paciente.getId(), psicologoId);
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);
         consulta.setPsicologo(psicologo);
-        consulta.setSlotConsulta(slot);
+        consulta.setInicioEm(intervalo.inicioEm());
+        consulta.setFimEm(intervalo.fimEm());
         consulta.setAgendadoPorUsuario(agendadoPor);
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setObservacoes(sanitizeOptional(request.observacoes()));
 
-        slot.setStatus(StatusSlotConsulta.RESERVADO);
         return mapper.toResponse(consultaRepository.save(consulta));
     }
 
@@ -221,7 +224,6 @@ public class ConsultaService {
         consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         consulta.setMotivoCancelamento(request == null ? null : request.motivoCancelamento());
-        consulta.getSlotConsulta().setStatus(StatusSlotConsulta.DISPONIVEL);
 
         return mapper.toResponse(consulta);
     }
@@ -247,7 +249,6 @@ public class ConsultaService {
         consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         consulta.setMotivoCancelamento(request == null ? null : sanitizeOptional(request.motivoCancelamento()));
-        consulta.getSlotConsulta().setStatus(StatusSlotConsulta.DISPONIVEL);
 
         if (tipoUsuario == TipoUsuario.PACIENTE) {
             notificacaoService.notificarCancelamentoParaPsicologo(consulta);
@@ -270,30 +271,49 @@ public class ConsultaService {
         }
     }
 
-    private void validarSlotDisponivel(SlotConsulta slot, Long psicologoId) {
-        if (!slot.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Horario nao pertence ao psicologo informado");
-        }
-
-        if (slot.getStatus() != StatusSlotConsulta.DISPONIVEL) {
-            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento");
-        }
-
-        if (slot.getInicioEm().isBefore(LocalDateTime.now())) {
+    private void validarHorarioNoPassado(LocalDateTime inicioEm) {
+        if (inicioEm.isBefore(LocalDateTime.now())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido agendar consulta em horario passado");
         }
+    }
 
-        if (consultaRepository.existsBlockingOverlap(psicologoId, slot.getInicioEm(), slot.getFimEm(), NON_CONFLICTING_STATUSES)) {
-            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento");
+    private IntervaloConsulta resolverIntervaloDisponivel(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEmInformado) {
+        List<HorarioDisponivelDTO> disponibilidade = agendaService.listarDisponibilidade(
+                psicologoId,
+                inicioEm.toLocalDate(),
+                inicioEm.toLocalDate()
+        );
+
+        HorarioDisponivelDTO horario = disponibilidade.stream()
+                .filter(item -> item.inicio().equals(inicioEm))
+                .findFirst()
+                .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento"));
+
+        LocalDateTime fimEmCalculado = horario.fim();
+        if (fimEmInformado != null && !fimEmInformado.equals(fimEmCalculado)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Horario de fim invalido para o inicio informado");
         }
 
-        slotConsultaService.validarSemConflitoComPausa(psicologoId, slot.getInicioEm().toLocalDate(), slot.getInicioEm().toLocalTime(), slot.getFimEm().toLocalTime());
+        return new IntervaloConsulta(inicioEm, fimEmCalculado);
+    }
+
+    private void validarSemConflitoComLock(Long psicologoId, LocalDateTime inicioEm, LocalDateTime fimEm) {
+        List<Consulta> conflitos = consultaRepository.findBlockingConsultasForUpdate(
+                psicologoId,
+                inicioEm,
+                fimEm,
+                NON_CONFLICTING_STATUSES
+        );
+
+        if (!conflitos.isEmpty()) {
+            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento");
+        }
     }
 
     @Transactional(readOnly = true)
     public Optional<Consulta> buscarConsultaAnteriorConcluida(Long pacienteId, Long psicologoId, LocalDateTime antesDe) {
         return consultaRepository
-                .findFirstByPacienteIdAndPsicologoIdAndSlotConsultaInicioEmBeforeAndStatusOrderBySlotConsultaInicioEmDesc(
+            .findFirstByPacienteIdAndPsicologoIdAndInicioEmBeforeAndStatusOrderByInicioEmDesc(
                         pacienteId, psicologoId, antesDe, StatusConsulta.CONCLUIDA);
     }
 
@@ -332,5 +352,8 @@ public class ConsultaService {
         }
         String normalized = value.trim().replaceAll("\\s+", " ");
         return normalized.isBlank() ? null : normalized;
+    }
+
+    private record IntervaloConsulta(LocalDateTime inicioEm, LocalDateTime fimEm) {
     }
 }

@@ -1,6 +1,5 @@
 package com.psihub.api.modules.agenda.entity;
 
-import com.psihub.api.modules.agenda.entity.TipoExcecaoDisponibilidade;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
 import com.psihub.api.shared.entity.BaseEntity;
 import jakarta.persistence.Column;

@@ -1,7 +1,6 @@
 package com.psihub.api.modules.sessoes.entity;
 
 import com.psihub.api.modules.consultas.entity.Consulta;
-import com.psihub.api.modules.sessoes.entity.NivelEngajamento;
 import com.psihub.api.shared.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

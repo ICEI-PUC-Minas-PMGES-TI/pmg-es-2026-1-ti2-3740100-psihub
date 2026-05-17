@@ -1,7 +1,6 @@
 package com.psihub.api.modules.consultas.dto;
 
 import com.psihub.api.shared.enums.StatusConsulta;
-import com.psihub.api.shared.enums.StatusSlotConsulta;
 import com.psihub.api.shared.enums.TipoAtendimento;
 import java.time.LocalDateTime;
 
@@ -13,10 +12,8 @@ public record ConsultaResponse(
         String pacienteTelefone,
         Long psicologoId,
         String psicologoNome,
-        Long slotConsultaId,
         LocalDateTime inicioEm,
         LocalDateTime fimEm,
-        StatusSlotConsulta statusSlot,
         TipoAtendimento tipoAtendimento,
         StatusConsulta status,
         String observacoes,

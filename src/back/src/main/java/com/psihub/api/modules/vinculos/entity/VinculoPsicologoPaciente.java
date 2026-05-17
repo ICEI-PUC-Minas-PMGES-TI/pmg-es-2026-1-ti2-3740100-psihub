@@ -2,7 +2,6 @@ package com.psihub.api.modules.vinculos.entity;
 
 import com.psihub.api.modules.pacientes.entity.Paciente;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
-import com.psihub.api.modules.vinculos.entity.StatusVinculo;
 import com.psihub.api.shared.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
