@@ -32,7 +32,6 @@ export function PsychologistAgendaPage({ onToast }) {
         loadingAvailability,
         loadingSlots,
         loadingConsultations,
-        weekStart,
         setWeekStart,
         availabilityModal,
         setAvailabilityModal,

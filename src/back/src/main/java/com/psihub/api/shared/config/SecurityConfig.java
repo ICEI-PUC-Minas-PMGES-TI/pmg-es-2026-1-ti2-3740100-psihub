@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/pacientes/me/**").hasRole("PACIENTE")
                         .requestMatchers("/api/psicologos/me/**").hasRole("PSICOLOGO")
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/disponiveis").hasRole("PACIENTE")
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots-publicos").hasRole("PACIENTE")

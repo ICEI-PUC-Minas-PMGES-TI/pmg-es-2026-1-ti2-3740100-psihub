@@ -244,6 +244,7 @@ function consultationBadgeClass(status) {
 /* ─── PsychologistHome ──────────────────────────────────────────── */
 
 function PsychologistHome({ onNavigate }) {
+    const showAdminShortcut = false;
     const [consultations, setConsultations] = useState([]);
     const [loadingConsultations, setLoadingC] = useState(true);
 
@@ -510,10 +511,10 @@ function PsychologistHome({ onNavigate }) {
                         </div>
 
                         {[
-                            { label: 'Editar perfil profissional', view: 'perfil', icon: <Pencil size={15} /> },
+                            { label: 'Editar perfil profissional', view: 'psychologist-profile', icon: <Pencil size={15} /> },
                             { label: 'Gerenciar agenda', view: 'agenda', icon: <CalendarDays size={15} /> },
-                            { label: 'Gerenciar pacientes', view: 'pacientes', icon: <Users size={15} /> },
-                            { label: 'Visualizar relatórios', view: 'relatorios', icon: <BarChart2 size={15} /> },
+                            { label: 'Gerenciar pacientes', view: 'patients', icon: <Users size={15} /> },
+                            { label: 'Visualizar relatorios', view: 'reports', icon: <BarChart2 size={15} /> },
                         ].map((s) => (
                             <button key={s.view} className="psihome__shortcut" onClick={() => onNavigate?.(s.view)}>
                                 <span className="psihome__shortcut-left">
@@ -524,13 +525,13 @@ function PsychologistHome({ onNavigate }) {
                             </button>
                         ))}
 
-                        <button className="psihome__shortcut" onClick={() => onNavigate?.('psicologos')}>
+                        {showAdminShortcut && <button className="psihome__shortcut" type="button" onClick={() => onNavigate?.('admin-psychologists')}>
                             <span className="psihome__shortcut-left">
                                 <ShieldCheck size={15} />
                                 Gerenciar psicólogos
                             </span>
                             <span className="psihome__admin-badge">Apenas admin</span>
-                        </button>
+                        </button>}
                     </div>
 
                 </section>

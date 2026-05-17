@@ -12,5 +12,7 @@ public interface RegistroEmocionalRepository extends JpaRepository<RegistroEmoci
             LocalDateTime inicio,
             LocalDateTime fim
     );
+
+    List<RegistroEmocional> findByPacienteIdOrderByRegistradoEmDesc(Long pacienteId);
 }
 

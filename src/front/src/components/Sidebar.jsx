@@ -1,15 +1,22 @@
-import { CalendarCheck, CalendarDays, LogOut, ShieldCheck, UserRoundCheck } from 'lucide-react';
+import { BarChart2, CalendarCheck, CalendarDays, ClipboardList, HeartPulse, LogOut, ShieldCheck, User, UserRoundCheck, Users } from 'lucide-react';
 
 const icons = {
     agenda: CalendarDays,
+    dashboard: ClipboardList,
     schedule: UserRoundCheck,
     appointments: CalendarCheck,
+    patients: Users,
+    reports: BarChart2,
+    emotions: HeartPulse,
+    'patient-profile': User,
+    'psychologist-profile': User,
+    'admin-psychologists': ShieldCheck,
 };
 
 export function Sidebar({ collapsed, role, user, menuItems, activeView, onNavigate, onLogout }) {
-    const roleLabel = role === 'psicologo' ? 'Gestão do Psicólogo' : 'Área do Paciente';
+    const roleLabel = role === 'admin' ? 'Administracao' : role === 'psicologo' ? 'Gestao do Psicologo' : 'Area do Paciente';
     const initials = getInitials(user?.nome);
-    const profileLine = user?.crp ? `${user.cargo} · ${user.crp}` : user?.cargo;
+    const profileLine = user?.crp ? `${user.cargo} - ${user.crp}` : user?.cargo;
 
     return (
         <aside className={collapsed ? 'sidebar sidebar--collapsed' : 'sidebar'} aria-label="Menu principal">
@@ -47,9 +54,9 @@ export function Sidebar({ collapsed, role, user, menuItems, activeView, onNaviga
             </nav>
 
             {role === 'admin' && !collapsed && (
-                <section className="sidebar__admin" aria-label="Administração">
+                <section className="sidebar__admin" aria-label="Administracao">
                     <span>Acesso exclusivo do administrador</span>
-                    <button className="sidebar__admin-item" type="button">
+                    <button className="sidebar__admin-item" type="button" onClick={() => onNavigate('admin-psychologists')}>
                         <ShieldCheck size={18} />
                         <span>Gerenciar acessos</span>
                     </button>

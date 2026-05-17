@@ -1,8 +1,11 @@
 package com.psihub.api.modules.pacientes.service;
 
 import com.psihub.api.modules.auth.entity.Usuario;
+import com.psihub.api.modules.pacientes.dto.PacientePerfilRequest;
+import com.psihub.api.modules.pacientes.dto.PacientePerfilResponse;
 import com.psihub.api.modules.pacientes.entity.Paciente;
 import com.psihub.api.modules.pacientes.repository.PacienteRepository;
+import com.psihub.api.modules.vinculos.entity.StatusVinculo;
 import com.psihub.api.shared.exception.ApiException;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,15 +30,59 @@ public class PacienteService {
     }
 
     @Transactional
-    public void criarPerfilInicial(Usuario usuario) {
+    public void criarPerfilInicial(Usuario usuario, LocalDate dataNascimento) {
         Paciente paciente = new Paciente();
         paciente.setUsuario(usuario);
-        paciente.setDataNascimento(LocalDate.of(1900, 1, 1));
+        paciente.setDataNascimento(dataNascimento);
         pacienteRepository.save(paciente);
     }
 
     @Transactional(readOnly = true)
+    public PacientePerfilResponse obterPerfil(Long pacienteId) {
+        return toPerfilResponse(buscarPorId(pacienteId));
+    }
+
+    @Transactional
+    public PacientePerfilResponse atualizarPerfil(Long pacienteId, PacientePerfilRequest request) {
+        Paciente paciente = buscarPorId(pacienteId);
+        Usuario usuario = paciente.getUsuario();
+
+        String nome = sanitizeOptional(request.nome());
+        if (nome != null) {
+            usuario.setNome(nome);
+        }
+        usuario.setTelefone(sanitizeOptional(request.telefone()));
+        usuario.setFotoUrl(sanitizeOptional(request.fotoPerfilUrl()));
+        if (request.dataNascimento() != null) {
+            paciente.setDataNascimento(request.dataNascimento());
+        }
+        paciente.setObservacoesIniciais(sanitizeOptional(request.observacoesIniciais()));
+
+        return toPerfilResponse(paciente);
+    }
+
+    @Transactional(readOnly = true)
     public List<Paciente> buscarPorPsicologoId(Long psicologoId, String nome) {
-        return pacienteRepository.findByPsicologoId(psicologoId, nome);
+        return pacienteRepository.findByPsicologoId(psicologoId, StatusVinculo.ACEITO, nome);
+    }
+
+    private PacientePerfilResponse toPerfilResponse(Paciente paciente) {
+        return new PacientePerfilResponse(
+                paciente.getId(),
+                paciente.getUsuario().getNome(),
+                paciente.getUsuario().getEmail(),
+                paciente.getUsuario().getTelefone(),
+                paciente.getUsuario().getFotoUrl(),
+                paciente.getDataNascimento(),
+                paciente.getObservacoesIniciais()
+        );
+    }
+
+    private String sanitizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim().replaceAll("\\s+", " ");
+        return normalized.isBlank() ? null : normalized;
     }
 }

@@ -14,6 +14,9 @@ import com.psihub.api.modules.psicologos.entity.EspecialidadePsicologo;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
 import com.psihub.api.modules.psicologos.repository.EspecialidadePsicologoRepository;
 import com.psihub.api.modules.psicologos.repository.PsicologoRepository;
+import com.psihub.api.modules.vinculos.entity.StatusVinculo;
+import com.psihub.api.modules.vinculos.entity.VinculoPsicologoPaciente;
+import com.psihub.api.modules.vinculos.repository.VinculoPsicologoPacienteRepository;
 import com.psihub.api.shared.enums.DiaSemana;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
@@ -51,6 +54,7 @@ public class MockDataSeeder implements ApplicationRunner {
     private final RegraDisponibilidadeRepository regraDisponibilidadeRepository;
     private final SlotConsultaRepository slotConsultaRepository;
     private final ConsultaRepository consultaRepository;
+    private final VinculoPsicologoPacienteRepository vinculoRepository;
 
     public MockDataSeeder(
             Environment environment,
@@ -61,7 +65,8 @@ public class MockDataSeeder implements ApplicationRunner {
             EspecialidadePsicologoRepository especialidadePsicologoRepository,
             RegraDisponibilidadeRepository regraDisponibilidadeRepository,
             SlotConsultaRepository slotConsultaRepository,
-            ConsultaRepository consultaRepository
+            ConsultaRepository consultaRepository,
+            VinculoPsicologoPacienteRepository vinculoRepository
     ) {
         this.environment = environment;
         this.passwordEncoder = passwordEncoder;
@@ -72,6 +77,7 @@ public class MockDataSeeder implements ApplicationRunner {
         this.regraDisponibilidadeRepository = regraDisponibilidadeRepository;
         this.slotConsultaRepository = slotConsultaRepository;
         this.consultaRepository = consultaRepository;
+        this.vinculoRepository = vinculoRepository;
     }
 
     @Override
@@ -96,6 +102,8 @@ public class MockDataSeeder implements ApplicationRunner {
     }
 
     private void seed() {
+        createUser("Administrador PsiHub", "admin@psihub.com", TipoUsuario.ADMIN);
+
         Psicologo ana = createPsychologist(
                 "Dra. Ana Silva",
                 "ana@psihub.com",
@@ -114,6 +122,11 @@ public class MockDataSeeder implements ApplicationRunner {
         Paciente joao = createPatient("João da Silva", "joao@email.com", LocalDate.of(1991, 5, 14));
         Paciente maria = createPatient("Maria Eduarda", "maria@email.com", LocalDate.of(1997, 9, 3));
         Paciente fernanda = createPatient("Fernanda Lima", "fernanda@email.com", LocalDate.of(1988, 2, 21));
+
+        createAcceptedLink(joao, ana);
+        createAcceptedLink(maria, ana);
+        createAcceptedLink(fernanda, carlos);
+        createAcceptedLink(joao, carlos);
 
         List<RegraDisponibilidade> anaRules = createAvailability(
                 ana,
@@ -182,6 +195,16 @@ public class MockDataSeeder implements ApplicationRunner {
         user.setTipoUsuario(userType);
         user.setAtivo(true);
         return usuarioRepository.save(user);
+    }
+
+    private void createAcceptedLink(Paciente patient, Psicologo psychologist) {
+        VinculoPsicologoPaciente link = new VinculoPsicologoPaciente();
+        link.setPaciente(patient);
+        link.setPsicologo(psychologist);
+        link.setStatus(StatusVinculo.ACEITO);
+        link.setSolicitadoEm(LocalDateTime.now().minusDays(10));
+        link.setRespondidoEm(LocalDateTime.now().minusDays(9));
+        vinculoRepository.save(link);
     }
 
     private List<RegraDisponibilidade> createAvailability(

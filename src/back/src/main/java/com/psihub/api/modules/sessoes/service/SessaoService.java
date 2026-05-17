@@ -14,6 +14,7 @@ import com.psihub.api.modules.sessoes.dto.ResumoEmocionalResponse;
 import com.psihub.api.modules.sessoes.dto.SalvarRascunhoSessaoRequest;
 import com.psihub.api.modules.sessoes.entity.ProntuarioSessao;
 import com.psihub.api.modules.sessoes.repository.ProntuarioSessaoRepository;
+import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.ApiResponseMapper;
@@ -34,19 +35,22 @@ public class SessaoService {
     private final RegistroEmocionalService registroEmocionalService;
     private final ApiResponseMapper mapper;
     private final JsonListMapper jsonListMapper;
+    private final VinculoService vinculoService;
 
     public SessaoService(
             ConsultaService consultaService,
             ProntuarioSessaoRepository prontuarioSessaoRepository,
             RegistroEmocionalService registroEmocionalService,
             ApiResponseMapper mapper,
-            JsonListMapper jsonListMapper
+            JsonListMapper jsonListMapper,
+            VinculoService vinculoService
     ) {
         this.consultaService = consultaService;
         this.prontuarioSessaoRepository = prontuarioSessaoRepository;
         this.registroEmocionalService = registroEmocionalService;
         this.mapper = mapper;
         this.jsonListMapper = jsonListMapper;
+        this.vinculoService = vinculoService;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +63,7 @@ public class SessaoService {
     public PreparacaoSessaoResponse prepararComoPsicologo(Long consultaId, Long psicologoId) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         validarPsicologoDaConsulta(consulta, psicologoId);
+        validarVinculoClinico(consulta, psicologoId);
         return montarPreparacao(consulta, consultaId);
     }
 
@@ -81,6 +86,7 @@ public class SessaoService {
     public ProntuarioSessaoResponse iniciarComoPsicologo(Long consultaId, Long psicologoId, IniciarSessaoRequest request) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         validarPsicologoDaConsulta(consulta, psicologoId);
+        validarVinculoClinico(consulta, psicologoId);
         return iniciarConsulta(consulta, request);
     }
 
@@ -115,6 +121,7 @@ public class SessaoService {
     ) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         validarPsicologoDaConsulta(consulta, psicologoId);
+        validarVinculoClinico(consulta, psicologoId);
         return salvarRascunhoConsulta(consulta, request);
     }
 
@@ -140,6 +147,7 @@ public class SessaoService {
     public ProntuarioSessaoResponse encerrarComoPsicologo(Long consultaId, Long psicologoId, EncerrarSessaoRequest request) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         validarPsicologoDaConsulta(consulta, psicologoId);
+        validarVinculoClinico(consulta, psicologoId);
         return encerrarConsulta(consulta, request);
     }
 
@@ -187,6 +195,7 @@ public class SessaoService {
             LocalDate fim,
             String tema
     ) {
+        vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
         LocalDate dataInicio = inicio == null ? LocalDate.now().minusDays(30) : inicio;
         LocalDate dataFim = fim == null ? LocalDate.now().plusDays(1) : fim;
 
@@ -219,6 +228,7 @@ public class SessaoService {
         ProntuarioSessao prontuario = prontuarioSessaoRepository.findDetailedById(prontuarioId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuario nao encontrado"));
         validarPsicologoDaConsulta(prontuario.getConsulta(), psicologoId);
+        validarVinculoClinico(prontuario.getConsulta(), psicologoId);
 
         return mapper.toResponse(prontuario);
     }
@@ -312,6 +322,10 @@ public class SessaoService {
         }
     }
 
+    private void validarVinculoClinico(Consulta consulta, Long psicologoId) {
+        vinculoService.exigirVinculoAceito(consulta.getPaciente().getId(), psicologoId);
+    }
+
     private String normalizarTema(String tema) {
         if (tema == null || tema.isBlank()) {
             return null;
@@ -319,4 +333,3 @@ public class SessaoService {
         return tema.trim();
     }
 }
-

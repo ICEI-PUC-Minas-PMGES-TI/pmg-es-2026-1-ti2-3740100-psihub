@@ -15,6 +15,7 @@ import com.psihub.api.modules.pacientes.entity.Paciente;
 import com.psihub.api.modules.pacientes.service.PacienteService;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
 import com.psihub.api.modules.psicologos.service.PsicologoService;
+import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.enums.StatusSlotConsulta;
@@ -53,6 +54,7 @@ public class ConsultaService {
     private final SlotConsultaService slotConsultaService;
     private final ApiResponseMapper mapper;
     private final NotificacaoService notificacaoService;
+    private final VinculoService vinculoService;
 
     public ConsultaService(
             ConsultaRepository consultaRepository,
@@ -61,7 +63,8 @@ public class ConsultaService {
             AuthService authService,
             SlotConsultaService slotConsultaService,
             ApiResponseMapper mapper,
-            NotificacaoService notificacaoService
+            NotificacaoService notificacaoService,
+            VinculoService vinculoService
     ) {
         this.consultaRepository = consultaRepository;
         this.pacienteService = pacienteService;
@@ -70,6 +73,7 @@ public class ConsultaService {
         this.slotConsultaService = slotConsultaService;
         this.mapper = mapper;
         this.notificacaoService = notificacaoService;
+        this.vinculoService = vinculoService;
     }
 
     @Transactional
@@ -81,6 +85,7 @@ public class ConsultaService {
 
         validarPsicologoAtivo(psicologo);
         validarSlotDisponivel(slot, psicologo.getId());
+        vinculoService.garantirSolicitado(paciente.getId(), psicologo.getId());
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);
@@ -104,6 +109,7 @@ public class ConsultaService {
 
         validarPsicologoAtivo(psicologo);
         validarSlotDisponivel(slot, psicologoId);
+        vinculoService.garantirAceito(paciente.getId(), psicologoId);
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);
@@ -328,4 +334,3 @@ public class ConsultaService {
         return normalized.isBlank() ? null : normalized;
     }
 }
-

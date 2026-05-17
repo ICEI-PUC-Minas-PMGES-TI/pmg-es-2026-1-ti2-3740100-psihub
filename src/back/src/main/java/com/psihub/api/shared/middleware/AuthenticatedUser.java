@@ -15,5 +15,9 @@ public record AuthenticatedUser(
     public boolean isPsicologo() {
         return tipo == TipoUsuario.PSICOLOGO;
     }
+
+    public boolean isAdmin() {
+        return tipo == TipoUsuario.ADMIN;
+    }
 }
 

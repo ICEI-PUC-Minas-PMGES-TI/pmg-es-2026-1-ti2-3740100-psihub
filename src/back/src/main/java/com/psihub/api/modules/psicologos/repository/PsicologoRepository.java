@@ -18,5 +18,15 @@ public interface PsicologoRepository extends JpaRepository<Psicologo, Long> {
               and usuario.ativo = true
             """)
     List<Psicologo> findDisponiveis(@Param("status") StatusAcesso status);
+
+    @Query("""
+            select distinct psicologo
+            from Psicologo psicologo
+            join fetch psicologo.usuario usuario
+            left join fetch psicologo.especialidades especialidade
+            where (:status is null or psicologo.statusAcesso = :status)
+            order by usuario.nome asc
+            """)
+    List<Psicologo> findParaAdmin(@Param("status") StatusAcesso status);
 }
 

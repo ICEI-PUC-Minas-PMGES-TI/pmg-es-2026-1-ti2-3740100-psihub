@@ -721,6 +721,65 @@ textarea:focus {
   width: fit-content;
 }
 
+.inline-alert {
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  font-weight: 700;
+}
+
+.inline-alert--error {
+  background: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+
+.state-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  margin: 14px 0;
+}
+
+.simple-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.simple-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--color-surface);
+}
+
+.simple-list__item > div:not(.row-actions) {
+  display: grid;
+  gap: 4px;
+}
+
+.simple-list__item span {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.simple-list__item .row-actions {
+  display: flex;
+}
+
 .primary-button:not(:disabled):hover {
   background: #6D28D9;
 }

@@ -1,6 +1,9 @@
 package com.psihub.api.modules.psicologos.service;
 
 import com.psihub.api.modules.auth.entity.Usuario;
+import com.psihub.api.modules.psicologos.dto.AdminPsicologoResponse;
+import com.psihub.api.modules.psicologos.dto.PerfilPsicologoRequest;
+import com.psihub.api.modules.psicologos.dto.PerfilPsicologoResponse;
 import com.psihub.api.modules.psicologos.dto.PsicologoDisponivelResponse;
 import com.psihub.api.modules.psicologos.entity.EspecialidadePsicologo;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
@@ -9,8 +12,11 @@ import com.psihub.api.modules.psicologos.repository.PsicologoRepository;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.exception.ApiException;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -45,6 +51,23 @@ public class PsicologoService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
     }
 
+    @Transactional(readOnly = true)
+    public Psicologo buscarAtivoPorId(Long id) {
+        Psicologo psicologo = buscarPorId(id);
+        validarStatusAtivo(psicologo);
+        return psicologo;
+    }
+
+    @Transactional(readOnly = true)
+    public StatusAcesso buscarStatusAcessoPorId(Long id) {
+        return buscarPorId(id).getStatusAcesso();
+    }
+
+    @Transactional(readOnly = true)
+    public PerfilPsicologoResponse obterPerfil(Long psicologoId) {
+        return toPerfilResponse(buscarPorId(psicologoId));
+    }
+
     @Transactional
     public void criarPerfilInicial(Usuario usuario) {
         Psicologo psicologo = new Psicologo();
@@ -52,13 +75,73 @@ public class PsicologoService {
         psicologo.setCrp("CADASTRO-" + usuario.getId());
         psicologo.setValorConsulta(BigDecimal.ZERO);
         psicologo.setBiografia("Perfil profissional em configuracao.");
-        psicologo.setStatusAcesso(StatusAcesso.ATIVO);
+        psicologo.setStatusAcesso(StatusAcesso.PENDENTE);
         Psicologo psicologoSalvo = psicologoRepository.save(psicologo);
 
         EspecialidadePsicologo especialidade = new EspecialidadePsicologo();
         especialidade.setPsicologo(psicologoSalvo);
         especialidade.setNome("Psicologia");
         especialidadePsicologoRepository.save(especialidade);
+    }
+
+    @Transactional
+    public PerfilPsicologoResponse atualizarPerfil(Long psicologoId, PerfilPsicologoRequest request) {
+        Psicologo psicologo = buscarPorId(psicologoId);
+        Usuario usuario = psicologo.getUsuario();
+
+        String nome = sanitizeOptional(request.nome());
+        if (nome != null) {
+            usuario.setNome(nome);
+        }
+        usuario.setTelefone(sanitizeOptional(request.telefone()));
+        usuario.setFotoUrl(sanitizeOptional(request.fotoPerfilUrl()));
+
+        String crp = sanitizeOptional(request.crp());
+        if (crp != null) {
+            psicologo.setCrp(crp);
+        }
+        if (request.valorConsulta() != null) {
+            psicologo.setValorConsulta(request.valorConsulta());
+        }
+        psicologo.setBiografia(sanitizeOptional(request.biografia()));
+
+        atualizarEspecialidades(psicologo, request.especialidades());
+        return toPerfilResponse(psicologo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminPsicologoResponse> listarParaAdmin(StatusAcesso status) {
+        return psicologoRepository.findParaAdmin(status)
+                .stream()
+                .map(this::toAdminResponse)
+                .toList();
+    }
+
+    @Transactional
+    public AdminPsicologoResponse aprovar(Long psicologoId) {
+        Psicologo psicologo = buscarPorId(psicologoId);
+        if (psicologo.getStatusAcesso() == StatusAcesso.ATIVO) {
+            return toAdminResponse(psicologo);
+        }
+        if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
+            throw new ApiException(HttpStatus.CONFLICT, "Psicologo revogado nao pode ser aprovado automaticamente");
+        }
+
+        psicologo.setStatusAcesso(StatusAcesso.ATIVO);
+        psicologo.setMotivoRevogacao(null);
+        return toAdminResponse(psicologo);
+    }
+
+    @Transactional
+    public AdminPsicologoResponse revogar(Long psicologoId, String motivo) {
+        Psicologo psicologo = buscarPorId(psicologoId);
+        if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
+            return toAdminResponse(psicologo);
+        }
+
+        psicologo.setStatusAcesso(StatusAcesso.REVOGADO);
+        psicologo.setMotivoRevogacao(sanitizeOptional(motivo));
+        return toAdminResponse(psicologo);
     }
 
     public String buscarCrpPorId(Long id) {
@@ -83,5 +166,91 @@ public class PsicologoService {
                 especialidades
         );
     }
-}
 
+    private PerfilPsicologoResponse toPerfilResponse(Psicologo psicologo) {
+        return new PerfilPsicologoResponse(
+                psicologo.getId(),
+                psicologo.getUsuario().getNome(),
+                psicologo.getUsuario().getEmail(),
+                psicologo.getUsuario().getTelefone(),
+                psicologo.getUsuario().getFotoUrl(),
+                psicologo.getCrp(),
+                psicologo.getValorConsulta(),
+                psicologo.getBiografia(),
+                especialidades(psicologo),
+                psicologo.getStatusAcesso()
+        );
+    }
+
+    private AdminPsicologoResponse toAdminResponse(Psicologo psicologo) {
+        return new AdminPsicologoResponse(
+                psicologo.getId(),
+                psicologo.getUsuario().getNome(),
+                psicologo.getUsuario().getEmail(),
+                psicologo.getCrp(),
+                psicologo.getValorConsulta(),
+                especialidades(psicologo),
+                psicologo.getStatusAcesso(),
+                psicologo.getMotivoRevogacao()
+        );
+    }
+
+    private List<String> especialidades(Psicologo psicologo) {
+        return psicologo.getEspecialidades()
+                .stream()
+                .map(EspecialidadePsicologo::getNome)
+                .sorted(Comparator.naturalOrder())
+                .toList();
+    }
+
+    private void validarStatusAtivo(Psicologo psicologo) {
+        if (psicologo.getStatusAcesso() != StatusAcesso.ATIVO) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
+        }
+    }
+
+    private void atualizarEspecialidades(Psicologo psicologo, List<String> especialidades) {
+        if (especialidades == null) {
+            return;
+        }
+
+        List<String> nomes = especialidades.stream()
+                .map(this::sanitizeOptional)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
+        Map<String, EspecialidadePsicologo> existentes = new LinkedHashMap<>();
+        for (EspecialidadePsicologo especialidade : especialidadePsicologoRepository.findAllByPsicologoIdIncludingInactive(psicologo.getId())) {
+            existentes.put(normalizarChave(especialidade.getNome()), especialidade);
+        }
+
+        for (EspecialidadePsicologo especialidade : existentes.values()) {
+            especialidade.setAtivo(false);
+        }
+
+        for (String nome : nomes) {
+            String chave = normalizarChave(nome);
+            EspecialidadePsicologo especialidade = existentes.get(chave);
+            if (especialidade == null) {
+                especialidade = new EspecialidadePsicologo();
+                especialidade.setPsicologo(psicologo);
+                especialidade.setNome(nome);
+            }
+            especialidade.setAtivo(true);
+            especialidadePsicologoRepository.save(especialidade);
+        }
+    }
+
+    private String normalizarChave(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String sanitizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim().replaceAll("\\s+", " ");
+        return normalized.isBlank() ? null : normalized;
+    }
+}
