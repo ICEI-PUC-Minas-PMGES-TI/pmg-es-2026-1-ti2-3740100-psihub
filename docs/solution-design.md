@@ -13,7 +13,7 @@ Adequação aos princípios da Lei Geral de Proteção de Dados (LGPD)
 
 As entidades foram relacionadas por meio de chaves primárias e estrangeiras, garantindo consistência e normalização dos dados.
 
-![Modelo relacional do PsiHub](images/modeloRelacional_v2.png "Modelo Relacional do PsiHub")
+![Modelo relacional do PsiHub](images/modeloRelacional_v3.png "Modelo Relacional do PsiHub")
 
 ### 4.2. Tecnologias
 
