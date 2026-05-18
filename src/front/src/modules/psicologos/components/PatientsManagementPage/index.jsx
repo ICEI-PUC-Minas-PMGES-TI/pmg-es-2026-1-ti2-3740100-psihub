@@ -3,7 +3,7 @@ import { Check, Loader2, Search, X } from 'lucide-react';
 import { clinicalApi } from '@/services/clinical.service';
 import { schedulingApi } from '@/services/scheduling.service';
 
-export function PatientsManagementPage({ onToast }) {
+export function PatientsManagementPage({ onToast, onSelectPatient }) {
     const [patients, setPatients] = useState([]);
     const [links, setLinks] = useState([]);
     const [search, setSearch] = useState('');
@@ -107,9 +107,14 @@ export function PatientsManagementPage({ onToast }) {
                     <div className="simple-list">
                         {patients.map((patient) => (
                             <article className="simple-list__item" key={patient.id}>
-                                <div>
-                                    <strong>{patient.nome}</strong>
-                                </div>
+                                <strong>{patient.nome}</strong>
+                                <button
+                                    className="secondary-button"
+                                    type="button"
+                                    onClick={() => onSelectPatient?.(patient.id)}
+                                >
+                                    Ver relatório
+                                </button>
                             </article>
                         ))}
                     </div>

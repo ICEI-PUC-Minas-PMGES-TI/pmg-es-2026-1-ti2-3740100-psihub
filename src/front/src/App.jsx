@@ -23,6 +23,7 @@ export default function App() {
         getInitialView(getStoredAuthSession()?.tipo)
     );
     const [toast, setToast] = useState(null);
+    const [preselectedPatient, setPreselectedPatient] = useState(null);
 
     const role = auth?.tipo;
 
@@ -106,11 +107,17 @@ export default function App() {
                         )}
 
                         {activeView === 'patients' && (
-                            <PatientsManagementPage onToast={setToast} />
+                            <PatientsManagementPage
+                                onToast={setToast}
+                                onSelectPatient={(id) => {
+                                    setPreselectedPatient(id);
+                                    setActiveView('reports');
+                                }}
+                            />
                         )}
 
                         {activeView === 'reports' && (
-                            <ReportsPage onToast={setToast} />
+                            <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />
                         )}
                     </>
                 ) : (

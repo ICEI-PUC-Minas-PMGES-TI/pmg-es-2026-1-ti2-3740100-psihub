@@ -4,9 +4,11 @@ import { clinicalApi } from '@/services/clinical.service';
 import { schedulingApi } from '@/services/scheduling.service';
 import { formatDateTime } from '@/shared/utils/date.utils';
 
-export function ReportsPage({ onToast }) {
+export function ReportsPage({ onToast, initialPatientId }) {
     const [patients, setPatients] = useState([]);
-    const [selectedPatient, setSelectedPatient] = useState('');
+    const [selectedPatient, setSelectedPatient] = useState(() =>
+        initialPatientId ? String(initialPatientId) : ''
+    );
     const [timeline, setTimeline] = useState([]);
     const [loadingPatients, setLoadingPatients] = useState(true);
     const [loadingTimeline, setLoadingTimeline] = useState(false);
@@ -17,7 +19,7 @@ export function ReportsPage({ onToast }) {
         schedulingApi.listMyPatients({ signal: controller.signal })
             .then((data) => {
                 setPatients(data || []);
-                setSelectedPatient(data?.[0]?.id ? String(data[0].id) : '');
+                setSelectedPatient((prev) => prev || (data?.[0]?.id ? String(data[0].id) : ''));
             })
             .catch((err) => {
                 if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar pacientes.');
