@@ -94,10 +94,10 @@ export function PatientsManagementPage({ onToast }) {
                 <div className="panel__header">
                     <h2>Pacientes vinculados</h2>
                 </div>
-                <form className="inline-form" onSubmit={reloadBySearch}>
-                    <label>
+                <form className="search-bar" onSubmit={reloadBySearch}>
+                    <label className="field">
                         Buscar por nome
-                        <input value={search} onChange={(event) => setSearch(event.target.value)} />
+                        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome do paciente" />
                     </label>
                     <button className="primary-button primary-button--fit" type="submit">
                         <Search size={16} /> Buscar
@@ -109,7 +109,6 @@ export function PatientsManagementPage({ onToast }) {
                             <article className="simple-list__item" key={patient.id}>
                                 <div>
                                     <strong>{patient.nome}</strong>
-                                    <span>ID clinico: {patient.id}</span>
                                 </div>
                             </article>
                         ))}

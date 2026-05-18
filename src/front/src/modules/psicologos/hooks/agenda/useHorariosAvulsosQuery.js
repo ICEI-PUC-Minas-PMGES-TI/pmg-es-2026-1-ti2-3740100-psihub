@@ -23,7 +23,7 @@ export function useHorariosAvulsosQuery({ onToast, refreshKey }) {
             fim: `${toIsoDate(addDays(today, MANUAL_SLOT_RANGE_DAYS))}T23:59:59`,
             signal: controller.signal,
         })
-            .then((data) => setManualSlots(data || []))
+            .then((data) => setManualSlots(Array.isArray(data) ? data : []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
                     onToast?.({ type: 'error', message: 'Nao foi possivel carregar os horarios avulsos.' });

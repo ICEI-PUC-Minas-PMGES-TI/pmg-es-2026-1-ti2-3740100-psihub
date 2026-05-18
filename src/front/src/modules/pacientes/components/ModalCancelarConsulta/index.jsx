@@ -10,12 +10,16 @@ export function ModalCancelarConsulta({
 }) {
     return (
         <div className="cancel-box">
-            <textarea
-                rows={2}
-                maxLength={300}
-                value={cancelReason}
-                onChange={(event) => onCancelReasonChange(event.target.value)}
-            />
+            <label className="cancel-box__label">
+                Motivo do cancelamento
+                <textarea
+                    rows={2}
+                    maxLength={300}
+                    placeholder="Descreva o motivo do cancelamento (opcional)"
+                    value={cancelReason}
+                    onChange={(event) => onCancelReasonChange(event.target.value)}
+                />
+            </label>
             <div className="inline-actions">
                 <button className="danger-button" type="button" disabled={submitting} onClick={() => onConfirmCancel(appointment)}>
                     <X size={16} />

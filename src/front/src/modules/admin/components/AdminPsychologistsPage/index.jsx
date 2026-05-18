@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import { clinicalApi } from '@/services/clinical.service';
 
+const accessStatusLabels = {
+    PENDENTE: 'Pendente',
+    ATIVO: 'Ativo',
+    REVOGADO: 'Revogado',
+};
+
 export function AdminPsychologistsPage({ onToast }) {
     const [status, setStatus] = useState('');
     const [items, setItems] = useState([]);
@@ -63,7 +69,7 @@ export function AdminPsychologistsPage({ onToast }) {
                             <article className="simple-list__item" key={item.id}>
                                 <div>
                                     <strong>{item.nome}</strong>
-                                    <span>{item.email} | {item.crp} | {item.statusAcesso}</span>
+                                    <span>{item.email} | {item.crp} | {accessStatusLabels[item.statusAcesso] ?? item.statusAcesso}</span>
                                 </div>
                                 <div className="row-actions">
                                     <button className="btn btn--primary" type="button" onClick={() => changeAccess(item.id, 'approve')} disabled={item.statusAcesso === 'ATIVO'}>

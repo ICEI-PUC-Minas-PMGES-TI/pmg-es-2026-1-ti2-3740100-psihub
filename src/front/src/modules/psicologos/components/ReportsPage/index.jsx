@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
 import { clinicalApi } from '@/services/clinical.service';
 import { schedulingApi } from '@/services/scheduling.service';
+import { formatDateTime } from '@/shared/utils/date.utils';
 
 export function ReportsPage({ onToast }) {
     const [patients, setPatients] = useState([]);
@@ -79,7 +80,7 @@ export function ReportsPage({ onToast }) {
                                     <strong>{formatDateTime(item.inicioEm)}</strong>
                                     <span>{(item.temasSessao || []).join(', ') || 'Sem temas registrados'}</span>
                                 </div>
-                                <span>Progresso: {item.nivelProgresso ?? '-'}</span>
+                                <span>Progresso: {item.nivelProgresso != null ? `${item.nivelProgresso}/10` : 'Não informado'}</span>
                             </article>
                         ))}
                     </div>
@@ -89,7 +90,4 @@ export function ReportsPage({ onToast }) {
     );
 }
 
-function formatDateTime(value) {
-    if (!value) return '-';
-    return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
-}
+

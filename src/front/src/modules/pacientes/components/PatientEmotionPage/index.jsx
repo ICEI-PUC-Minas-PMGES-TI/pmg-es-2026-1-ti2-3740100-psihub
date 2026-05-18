@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { clinicalApi } from '@/services/clinical.service';
+import { formatDateTime } from '@/shared/utils/date.utils';
+
+const HUMOR_OPTIONS = [
+    { value: 1, label: 'Muito ruim' },
+    { value: 2, label: 'Ruim' },
+    { value: 3, label: 'Neutro' },
+    { value: 4, label: 'Bom' },
+    { value: 5, label: 'Muito bom' },
+];
 
 const initialForm = {
     humorDia: 3,
@@ -83,10 +92,21 @@ export function PatientEmotionPage({ onToast }) {
                     <h2>{editingId ? 'Editar registro' : 'Novo registro'}</h2>
                 </div>
                 <form className="form-grid" onSubmit={handleSubmit}>
-                    <label className="form-group">
-                        Humor do dia
-                        <input type="number" min="1" max="5" value={form.humorDia} onChange={(event) => setForm((current) => ({ ...current, humorDia: event.target.value }))} required />
-                    </label>
+                    <div className="form-group">
+                        <span className="form-group__label">Humor do dia</span>
+                        <div className="humor-options">
+                            {HUMOR_OPTIONS.map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    className={Number(form.humorDia) === value ? 'humor-button humor-button--active' : 'humor-button'}
+                                    onClick={() => setForm((current) => ({ ...current, humorDia: value }))}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <label className="form-group">
                         Emocoes
                         <input value={form.emocoes} onChange={(event) => setForm((current) => ({ ...current, emocoes: event.target.value }))} placeholder="Separe por virgula" />
@@ -133,9 +153,4 @@ export function PatientEmotionPage({ onToast }) {
 function isEditable(value) {
     if (!value) return false;
     return Date.now() - new Date(value).getTime() <= 24 * 60 * 60 * 1000;
-}
-
-function formatDateTime(value) {
-    if (!value) return '-';
-    return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 }

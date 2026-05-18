@@ -46,7 +46,7 @@ export function useAgendaCalendar({ availabilityRules, consultations, manualSlot
     const weekBlockedSlots = useMemo(() => {
         const start = weekStart;
         const end = addDays(weekStart, 7);
-        return manualSlots
+        return (Array.isArray(manualSlots) ? manualSlots : [])
             .filter((slot) => slot.status === 'BLOQUEADO')
             .filter((slot) => {
                 const date = new Date(slot.inicioEm);
