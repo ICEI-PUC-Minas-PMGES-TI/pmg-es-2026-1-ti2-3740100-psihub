@@ -19,6 +19,7 @@ const PatientsManagementPage = lazy(() => import('@/pages/PatientsManagement').t
 const PsychologistAgendaPage = lazy(() => import('@/pages/PsychologistAgenda').then(m => ({ default: m.PsychologistAgendaPage })));
 const PsychologistDashboard = lazy(() => import('@/pages/PsychologistDashboard').then(m => ({ default: m.PsychologistDashboard })));
 const PsychologistProfilePage = lazy(() => import('@/pages/PsychologistProfile').then(m => ({ default: m.PsychologistProfilePage })));
+const PsychologistRegisterPage = lazy(() => import('@/pages/PsychologistRegister').then(m => ({ default: m.PsychologistRegisterPage })));
 const ReportsPage = lazy(() => import('@/pages/Reports').then(m => ({ default: m.ReportsPage })));
 
 const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
@@ -150,10 +151,8 @@ export default function App() {
                     <Route
                         path="/auth/cadastro/psicologo"
                         element={(
-                            <AuthRoute
+                            <PsychologistRegisterRoute
                                 auth={auth}
-                                initialMode="register"
-                                initialTipo="psicologo"
                                 onAuthenticated={handleAuthenticated}
                                 onToast={setToast}
                             />
@@ -262,6 +261,23 @@ export default function App() {
                 onClose={() => setToast(null)}
             />
         </>
+    );
+}
+
+function PsychologistRegisterRoute({ auth, onAuthenticated, onToast }) {
+    const navigate = useNavigate();
+    const session = auth || getStoredAuthSession();
+
+    if (session?.token) {
+        return <Navigate to={getDefaultRoute(session.tipo)} replace />;
+    }
+
+    return (
+        <PsychologistRegisterPage
+            onAuthenticated={onAuthenticated}
+            onToast={onToast}
+            onBack={() => navigate('/')}
+        />
     );
 }
 

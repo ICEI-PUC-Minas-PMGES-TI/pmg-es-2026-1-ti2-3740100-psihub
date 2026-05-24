@@ -101,13 +101,13 @@ export function LandingPage() {
                         <div className="flex flex-wrap gap-4 mt-10">
                             <Link
                                 to="/auth/cadastro/paciente"
-                                className="px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-xl shadow-violet-500/30 text-white"
+                                className="inline-flex items-center px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-xl shadow-violet-500/30 text-white"
                             >
                                 Encontrar psicólogo
                             </Link>
                             <Link
                                 to="/auth/cadastro/psicologo"
-                                className="px-7 py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
+                                className="inline-flex items-center px-7 py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
                             >
                                 Criar perfil profissional
                             </Link>
@@ -189,7 +189,7 @@ export function LandingPage() {
                             </div>
                             <Link
                                 to="/auth/cadastro/paciente"
-                                className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg text-white"
+                                className="block w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg text-white text-center"
                             >
                                 Encontrar psicólogo
                             </Link>
@@ -221,7 +221,7 @@ export function LandingPage() {
                             </div>
                             <Link
                                 to="/auth/cadastro/psicologo"
-                                className="w-full py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
+                                className="block w-full py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg text-center"
                             >
                                 Criar perfil profissional
                             </Link>
