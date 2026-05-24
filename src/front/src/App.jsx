@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
 import { AuthPage } from '@/pages/Auth';
@@ -18,6 +18,7 @@ import {
     getStoredAuthSession,
     storeAuthSession,
 } from '@/modules/auth';
+import { trackUiEvent } from '@/shared/utils/metrics.utils';
 
 const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
 
@@ -44,8 +45,13 @@ export default function App() {
     const [toast, setToast] = useState(null);
     const [preselectedPatient, setPreselectedPatient] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const role = normalizeRole(auth?.tipo);
+
+    useEffect(() => {
+        trackUiEvent('route_change', { role: role || 'public', path: location.pathname, search: location.search || undefined }); // Registra navegacao para medir abandono e uso por perfil sem depender de ferramenta externa.
+    }, [location.pathname, location.search, role]);
 
     const menuItems = useMemo(() => {
         if (role === 'admin') {

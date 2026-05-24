@@ -10,7 +10,8 @@ export function LandingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f5f7] text-[#1f2937] overflow-hidden">
+        <div className="landing-page min-h-screen bg-[#f5f5f7] text-[#1f2937] overflow-hidden">
+            {/* Classe escopada permite corrigir contraste da landing sem alterar a paleta global sem decisao de produto. */}
 
             {/* BACKGROUND EFFECTS */}
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-600/20 blur-[120px] rounded-full" />

@@ -46,14 +46,16 @@ export function CalendarioConsultas({
                 <div className="week-grid" aria-hidden="true">
                     {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'].map((day) => <span key={day}>{day}</span>)}
                 </div>
-                <div className={loading ? 'calendar-grid calendar-grid--loading' : 'calendar-grid'}>
+                {/* Expõe carregamento e nome do grid para usuarios de tecnologia assistiva. */}
+                <div className={loading ? 'calendar-grid calendar-grid--loading' : 'calendar-grid'} aria-label="Datas disponiveis" aria-busy={loading}>
                     {days.map((date, index) => {
-                        if (!date) return <span className="calendar-cell calendar-cell--empty" key={`empty-${index}`} />;
+                        if (!date) return <span className="calendar-cell calendar-cell--empty" aria-hidden="true" key={`empty-${index}`} />; // Oculta celulas vazias para reduzir ruido na navegacao assistiva.
 
                         const dateKey = toIsoDate(date);
                         const past = isBeforeToday(date);
                         const available = availableDateKeys.has(dateKey);
                         const selected = selectedDateKey === dateKey;
+                        const availabilityLabel = available ? 'com horarios disponiveis' : 'sem horarios disponiveis'; // Descreve disponibilidade alem da cor visual do calendario.
 
                         return (
                             <button
@@ -65,6 +67,8 @@ export function CalendarioConsultas({
                                 type="button"
                                 disabled={past}
                                 onClick={() => onDateSelect(dateKey)}
+                                aria-pressed={selected}
+                                aria-label={`${formatDate(`${dateKey}T00:00:00`)}, ${availabilityLabel}`} // Comunica estado selecionado/disponivel sem depender apenas de cor.
                                 key={dateKey}
                             >
                                 <span>{date.getDate()}</span>

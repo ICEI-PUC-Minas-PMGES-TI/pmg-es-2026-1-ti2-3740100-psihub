@@ -33,16 +33,18 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                     </div>
                 ) : (
                 <form className="auth-form" onSubmit={handleSubmit}>
-                    <div className="segmented-control" role="tablist" aria-label="Modo de acesso">
+                    <div className="segmented-control" role="group" aria-label="Modo de acesso">
                         <Link
                             to="/auth/login"
                             className={!isRegister ? 'segmented-control__item segmented-control__item--active' : 'segmented-control__item'}
+                            aria-current={!isRegister ? 'page' : undefined} // Usa aria-current porque os itens sao links de rota, nao tabs com paineis locais.
                         >
                             Entrar
                         </Link>
                         <Link
                             to="/auth/cadastro/paciente"
                             className={isRegister ? 'segmented-control__item segmented-control__item--active' : 'segmented-control__item'}
+                            aria-current={isRegister ? 'page' : undefined} // Expõe qual rota de autenticacao esta ativa para leitores de tela.
                         >
                             Criar conta
                         </Link>
