@@ -9,9 +9,9 @@ const initialForm = {
     tipo: 'paciente',
 };
 
-export function useAuthForm({ onAuthenticated, onToast }) {
-    const [mode, setMode] = useState('login');
-    const [form, setForm] = useState(initialForm);
+export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', initialTipo = 'paciente' }) {
+    const [mode, setMode] = useState(initialMode);
+    const [form, setForm] = useState({ ...initialForm, tipo: initialTipo });
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 

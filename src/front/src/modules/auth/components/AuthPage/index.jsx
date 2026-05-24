@@ -1,7 +1,7 @@
 import { Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
 import { useAuthForm } from '@/modules/auth/hooks/useAuthForm';
 
-export function AuthPage({ onAuthenticated, onToast }) {
+export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo }) {
     const {
         form,
         handleSubmit,
@@ -12,7 +12,7 @@ export function AuthPage({ onAuthenticated, onToast }) {
         showPassword,
         submitting,
         updateField,
-    } = useAuthForm({ onAuthenticated, onToast });
+    } = useAuthForm({ onAuthenticated, onToast, initialMode, initialTipo });
 
     return (
         <main className="auth-page">

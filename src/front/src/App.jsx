@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
 import { AuthPage } from '@/pages/Auth';
+import { LandingPage } from '@/pages/Landing';
 import { PatientDashboard } from '@/pages/PatientDashboard';
 import { PatientEmotionPage } from '@/pages/PatientEmotion';
 import { PatientProfilePage } from '@/pages/PatientProfile';
@@ -22,6 +23,9 @@ export default function App() {
     const [activeView, setActiveView] = useState(() =>
         getInitialView(getStoredAuthSession()?.tipo)
     );
+    const [publicView, setPublicView] = useState('landing');
+    const [authMode, setAuthMode] = useState('login');
+    const [authType, setAuthType] = useState('paciente');
     const [toast, setToast] = useState(null);
     const [preselectedPatient, setPreselectedPatient] = useState(null);
 
@@ -54,20 +58,46 @@ export default function App() {
         storeAuthSession(session);
         setAuth(session);
         setActiveView(getInitialView(session.tipo));
+        setPublicView('landing');
     }
 
     function handleLogout() {
         clearAuthSession();
         setAuth(null);
         setActiveView(null);
+        setPublicView('landing');
     }
 
     if (!auth) {
+        if (publicView === 'auth') {
+            return (
+                <>
+                    <AuthPage
+                        onAuthenticated={handleAuthenticated}
+                        onToast={setToast}
+                        initialMode={authMode}
+                        initialTipo={authType}
+                    />
+                    <Toast
+                        toast={toast}
+                        onClose={() => setToast(null)}
+                    />
+                </>
+            );
+        }
+
         return (
             <>
-                <AuthPage
-                    onAuthenticated={handleAuthenticated}
-                    onToast={setToast}
+                <LandingPage
+                    onLogin={() => {
+                        setAuthMode('login');
+                        setPublicView('auth');
+                    }}
+                    onRegister={(tipo) => {
+                        setAuthMode('register');
+                        setAuthType(tipo);
+                        setPublicView('auth');
+                    }}
                 />
                 <Toast
                     toast={toast}
