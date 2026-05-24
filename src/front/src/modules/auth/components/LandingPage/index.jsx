@@ -1,6 +1,7 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
-export function LandingPage({ onLogin, onRegister }) {
+export function LandingPage() {
 
     const sectionRef = useRef(null);
 
@@ -31,12 +32,12 @@ export function LandingPage({ onLogin, onRegister }) {
 
                     <div className="flex items-center gap-4">
                         {/* Entrar → tela de login (única para todos os perfis) */}
-                        <button
-                            onClick={onLogin}
+                        <Link
+                            to="/auth/login"
                             className="px-5 py-2.5 rounded-xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition"
                         >
                             Entrar
-                        </button>
+                        </Link>
 
                         {/* Criar conta → scroll suave até a seção de escolha de perfil */}
                         <button
@@ -97,18 +98,18 @@ export function LandingPage({ onLogin, onRegister }) {
 
                         {/* BUTTONS — também descem até a seção de escolha */}
                         <div className="flex flex-wrap gap-4 mt-10">
-                            <button
-                                onClick={() => onRegister("paciente")}
+                            <Link
+                                to="/auth/cadastro/paciente"
                                 className="px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-xl shadow-violet-500/30 text-white"
                             >
                                 Encontrar psicólogo
-                            </button>
-                            <button
-                                onClick={() => onRegister("psicologo")}
+                            </Link>
+                            <Link
+                                to="/auth/cadastro/psicologo"
                                 className="px-7 py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
                             >
                                 Criar perfil profissional
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -161,7 +162,7 @@ export function LandingPage({ onLogin, onRegister }) {
 
                     <div className="grid lg:grid-cols-2 gap-8">
 
-                        {/* PACIENTE — onRegister("paciente") direciona ao cadastro de paciente */}
+                        {/* PACIENTE — link direto para cadastro de paciente */}
                         <div className="bg-white border border-zinc-200 shadow-sm rounded-[32px] p-10 hover:border-violet-300 transition">
                             <div className="inline-flex px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-600 mb-6">
                                 Sou paciente
@@ -185,15 +186,15 @@ export function LandingPage({ onLogin, onRegister }) {
                                     Acompanhamento contínuo
                                 </div>
                             </div>
-                            <button
-                                onClick={() => onRegister("paciente")}
+                            <Link
+                                to="/auth/cadastro/paciente"
                                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg text-white"
                             >
                                 Encontrar psicólogo
-                            </button>
+                            </Link>
                         </div>
 
-                        {/* PSICÓLOGO — onRegister("psicologo") direciona ao cadastro de psicólogo */}
+                        {/* PSICÓLOGO — link direto para cadastro de psicólogo */}
                         <div className="bg-white border border-zinc-200 shadow-sm rounded-[32px] p-10 hover:border-fuchsia-300 transition">
                             <div className="inline-flex px-4 py-2 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-600 mb-6">
                                 Sou psicólogo
@@ -217,12 +218,12 @@ export function LandingPage({ onLogin, onRegister }) {
                                     Expanda sua presença online
                                 </div>
                             </div>
-                            <button
-                                onClick={() => onRegister("psicologo")}
+                            <Link
+                                to="/auth/cadastro/psicologo"
                                 className="w-full py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
                             >
                                 Criar perfil profissional
-                            </button>
+                            </Link>
                         </div>
 
                     </div>

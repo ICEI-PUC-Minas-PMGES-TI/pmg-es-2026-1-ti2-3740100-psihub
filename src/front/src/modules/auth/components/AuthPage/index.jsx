@@ -1,4 +1,5 @@
 import { CheckCircle, Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuthForm } from '@/modules/auth/hooks/useAuthForm';
 
 export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo }) {
@@ -8,7 +9,6 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
         handleSubmit,
         isRegister,
         passwordTooShort,
-        setMode,
         setShowPassword,
         showPassword,
         submitting,
@@ -34,20 +34,18 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                 ) : (
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="segmented-control" role="tablist" aria-label="Modo de acesso">
-                        <button
-                            type="button"
+                        <Link
+                            to="/auth/login"
                             className={!isRegister ? 'segmented-control__item segmented-control__item--active' : 'segmented-control__item'}
-                            onClick={() => setMode('login')}
                         >
                             Entrar
-                        </button>
-                        <button
-                            type="button"
+                        </Link>
+                        <Link
+                            to="/auth/cadastro/paciente"
                             className={isRegister ? 'segmented-control__item segmented-control__item--active' : 'segmented-control__item'}
-                            onClick={() => setMode('register')}
                         >
                             Criar conta
-                        </button>
+                        </Link>
                     </div>
 
                     {isRegister && (

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
 import { AuthPage } from '@/pages/Auth';
 import { LandingPage } from '@/pages/Landing';
@@ -9,7 +10,6 @@ import { PatientsManagementPage } from '@/pages/PatientsManagement';
 import { PsychologistAgendaPage } from '@/pages/PsychologistAgenda';
 import { PsychologistDashboard } from '@/pages/PsychologistDashboard';
 import { PsychologistProfilePage } from '@/pages/PsychologistProfile';
-import { PsychologistRegisterPage } from '@/pages/PsychologistRegister';
 import { ReportsPage } from '@/pages/Reports';
 import { AppShell } from '@/shared/components/AppShell';
 import { Toast } from '@/shared/components/Toast';
@@ -19,18 +19,33 @@ import {
     storeAuthSession,
 } from '@/modules/auth';
 
+const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
+
+const ROUTES_BY_VIEW = {
+    schedule: '/paciente/dashboard',
+    appointments: `/paciente/dashboard${PATIENT_APPOINTMENTS_SEARCH}`,
+    emotions: '/paciente/emocoes',
+    'patient-profile': '/paciente/perfil',
+    dashboard: '/psicologo/dashboard',
+    agenda: '/psicologo/agenda',
+    patients: '/psicologo/pacientes',
+    pacientes: '/psicologo/pacientes',
+    reports: '/psicologo/relatorios',
+    relatorios: '/psicologo/relatorios',
+    'psychologist-profile': '/psicologo/perfil',
+    perfil: '/psicologo/perfil',
+    notificacoes: '/psicologo/pacientes',
+    'admin-psychologists': '/admin/psicologos',
+    psicologos: '/admin/psicologos',
+};
+
 export default function App() {
     const [auth, setAuth] = useState(() => getStoredAuthSession());
-    const [activeView, setActiveView] = useState(() =>
-        getInitialView(getStoredAuthSession()?.tipo)
-    );
-    const [publicView, setPublicView] = useState('landing');
-    const [authMode, setAuthMode] = useState('login');
-    const [authType, setAuthType] = useState('paciente');
     const [toast, setToast] = useState(null);
     const [preselectedPatient, setPreselectedPatient] = useState(null);
+    const navigate = useNavigate();
 
-    const role = auth?.tipo;
+    const role = normalizeRole(auth?.tipo);
 
     const menuItems = useMemo(() => {
         if (role === 'admin') {
@@ -58,134 +73,176 @@ export default function App() {
     function handleAuthenticated(session) {
         storeAuthSession(session);
         setAuth(session);
-        setActiveView(getInitialView(session.tipo));
-        setPublicView('landing');
+        navigate(getDefaultRoute(session.tipo), { replace: true });
     }
 
     function handleLogout() {
         clearAuthSession();
         setAuth(null);
-        setActiveView(null);
-        setPublicView('landing');
+        navigate('/', { replace: true });
     }
 
-    if (!auth) {
-        if (publicView === 'psychologist-register') {
-            return (
-                <>
-                    <PsychologistRegisterPage
-                        onAuthenticated={handleAuthenticated}
-                        onBack={() => setPublicView('landing')}
-                        onToast={setToast}
-                    />
-                    <Toast
-                        toast={toast}
-                        onClose={() => setToast(null)}
-                    />
-                </>
-            );
-        }
+    function navigateByView(view) {
+        navigate(ROUTES_BY_VIEW[view] || getDefaultRoute(role));
+    }
 
-        if (publicView === 'auth') {
-            return (
-                <>
-                    <AuthPage
-                        onAuthenticated={handleAuthenticated}
-                        onToast={setToast}
-                        initialMode={authMode}
-                        initialTipo={authType}
-                    />
-                    <Toast
-                        toast={toast}
-                        onClose={() => setToast(null)}
-                    />
-                </>
-            );
+    function renderShell(activeView, children) {
+        const session = auth || getStoredAuthSession();
+
+        if (!session) {
+            return <Navigate to="/auth/login" replace />;
         }
 
         return (
-            <>
-                <LandingPage
-                    onLogin={() => {
-                        setAuthMode('login');
-                        setPublicView('auth');
-                    }}
-                    onRegister={(tipo) => {
-                        if (tipo === 'psicologo') {
-                            setPublicView('psychologist-register');
-                            return;
-                        }
-                        setAuthMode('register');
-                        setAuthType(tipo);
-                        setPublicView('auth');
-                    }}
-                />
-                <Toast
-                    toast={toast}
-                    onClose={() => setToast(null)}
-                />
-            </>
+            <AppShell
+                user={session.user}
+                role={normalizeRole(session.tipo)}
+                menuItems={menuItems}
+                activeView={activeView}
+                onNavigate={navigateByView}
+                onLogout={handleLogout}
+            >
+                {children}
+            </AppShell>
         );
     }
 
     return (
         <>
-            <AppShell
-                user={auth.user}
-                role={role}
-                menuItems={menuItems}
-                activeView={activeView}
-                onNavigate={setActiveView}
-                onLogout={handleLogout}
-            >
-                {role === 'admin' ? (
-                    <AdminPsychologistsPage onToast={setToast} />
-                ) : role === 'psicologo' ? (
-                    <>
-                        {activeView === 'agenda' && (
-                            <PsychologistAgendaPage onToast={setToast} />
-                        )}
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route
+                    path="/auth/login"
+                    element={(
+                        <AuthRoute
+                            auth={auth}
+                            initialMode="login"
+                            initialTipo="paciente"
+                            onAuthenticated={handleAuthenticated}
+                            onToast={setToast}
+                        />
+                    )}
+                />
+                <Route
+                    path="/auth/cadastro/paciente"
+                    element={(
+                        <AuthRoute
+                            auth={auth}
+                            initialMode="register"
+                            initialTipo="paciente"
+                            onAuthenticated={handleAuthenticated}
+                            onToast={setToast}
+                        />
+                    )}
+                />
+                <Route
+                    path="/auth/cadastro/psicologo"
+                    element={(
+                        <AuthRoute
+                            auth={auth}
+                            initialMode="register"
+                            initialTipo="psicologo"
+                            onAuthenticated={handleAuthenticated}
+                            onToast={setToast}
+                        />
+                    )}
+                />
 
-                        {activeView === 'dashboard' && (
-                            <PsychologistDashboard
+                <Route
+                    path="/paciente/dashboard"
+                    element={(
+                        <PrivateRoute allowedRoles={['paciente']}>
+                            <PatientDashboardRoute
+                                auth={auth}
+                                onNavigate={navigateByView}
                                 onToast={setToast}
-                                onNavigate={setActiveView}
+                                renderShell={renderShell}
                             />
-                        )}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/paciente/emocoes"
+                    element={(
+                        <PrivateRoute allowedRoles={['paciente']}>
+                            {renderShell('emotions', <PatientEmotionPage onToast={setToast} />)}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/paciente/perfil"
+                    element={(
+                        <PrivateRoute allowedRoles={['paciente']}>
+                            {renderShell('patient-profile', <PatientProfilePage onToast={setToast} />)}
+                        </PrivateRoute>
+                    )}
+                />
 
-                        {activeView === 'psychologist-profile' && (
-                            <PsychologistProfilePage onToast={setToast} />
-                        )}
+                <Route
+                    path="/psicologo/dashboard"
+                    element={(
+                        <PrivateRoute allowedRoles={['psicologo']}>
+                            {renderShell(
+                                'dashboard',
+                                <PsychologistDashboard activeView="dashboard" onToast={setToast} onNavigate={navigateByView} />,
+                            )}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/psicologo/agenda"
+                    element={(
+                        <PrivateRoute allowedRoles={['psicologo']}>
+                            {renderShell('agenda', <PsychologistAgendaPage onToast={setToast} />)}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/psicologo/pacientes"
+                    element={(
+                        <PrivateRoute allowedRoles={['psicologo']}>
+                            {renderShell(
+                                'patients',
+                                <PatientsManagementPage
+                                    onToast={setToast}
+                                    onSelectPatient={(id) => {
+                                        setPreselectedPatient(id);
+                                        navigate('/psicologo/relatorios');
+                                    }}
+                                />,
+                            )}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/psicologo/relatorios"
+                    element={(
+                        <PrivateRoute allowedRoles={['psicologo']}>
+                            {renderShell('reports', <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />)}
+                        </PrivateRoute>
+                    )}
+                />
+                <Route
+                    path="/psicologo/perfil"
+                    element={(
+                        <PrivateRoute allowedRoles={['psicologo']}>
+                            {renderShell('psychologist-profile', <PsychologistProfilePage onToast={setToast} />)}
+                        </PrivateRoute>
+                    )}
+                />
 
-                        {activeView === 'patients' && (
-                            <PatientsManagementPage
-                                onToast={setToast}
-                                onSelectPatient={(id) => {
-                                    setPreselectedPatient(id);
-                                    setActiveView('reports');
-                                }}
-                            />
-                        )}
+                <Route
+                    path="/admin/psicologos"
+                    element={(
+                        <PrivateRoute allowedRoles={['admin']}>
+                            {renderShell('admin-psychologists', <AdminPsychologistsPage onToast={setToast} />)}
+                        </PrivateRoute>
+                    )}
+                />
 
-                        {activeView === 'reports' && (
-                            <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />
-                        )}
-                    </>
-                ) : (
-                    <>
-                        {(activeView === 'schedule' || activeView === 'appointments') && (
-                            <PatientDashboard
-                                activeView={activeView}
-                                patientName={auth.user.nome}
-                                onNavigate={setActiveView}
-                                onToast={setToast}
-                            />
-                        )}
-                        {activeView === 'emotions' && <PatientEmotionPage onToast={setToast} />}
-                        {activeView === 'patient-profile' && <PatientProfilePage onToast={setToast} />}
-                    </>
-                )}
-            </AppShell>
+                <Route path="/forbidden" element={<ForbiddenPage auth={auth} />} />
+                <Route path="*" element={<Navigate to={auth ? getDefaultRoute(auth.tipo) : '/'} replace />} />
+            </Routes>
 
             <Toast
                 toast={toast}
@@ -195,9 +252,86 @@ export default function App() {
     );
 }
 
-function getInitialView(role) {
-    if (role === 'admin') return 'admin-psychologists';
-    if (role === 'psicologo') return 'agenda';
-    if (role === 'paciente') return 'schedule';
-    return null;
+function AuthRoute({ auth, initialMode, initialTipo, onAuthenticated, onToast }) {
+    const session = auth || getStoredAuthSession();
+
+    if (session?.token) {
+        return <Navigate to={getDefaultRoute(session.tipo)} replace />;
+    }
+
+    return (
+        <AuthPage
+            key={`${initialMode}-${initialTipo}`}
+            onAuthenticated={onAuthenticated}
+            onToast={onToast}
+            initialMode={initialMode}
+            initialTipo={initialTipo}
+        />
+    );
+}
+
+function PatientDashboardRoute({ auth, onNavigate, onToast, renderShell }) {
+    const location = useLocation();
+    const activeView = location.search === PATIENT_APPOINTMENTS_SEARCH ? 'appointments' : 'schedule';
+    const session = auth || getStoredAuthSession();
+
+    return renderShell(
+        activeView,
+        <PatientDashboard
+            activeView={activeView}
+            patientName={session?.user?.nome}
+            onNavigate={onNavigate}
+            onToast={onToast}
+        />,
+    );
+}
+
+function PrivateRoute({ allowedRoles, children }) {
+    const location = useLocation();
+    const session = getStoredAuthSession();
+
+    if (!session?.token) {
+        return <Navigate to="/auth/login" replace state={{ from: location }} />;
+    }
+
+    const role = normalizeRole(session.tipo);
+    const allowed = allowedRoles.map(normalizeRole);
+
+    if (!allowed.includes(role)) {
+        return <Navigate to="/forbidden" replace />;
+    }
+
+    return children;
+}
+
+function ForbiddenPage({ auth }) {
+    const session = auth || getStoredAuthSession();
+
+    return (
+        <main className="auth-page">
+            <section className="auth-panel">
+                <div className="auth-panel__intro">
+                    <div className="brand-mark" aria-hidden="true"></div>
+                    <h1>Acesso negado</h1>
+                    <p>Seu perfil nao tem permissao para acessar esta pagina.</p>
+                </div>
+                <Link className="primary-button" to={session ? getDefaultRoute(session.tipo) : '/auth/login'}>
+                    Voltar
+                </Link>
+            </section>
+        </main>
+    );
+}
+
+function getDefaultRoute(role) {
+    const normalized = normalizeRole(role);
+
+    if (normalized === 'admin') return '/admin/psicologos';
+    if (normalized === 'psicologo') return '/psicologo/agenda';
+    if (normalized === 'paciente') return '/paciente/dashboard';
+    return '/';
+}
+
+function normalizeRole(role = '') {
+    return String(role || '').toLowerCase();
 }
