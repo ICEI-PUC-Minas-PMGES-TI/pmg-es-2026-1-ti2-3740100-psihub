@@ -98,10 +98,10 @@ export function LandingPage() {
                         </div>
 
                         {/* BUTTONS — também descem até a seção de escolha */}
-                        <div className="flex flex-wrap gap-4 mt-10">
+                        <div className="flex flex-wrap items-center gap-4 mt-10">
                             <Link
                                 to="/auth/cadastro/paciente"
-                                className="inline-flex items-center px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-xl shadow-violet-500/30 text-white"
+                                className="inline-flex items-center px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-lg shadow-violet-500/30 text-white"
                             >
                                 Encontrar psicólogo
                             </Link>
