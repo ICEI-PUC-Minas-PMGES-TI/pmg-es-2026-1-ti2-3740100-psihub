@@ -6,8 +6,12 @@ import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.auth.service.AuthService;
 import com.psihub.api.modules.consultas.dto.AgendarConsultaRequest;
 import com.psihub.api.modules.consultas.dto.AgendarPorPsicologoRequest;
+import com.psihub.api.modules.consultas.dto.AgendarRecorrenciaRequest;
+import com.psihub.api.modules.consultas.dto.AtualizarConsultaRequest;
+import com.psihub.api.modules.consultas.dto.AtualizarStatusConsultaRequest;
 import com.psihub.api.modules.consultas.dto.CancelarConsultaRequest;
 import com.psihub.api.modules.consultas.dto.ConsultaResponse;
+import com.psihub.api.modules.consultas.dto.FrequenciaRecorrencia;
 import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.consultas.repository.ConsultaRepository;
 import com.psihub.api.modules.notificacoes.service.NotificacaoService;
@@ -24,6 +28,7 @@ import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.ApiResponseMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -259,6 +264,133 @@ public class ConsultaService {
         return mapper.toResponse(consulta);
     }
 
+    @Transactional
+    public ConsultaResponse atualizarStatusComoUsuario(
+            Long consultaId,
+            Long userId,
+            TipoUsuario tipoUsuario,
+            AtualizarStatusConsultaRequest request
+    ) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        validarAcessoConsulta(consulta, userId, tipoUsuario);
+
+        StatusConsulta novoStatus = request.status();
+        if (novoStatus == StatusConsulta.CANCELADA) {
+            return cancelarComoUsuario(
+                    consultaId,
+                    userId,
+                    tipoUsuario,
+                    new CancelarConsultaRequest(sanitizeOptional(request.motivo()))
+            );
+        }
+
+        if (novoStatus == StatusConsulta.AGENDADA) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido reverter consulta para AGENDADA");
+        }
+
+        if (consulta.getStatus() == StatusConsulta.CANCELADA || consulta.getStatus() == StatusConsulta.CONCLUIDA) {
+            throw new ApiException(HttpStatus.CONFLICT, "Consulta finalizada nao permite mudanca de status");
+        }
+
+        if (novoStatus == StatusConsulta.CONFIRMADA && tipoUsuario != TipoUsuario.PSICOLOGO) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem confirmar consultas");
+        }
+
+        if (novoStatus == StatusConsulta.FALTOU && tipoUsuario != TipoUsuario.PSICOLOGO) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem marcar falta");
+        }
+
+        if (novoStatus == StatusConsulta.EM_ANDAMENTO) {
+            consulta.setIniciadoEm(LocalDateTime.now());
+        }
+
+        if (novoStatus == StatusConsulta.CONCLUIDA) {
+            if (consulta.getIniciadoEm() == null) {
+                consulta.setIniciadoEm(LocalDateTime.now());
+            }
+            consulta.setFinalizadoEm(LocalDateTime.now());
+        }
+
+        consulta.setStatus(novoStatus);
+        return mapper.toResponse(consulta);
+    }
+
+    @Transactional
+    public ConsultaResponse atualizarComoPsicologo(
+            Long consultaId,
+            Long psicologoId,
+            AtualizarConsultaRequest request
+    ) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        if (!consulta.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+        }
+
+        if (consulta.getStatus() == StatusConsulta.CANCELADA || consulta.getStatus() == StatusConsulta.CONCLUIDA) {
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas finalizadas nao podem ser editadas");
+        }
+
+        LocalDateTime novoInicio = Objects.requireNonNull(request.inicioEm());
+        validarHorarioNoPassado(novoInicio);
+
+        IntervaloConsulta intervalo = resolverIntervaloDisponivel(psicologoId, novoInicio, request.fimEm());
+
+        List<Consulta> conflitos = consultaRepository.findBlockingConsultasForUpdateExcludingId(
+                consulta.getId(),
+                psicologoId,
+                intervalo.inicioEm(),
+                intervalo.fimEm(),
+                NON_CONFLICTING_STATUSES
+        );
+        if (!conflitos.isEmpty()) {
+            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para remarcacao");
+        }
+
+        consulta.setInicioEm(intervalo.inicioEm());
+        consulta.setFimEm(intervalo.fimEm());
+        consulta.setTipoAtendimento(request.tipoAtendimento() == null ? consulta.getTipoAtendimento() : request.tipoAtendimento());
+        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
+
+        return mapper.toResponse(consulta);
+    }
+
+    @Transactional
+    public ConsultaResponse excluirComoPsicologo(Long consultaId, Long psicologoId) {
+        Consulta consulta = buscarConsultaDetalhada(consultaId);
+        if (!consulta.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+        }
+        consulta.setAtivo(false);
+        consulta.setStatus(StatusConsulta.CANCELADA);
+        if (consulta.getMotivoCancelamento() == null) {
+            consulta.setMotivoCancelamento("Consulta removida pelo psicologo");
+        }
+        return mapper.toResponse(consulta);
+    }
+
+    @Transactional
+    public List<ConsultaResponse> agendarRecorrenciaComoPsicologo(
+            @NonNull Long psicologoId,
+            AgendarRecorrenciaRequest request
+    ) {
+        List<ConsultaResponse> criadas = new ArrayList<>();
+        for (int i = 0; i < request.ocorrencias(); i += 1) {
+            LocalDateTime inicio = aplicarFrequencia(request.inicioEm(), request.frequencia(), i);
+            ConsultaResponse resposta = agendarComoPsicologo(
+                    psicologoId,
+                    new AgendarPorPsicologoRequest(
+                            request.pacienteId(),
+                            inicio,
+                            null,
+                            request.tipoAtendimento(),
+                            request.observacoes()
+                    )
+            );
+            criadas.add(resposta);
+        }
+        return criadas;
+    }
+
     @Transactional(readOnly = true)
     public Consulta buscarConsultaDetalhada(Long consultaId) {
         return consultaRepository.findDetailedById(consultaId)
@@ -352,6 +484,15 @@ public class ConsultaService {
         }
         String normalized = value.trim().replaceAll("\\s+", " ");
         return normalized.isBlank() ? null : normalized;
+    }
+
+    private LocalDateTime aplicarFrequencia(LocalDateTime inicio, FrequenciaRecorrencia frequencia, int indice) {
+        if (indice == 0) return inicio;
+        return switch (frequencia) {
+            case SEMANAL -> inicio.plusWeeks(indice);
+            case QUINZENAL -> inicio.plusWeeks(indice * 2L);
+            case MENSAL -> inicio.plusMonths(indice);
+        };
     }
 
     private record IntervaloConsulta(LocalDateTime inicioEm, LocalDateTime fimEm) {

@@ -1,7 +1,8 @@
+import { useMemo, useState } from 'react';
 import { CalendarPlus, Loader2, Save, Trash2, X } from 'lucide-react';
 import { formatDate, formatTime, toIsoDate } from '@/shared/utils/date.utils';
 import { CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, DAY_FULL_LABELS, DAY_OPTIONS, DAY_ORDER, DEFAULT_DURATION } from '@/modules/psicologos/hooks/agenda/agenda.constants';
-import { canCancelConsultation, consultationStatusLabel, dayHeaderLabel, findBlockAtMinute, intervalsOverlap, isSlotWithinAvailability, minutesToTimeLabel, weekCalendarBlockClass } from '@/modules/psicologos/hooks/agenda/agenda.utils';
+import { canCancelConsultation, consultationStatusLabel, dayHeaderLabel, findBlockAtMinute, intervalsOverlap, isSlotWithinAvailability, minutesToTimeLabel, statusBadgeClass, weekCalendarBlockClass } from '@/modules/psicologos/hooks/agenda/agenda.utils';
 import { usePatientSearchField } from '@/modules/psicologos/hooks/agenda/usePatientSearchField';
 
 export function LoadingState() {
@@ -28,15 +29,17 @@ export function AvailabilitySkeletonGrid() {
     );
 }
 
-export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay, consultationBlocks, blockedBlocks, breakBlocks, readOnly, onOpenConsultation, onOpenCellMenu, onOpenBlockedSlot }) {
+export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay, consultationBlocks, blockedBlocks, breakBlocks, readOnly, onOpenConsultation, onOpenCellMenu, onOpenBlockedSlot, onMoveConsultation }) {
     return (
         <>
             <div className="week-calendar__legend" aria-label="Legenda do calendário semanal">
                 <span><i className="week-calendar__legend-dot week-calendar__legend-dot--available" />Disponível</span>
                 <span><i className="week-calendar__legend-dot week-calendar__legend-dot--scheduled" />Agendada</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--confirmed" />Confirmada</span>
                 <span><i className="week-calendar__legend-dot week-calendar__legend-dot--blocked" />Bloqueado</span>
                 <span><i className="week-calendar__legend-dot week-calendar__legend-dot--completed" />Concluída</span>
                 <span><i className="week-calendar__legend-dot week-calendar__legend-dot--cancelled" />Cancelada</span>
+                <span><i className="week-calendar__legend-dot week-calendar__legend-dot--missed" />Falta</span>
             </div>
             <div className="week-calendar">
                 <div className="week-calendar__header">
@@ -66,6 +69,7 @@ export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay,
                         const now = new Date();
                         const nowDayKey = toIsoDate(now);
                         const nowMinutes = now.getHours() * 60 + now.getMinutes();
+                        const isTodayColumn = dayKey === nowDayKey;
                     const dayAvailability = availabilityByDay.get(dayKey) || [];
                     const slotDuration = durationByDay.get(dayKey) || DEFAULT_DURATION;
                     const dayBlocks = consultationBlocks.filter((block) => block.dayKey === dayKey);
@@ -80,32 +84,73 @@ export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay,
                                 const blocked = dayBlockedSlots.some((slot) => row.minutes >= slot.startMinutes && row.minutes < slot.startMinutes + slot.durationMinutes);
                                 const isPast = dayKey < nowDayKey || (dayKey === nowDayKey && row.minutes < nowMinutes);
                                 const disabled = readOnly || !available || Boolean(consultation) || blocked || breakBlocked || isPast;
+                                const isCurrentSlot = isTodayColumn && row.minutes <= nowMinutes && nowMinutes < row.minutes + CALENDAR_SLOT_MINUTES;
                                 return (
                                     <button
                                         key={row.minutes}
                                         type="button"
-                                        className={available && !breakBlocked ? 'week-calendar__cell week-calendar__cell--available' : 'week-calendar__cell week-calendar__cell--blocked'}
+                                        className={available && !breakBlocked
+                                            ? `week-calendar__cell week-calendar__cell--available${isCurrentSlot ? ' week-calendar__cell--now' : ''}`
+                                            : `week-calendar__cell week-calendar__cell--blocked${isCurrentSlot ? ' week-calendar__cell--now' : ''}`}
                                         disabled={disabled}
                                         onClick={() => !disabled && onOpenCellMenu(date, row.minutes)}
-                                            title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
-                                        />
+                                        onDragOver={(event) => {
+                                            if (!disabled && onMoveConsultation) {
+                                                event.preventDefault();
+                                            }
+                                        }}
+                                        onDrop={(event) => {
+                                            if (disabled || !onMoveConsultation) return;
+                                            const payload = event.dataTransfer.getData('application/psihub-consultation');
+                                            if (!payload) return;
+                                            try {
+                                                const parsed = JSON.parse(payload);
+                                                onMoveConsultation(parsed, date, row.minutes);
+                                            } catch {
+                                                // no-op
+                                            }
+                                        }}
+                                        data-hint={available && !disabled ? 'Clique para agendar' : null}
+                                        title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
+                                    />
                                     );
                                 })}
+
+                            {isTodayColumn && (
+                                <div
+                                    className="week-calendar__now-line"
+                                    aria-hidden="true"
+                                    style={{
+                                        top: `${((nowMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                    }}
+                                />
+                            )}
 
                                 {dayBlocks.map((block) => (
                                     <button
                                         type="button"
                                         key={block.id}
-                                        className={`week-calendar__block ${weekCalendarBlockClass(block)}`}
+                                        className={`week-calendar__block ${weekCalendarBlockClass(block)}${!readOnly ? ' week-calendar__block--draggable' : ''}`}
+                                        draggable={!readOnly}
                                         style={{
                                             top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
                                             height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
                                         }}
+                                        onDragStart={(event) => {
+                                            event.dataTransfer.setData('application/psihub-consultation', JSON.stringify({
+                                                id: block.id,
+                                                durationMinutes: block.durationMinutes,
+                                            }));
+                                        }}
                                         onClick={() => onOpenConsultation(block)}
+                                        data-tooltip={`${block.pacienteNome}\n${consultationStatusLabel(block.status)} · ${block.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}\n${formatTime(block.inicioEm)} - ${formatTime(block.fimEm)}`}
                                         title={`${block.pacienteNome} - ${formatTime(block.inicioEm)} - ${formatTime(block.fimEm)}`}
                                     >
                                         <span className="week-calendar__block-title">{block.pacienteNome}</span>
                                         <strong>{formatTime(block.inicioEm)} - {formatTime(block.fimEm)}</strong>
+                                        <span className={`status-badge ${statusBadgeClass(block.status)}`}>
+                                            {consultationStatusLabel(block.status)}
+                                        </span>
                                         <span className="status-badge status-badge--type">
                                             {block.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}
                                         </span>
@@ -362,7 +407,7 @@ function PatientSearchField({ value, selectedId, onSelect, onClear }) {
         handleBlur,
     } = usePatientSearchField({ value, selectedId, onSelect, onClear });
     return (
-        <div className="field" ref={containerRef} onBlur={handleBlur} style={{ position: 'relative' }}>
+        <div className="field patient-search-field" ref={containerRef} onBlur={handleBlur}>
             <label htmlFor="patient-search">Paciente</label>
             <input
                 id="patient-search"
@@ -374,39 +419,16 @@ function PatientSearchField({ value, selectedId, onSelect, onClear }) {
                 autoComplete="off"
                 required
             />
-            {loading && <span style={{ position: 'absolute', right: '10px', top: '34px', fontSize: '12px', color: '#6B7280' }}>Buscando...</span>}
+            {loading && <span className="patient-search-field__hint">Buscando...</span>}
             {open && !loading && (
-                <ul style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    background: '#fff',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    zIndex: 100,
-                    margin: 0,
-                    padding: 0,
-                    listStyle: 'none',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                }}>
+                <ul className="patient-search-field__results">
                     {results.length === 0
-                        ? <li style={{ padding: '10px 14px', color: '#6B7280', fontSize: '14px' }}>Nenhum paciente encontrado</li>
+                        ? <li className="patient-search-field__empty">Nenhum paciente encontrado</li>
                         : results.map((paciente) => (
                             <li key={paciente.id}>
                                 <button
                                     type="button"
-                                    style={{
-                                        width: '100%',
-                                        textAlign: 'left',
-                                        padding: '10px 14px',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                    }}
+                                    className="patient-search-field__option"
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={() => handleSelect(paciente)}
                                 >
@@ -456,7 +478,7 @@ export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, 
 
                     <fieldset className="checkbox-group">
                         <legend>Tipo de atendimento</legend>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div className="consultation-radio-grid consultation-radio-grid--two-columns">
                             <label className="check-card">
                                 <input type="radio" name="tipoAtendimento" value="ONLINE" checked={state.tipoAtendimento === 'ONLINE'} onChange={() => onChange((current) => ({ ...current, tipoAtendimento: 'ONLINE' }))} />
                                 <span>Online</span>
@@ -468,6 +490,37 @@ export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, 
                         </div>
                     </fieldset>
 
+                    <fieldset className="checkbox-group">
+                        <legend>Recorrência</legend>
+                        <div className="consultation-radio-grid consultation-radio-grid--four-columns">
+                            {['NENHUMA', 'SEMANAL', 'QUINZENAL', 'MENSAL'].map((value) => (
+                                <label className="check-card" key={value}>
+                                    <input
+                                        type="radio"
+                                        name="recorrencia"
+                                        value={value}
+                                        checked={state.recorrencia === value}
+                                        onChange={() => onChange((current) => ({ ...current, recorrencia: value }))}
+                                    />
+                                    <span>{value.toLowerCase()}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
+
+                    {state.recorrencia !== 'NENHUMA' && (
+                        <label className="field">
+                            Ocorrências
+                            <input
+                                type="number"
+                                min="2"
+                                max="48"
+                                value={state.ocorrencias}
+                                onChange={(event) => onChange((current) => ({ ...current, ocorrencias: event.target.value }))}
+                            />
+                        </label>
+                    )}
+
                     <label className="field">
                         Observações (máximo 300 caracteres)
                         <textarea
@@ -476,7 +529,7 @@ export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, 
                             rows="4"
                             placeholder="Adicione observações sobre a consulta"
                         />
-                        <span style={{ fontSize: '12px', color: '#6B7280' }}>{state.observacoes.length}/300</span>
+                        <span className="textarea-counter">{state.observacoes.length}/300</span>
                     </label>
 
                     <div className="inline-actions inline-actions--spread">
@@ -492,10 +545,24 @@ export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, 
     );
 }
 
-export function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCancelReasonChange, onConfirmCancel, cancelSubmitting }) {
+export function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCancelReasonChange, onConfirmCancel, cancelSubmitting, onUpdateStatus, statusSubmitting, onEditConsultation, editSubmitting, onDeleteConsultation, deleteSubmitting }) {
     const canCancel = canCancelConsultation(consultation);
     const cancelLimitReached = cancelReason.length >= 300;
     const hasPatientContact = Boolean(consultation.pacienteTelefone || consultation.pacienteEmail);
+    const [editMode, setEditMode] = useState(false);
+    const [editForm, setEditForm] = useState({
+        inicioEm: consultation.inicioEm,
+        fimEm: consultation.fimEm,
+        tipoAtendimento: consultation.tipoAtendimento,
+        observacoes: consultation.observacoes || '',
+    });
+
+    const statusActions = useMemo(() => [
+        { value: 'CONFIRMADA', label: 'Confirmar' },
+        { value: 'EM_ANDAMENTO', label: 'Iniciar' },
+        { value: 'CONCLUIDA', label: 'Concluir' },
+        { value: 'FALTOU', label: 'Marcar falta' },
+    ], []);
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
@@ -537,6 +604,78 @@ export function ConsultationDetailsModal({ consultation, cancelReason, onClose, 
                         <dd>{consultation.observacoes || 'Sem observações.'}</dd>
                     </div>
                 </dl>
+
+                <div className="inline-actions agenda-modal__status-actions">
+                    {statusActions.map((action) => (
+                        <button
+                            key={action.value}
+                            className="ghost-button"
+                            type="button"
+                            disabled={statusSubmitting}
+                            onClick={() => onUpdateStatus?.(action.value)}
+                        >
+                            {action.label}
+                        </button>
+                    ))}
+                    <button className="ghost-button" type="button" onClick={() => setEditMode((v) => !v)}>
+                        {editMode ? 'Fechar edição' : 'Editar consulta'}
+                    </button>
+                    <button className="danger-button" type="button" disabled={deleteSubmitting} onClick={() => onDeleteConsultation?.()}>
+                        {deleteSubmitting ? <Loader2 className="spin" size={17} /> : <Trash2 size={17} />}
+                        Excluir
+                    </button>
+                </div>
+
+                {editMode && (
+                    <form
+                        className="stack-form agenda-modal__edit-form"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            onEditConsultation?.(editForm);
+                        }}
+                    >
+                        <label>
+                            Início
+                            <input
+                                type="datetime-local"
+                                value={editForm.inicioEm?.slice(0, 16)}
+                                onChange={(event) => setEditForm((prev) => ({ ...prev, inicioEm: `${event.target.value}:00` }))}
+                                required
+                            />
+                        </label>
+                        <label>
+                            Fim
+                            <input
+                                type="datetime-local"
+                                value={editForm.fimEm?.slice(0, 16)}
+                                onChange={(event) => setEditForm((prev) => ({ ...prev, fimEm: `${event.target.value}:00` }))}
+                            />
+                        </label>
+                        <label>
+                            Tipo
+                            <select
+                                value={editForm.tipoAtendimento}
+                                onChange={(event) => setEditForm((prev) => ({ ...prev, tipoAtendimento: event.target.value }))}
+                            >
+                                <option value="ONLINE">Online</option>
+                                <option value="PRESENCIAL">Presencial</option>
+                            </select>
+                        </label>
+                        <label>
+                            Observações
+                            <textarea
+                                value={editForm.observacoes}
+                                maxLength={300}
+                                rows={3}
+                                onChange={(event) => setEditForm((prev) => ({ ...prev, observacoes: event.target.value }))}
+                            />
+                        </label>
+                        <button className="primary-button primary-button--fit" type="submit" disabled={editSubmitting}>
+                            {editSubmitting ? <Loader2 className="spin" size={17} /> : <Save size={17} />}
+                            Salvar alterações
+                        </button>
+                    </form>
+                )}
 
                 {canCancel && (
                     <div className="details-cancel">
@@ -587,7 +726,7 @@ export function CellActionMenuModal({ date, minutesFromMidnight, duration, loadi
                 </div>
                 <div className="stack-form">
                     <p className="cell-action-context">Criar horário das {timeLabel} às {endLabel} ({duration} min)</p>
-                    <p style={{ color: '#6B7280', fontSize: '14px' }}>O que deseja fazer com este horário?</p>
+                    <p className="modal-helper-text">O que deseja fazer com este horário?</p>
                     <button className="primary-button" type="button" onClick={onSchedule} disabled={loading === 'schedule'}>
                         {loading === 'schedule' ? <Loader2 className="spin" size={17} /> : <CalendarPlus size={17} />}
                         Agendar consulta com paciente
@@ -616,7 +755,7 @@ export function UnblockSlotModal({ slot, onClose, onConfirm }) {
                     </button>
                 </div>
                 <div className="stack-form">
-                    <p style={{ color: '#6B7280', fontSize: '14px' }}>
+                    <p className="modal-helper-text">
                         {slot ? `${formatDate(slot.inicioEm)} · ${formatTime(slot.inicioEm)} – ${formatTime(slot.fimEm)}` : ''}
                     </p>
                     <p>Este horário ficará disponível para agendamento novamente.</p>

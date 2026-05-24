@@ -4,6 +4,7 @@ import com.psihub.api.modules.agenda.entity.ExcecaoDisponibilidade;
 import com.psihub.api.modules.agenda.entity.TipoExcecaoDisponibilidade;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExcecaoDisponibilidadeRepository extends JpaRepository<ExcecaoDisponibilidade, Long> {
@@ -21,4 +22,6 @@ public interface ExcecaoDisponibilidadeRepository extends JpaRepository<ExcecaoD
             LocalDate dataInicio,
             LocalDate dataFim
     );
+
+        Optional<ExcecaoDisponibilidade> findByIdAndPsicologoIdAndAtivoTrue(Long id, Long psicologoId);
 }

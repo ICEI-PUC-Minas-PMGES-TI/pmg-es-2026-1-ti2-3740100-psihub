@@ -11,9 +11,12 @@ const initialForm = {
     tipo: 'paciente',
 };
 
+const PSYCHOLOGIST_PENDING_MESSAGE = 'Seu cadastro foi recebido! Aguarde a aprovação do administrador. Você receberá acesso após a análise do seu perfil.';
+
 export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', initialTipo = 'paciente' }) {
     const [mode, setMode] = useState(initialMode);
     const [form, setForm] = useState({ ...initialForm, tipo: initialTipo });
+    const [confirmationMessage, setConfirmationMessage] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -22,13 +25,20 @@ export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', i
 
     async function handleSubmit(event) {
         event.preventDefault();
+        setConfirmationMessage('');
 
         if (form.senha.length < 8) {
+            onToast({ type: 'error', message: 'A senha precisa ter pelo menos 8 caracteres.' });
             return;
         }
 
         if (isRegister && form.senha !== form.confirmarSenha) {
             onToast({ type: 'error', message: 'A confirmação de senha não confere.' });
+            return;
+        }
+
+        if (isRegister && form.tipo === 'paciente' && !form.dataNascimento) {
+            onToast({ type: 'error', message: 'Informe sua data de nascimento para criar a conta.' });
             return;
         }
 
@@ -41,12 +51,29 @@ export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', i
                     email: form.email,
                     senha: form.senha,
                     confirmarSenha: form.confirmarSenha,
-                    dataNascimento: form.dataNascimento,
                     tipo: form.tipo,
+                    ...(form.tipo === 'paciente' ? { dataNascimento: form.dataNascimento } : {}),
                 }
                 : { email: form.email, senha: form.senha };
             const response = isRegister ? await authApi.register(payload) : await authApi.login(payload);
+
+            if (!response?.token) {
+                if (isRegister && form.tipo === 'psicologo') {
+                    setConfirmationMessage(PSYCHOLOGIST_PENDING_MESSAGE);
+                    onToast?.({ type: 'success', message: PSYCHOLOGIST_PENDING_MESSAGE });
+                    return;
+                }
+
+                onToast({ type: 'error', message: isRegister ? 'Não foi possível criar sua conta agora.' : 'Não foi possível entrar agora.' });
+                return;
+            }
+
             const tokenPayload = decodeJwtPayload(response.token);
+
+            if (!tokenPayload) {
+                onToast({ type: 'error', message: isRegister ? 'Não foi possível criar sua conta agora.' : 'Não foi possível entrar agora.' });
+                return;
+            }
 
             onAuthenticated({
                 token: response.token,
@@ -61,11 +88,13 @@ export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', i
     }
 
     function updateField(field, value) {
+        setConfirmationMessage('');
         setForm((current) => ({ ...current, [field]: value }));
     }
 
     return {
         form,
+        confirmationMessage,
         handleSubmit,
         isRegister,
         passwordTooShort,

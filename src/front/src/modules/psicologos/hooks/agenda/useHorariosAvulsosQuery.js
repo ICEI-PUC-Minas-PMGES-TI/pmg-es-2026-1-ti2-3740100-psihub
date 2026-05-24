@@ -18,7 +18,7 @@ export function useHorariosAvulsosQuery({ onToast, refreshKey }) {
         const today = new Date();
         setLoadingSlots(true);
 
-        schedulingApi.listMySlots({
+        schedulingApi.listMyBlocks({
             inicio: `${toIsoDate(addDays(today, -MANUAL_SLOT_RANGE_DAYS))}T00:00:00`,
             fim: `${toIsoDate(addDays(today, MANUAL_SLOT_RANGE_DAYS))}T23:59:59`,
             signal: controller.signal,

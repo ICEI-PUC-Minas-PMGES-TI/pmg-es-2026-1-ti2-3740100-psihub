@@ -1,6 +1,8 @@
 package com.psihub.api.modules.agenda.controller;
 
 import com.psihub.api.modules.agenda.dto.AgendaCompletaResponse;
+import com.psihub.api.modules.agenda.dto.BloqueioSlotResponse;
+import com.psihub.api.modules.agenda.dto.CriarBloqueioRequest;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
 import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("/api/psicologos")
@@ -81,6 +84,35 @@ public class AgendaController {
         LocalDateTime inicioPeriodo = parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
         LocalDateTime fimPeriodo = parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
         return agendaService.listarAgendaCompleta(user.userId(), inicioPeriodo, fimPeriodo);
+    }
+
+    @GetMapping("/me/agenda/bloqueios")
+    public List<BloqueioSlotResponse> listarMeusBloqueios(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(required = false) String inicio,
+            @RequestParam(required = false) String fim
+    ) {
+        LocalDateTime inicioPeriodo = parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
+        LocalDateTime fimPeriodo = parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
+        return agendaService.listarBloqueios(user.userId(), inicioPeriodo, fimPeriodo);
+    }
+
+    @PostMapping("/me/agenda/bloqueios")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<BloqueioSlotResponse> criarBloqueio(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody CriarBloqueioRequest request
+    ) {
+        return agendaService.criarBloqueios(user.userId(), request);
+    }
+
+    @PatchMapping("/me/agenda/bloqueios/{bloqueioId}/cancelar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removerBloqueio(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long bloqueioId
+    ) {
+        agendaService.removerBloqueio(user.userId(), bloqueioId);
     }
 
     @PostMapping("/me/agenda/slots")

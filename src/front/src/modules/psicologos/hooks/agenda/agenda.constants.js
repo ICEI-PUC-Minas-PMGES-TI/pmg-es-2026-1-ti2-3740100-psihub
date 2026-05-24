@@ -25,13 +25,16 @@ export const ACTIVE_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO'
 export const STATUS_OPTIONS = [
     { value: 'ALL', label: 'Todos' },
     { value: 'AGENDADA', label: 'Agendada' },
+    { value: 'CONFIRMADA', label: 'Confirmada' },
     { value: 'EM_ANDAMENTO', label: 'Em andamento' },
     { value: 'CONCLUIDA', label: 'Concluida' },
     { value: 'CANCELADA', label: 'Cancelada' },
+    { value: 'FALTOU', label: 'Faltou' },
 ];
 export const STATUS_OPTIONS_ACTIVE = [
     { value: 'ALL', label: 'Ativos' },
     { value: 'AGENDADA', label: 'Agendada' },
+    { value: 'CONFIRMADA', label: 'Confirmada' },
     { value: 'EM_ANDAMENTO', label: 'Em andamento' },
 ];
 export const TYPE_OPTIONS = [
@@ -39,7 +42,7 @@ export const TYPE_OPTIONS = [
     { value: 'ONLINE', label: 'Online' },
     { value: 'PRESENCIAL', label: 'Presencial' },
 ];
-export const GRID_CONSULTATION_STATUSES = new Set(['AGENDADA', 'EM_ANDAMENTO']);
+export const GRID_CONSULTATION_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO', 'CONCLUIDA', 'CANCELADA', 'FALTOU']);
 export const DEFAULT_DURATION = 50;
 export const CALENDAR_START_HOUR = 7;
 export const CALENDAR_END_HOUR = 22;

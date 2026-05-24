@@ -1,6 +1,11 @@
 const AUTH_STORAGE_KEY = 'psihub:auth';
 
 export function storeAuthSession(session) {
+  if (!session?.token) {
+    clearAuthSession();
+    return;
+  }
+
   window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
 }
 
@@ -35,7 +40,11 @@ export function decodeJwtPayload(token) {
   const payload = token?.split('.')[1];
   if (!payload) return null;
 
-  const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=');
-  return JSON.parse(window.atob(padded));
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=');
+    return JSON.parse(window.atob(padded));
+  } catch {
+    return null;
+  }
 }

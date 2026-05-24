@@ -30,12 +30,24 @@ export function useAgendarConsultaMutation({
 
         setScheduleConsultationSaving(true);
         try {
-            await schedulingApi.scheduleConsultationAsPsychologist({
-                pacienteId: Number(scheduleConsultationModal.pacienteId),
-                inicioEm: scheduleConsultationModal.inicioEm,
-                tipoAtendimento: scheduleConsultationModal.tipoAtendimento,
-                observacoes: scheduleConsultationModal.observacoes || null,
-            });
+            const recorrencia = scheduleConsultationModal.recorrencia || 'NENHUMA';
+            if (recorrencia === 'NENHUMA') {
+                await schedulingApi.scheduleConsultationAsPsychologist({
+                    pacienteId: Number(scheduleConsultationModal.pacienteId),
+                    inicioEm: scheduleConsultationModal.inicioEm,
+                    tipoAtendimento: scheduleConsultationModal.tipoAtendimento,
+                    observacoes: scheduleConsultationModal.observacoes || null,
+                });
+            } else {
+                await schedulingApi.scheduleRecurringConsultation({
+                    pacienteId: Number(scheduleConsultationModal.pacienteId),
+                    inicioEm: scheduleConsultationModal.inicioEm,
+                    tipoAtendimento: scheduleConsultationModal.tipoAtendimento,
+                    observacoes: scheduleConsultationModal.observacoes || null,
+                    frequencia: recorrencia,
+                    ocorrencias: Number(scheduleConsultationModal.ocorrencias || 2),
+                });
+            }
 
             onToast?.({ type: 'success', message: 'Consulta agendada com sucesso.' });
             setScheduleConsultationModal(null);
@@ -71,6 +83,8 @@ export function useAgendarConsultaMutation({
             pacienteNome: '',
             tipoAtendimento: 'ONLINE',
             observacoes: '',
+            recorrencia: 'NENHUMA',
+            ocorrencias: 2,
         });
     }
 
@@ -82,12 +96,12 @@ export function useAgendarConsultaMutation({
 
         setCellActionMenu((current) => ({ ...current, loading: 'block' }));
         try {
-            const slot = await schedulingApi.createManualSlot({
+            await schedulingApi.createManualSlot({
                 data: toIsoDate(date),
-                horaInicio: `${start}:00`,
-                horaFim: `${end}:00`,
+                horaInicio: `${start}:00`.slice(0, 8),
+                horaFim: `${end}:00`.slice(0, 8),
+                motivo: 'Bloqueio manual',
             });
-            await schedulingApi.blockMySlot(slot.id);
             onToast?.({ type: 'success', message: 'Horario marcado como indisponivel.' });
             setCellActionMenu(null);
             refreshAll();

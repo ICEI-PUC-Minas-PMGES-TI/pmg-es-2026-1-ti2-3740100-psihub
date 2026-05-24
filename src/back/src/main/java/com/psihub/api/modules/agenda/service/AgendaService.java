@@ -1,11 +1,14 @@
 package com.psihub.api.modules.agenda.service;
 
 import com.psihub.api.modules.agenda.dto.AgendaCompletaResponse;
+import com.psihub.api.modules.agenda.dto.BloqueioSlotResponse;
+import com.psihub.api.modules.agenda.dto.CriarBloqueioRequest;
 import com.psihub.api.modules.agenda.dto.DefinirDisponibilidadeRequest;
 import com.psihub.api.modules.agenda.dto.DisponibilidadeResponse;
 import com.psihub.api.modules.agenda.dto.HorarioDisponivelDTO;
 import com.psihub.api.modules.agenda.dto.PacienteResumoResponse;
 import com.psihub.api.modules.agenda.dto.RegraDisponibilidadeResponse;
+import com.psihub.api.modules.consultas.dto.FrequenciaRecorrencia;
 import com.psihub.api.modules.agenda.entity.ExcecaoDisponibilidade;
 import com.psihub.api.modules.agenda.entity.RegraDisponibilidade;
 import com.psihub.api.modules.agenda.entity.TipoExcecaoDisponibilidade;
@@ -238,6 +241,61 @@ public class AgendaService {
                 .toList();
     }
 
+    @Transactional
+    public List<BloqueioSlotResponse> criarBloqueios(Long psicologoId, CriarBloqueioRequest request) {
+        Psicologo psicologo = buscarPsicologoAtivo(psicologoId);
+        validarPeriodo(request.horaInicio(), request.horaFim());
+
+        int ocorrencias = request.ocorrencias() == null ? 1 : request.ocorrencias();
+        if (request.frequencia() == null) {
+            ocorrencias = 1;
+        }
+
+        List<BloqueioSlotResponse> criados = new ArrayList<>();
+        for (int i = 0; i < ocorrencias; i += 1) {
+            LocalDate data = aplicarFrequenciaData(request.data(), request.frequencia(), i);
+            LocalDateTime inicio = data.atTime(request.horaInicio());
+            LocalDateTime fim = data.atTime(request.horaFim());
+            validarSemConflitoComConsulta(psicologoId, inicio, fim);
+
+            ExcecaoDisponibilidade excecao = new ExcecaoDisponibilidade();
+            excecao.setPsicologo(psicologo);
+            excecao.setData(data);
+            excecao.setTipo(TipoExcecaoDisponibilidade.BLOQUEIO);
+            excecao.setHoraInicio(request.horaInicio());
+            excecao.setHoraFim(request.horaFim());
+            excecao.setMotivo(request.motivo());
+
+            ExcecaoDisponibilidade saved = excecaoDisponibilidadeRepository.save(excecao);
+            criados.add(toBloqueioResponse(saved));
+        }
+
+        return criados;
+    }
+
+    @Transactional(readOnly = true)
+    public List<BloqueioSlotResponse> listarBloqueios(Long psicologoId, LocalDateTime inicio, LocalDateTime fim) {
+        validarIntervaloDataHora(inicio, fim);
+        LocalDate dataInicio = inicio.toLocalDate();
+        LocalDate dataFim = fim.minusNanos(1).toLocalDate();
+
+        return excecaoDisponibilidadeRepository
+                .findByPsicologoIdAndDataBetweenAndAtivoTrue(psicologoId, dataInicio, dataFim)
+                .stream()
+                .filter(item -> item.getTipo() == TipoExcecaoDisponibilidade.BLOQUEIO)
+                .map(this::toBloqueioResponse)
+                .sorted(Comparator.comparing(BloqueioSlotResponse::inicioEm))
+                .toList();
+    }
+
+    @Transactional
+    public void removerBloqueio(Long psicologoId, Long bloqueioId) {
+        ExcecaoDisponibilidade excecao = excecaoDisponibilidadeRepository
+                .findByIdAndPsicologoIdAndAtivoTrue(bloqueioId, psicologoId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bloqueio nao encontrado"));
+        excecao.setAtivo(false);
+    }
+
     private RegraDisponibilidade criarRegra(
             Psicologo psicologo,
             DiaSemana dia,
@@ -256,6 +314,33 @@ public class AgendaService {
         regra.setDuracaoSlotMinutos(duracao);
         regra.setAtivo(true);
         return regra;
+    }
+
+    private void validarSemConflitoComConsulta(Long psicologoId, LocalDateTime inicio, LocalDateTime fim) {
+        boolean conflito = consultaRepository.existsBlockingOverlap(
+                psicologoId,
+                inicio,
+                fim,
+            List.of(StatusConsulta.CANCELADA, StatusConsulta.CONCLUIDA, StatusConsulta.FALTOU)
+        );
+        if (conflito) {
+            throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel bloquear horario com consulta existente");
+        }
+    }
+
+    private BloqueioSlotResponse toBloqueioResponse(ExcecaoDisponibilidade excecao) {
+        LocalDateTime inicio = excecao.getData().atTime(excecao.getHoraInicio());
+        LocalDateTime fim = excecao.getData().atTime(excecao.getHoraFim());
+        return new BloqueioSlotResponse(excecao.getId(), inicio, fim, excecao.getMotivo(), "BLOQUEADO");
+    }
+
+    private LocalDate aplicarFrequenciaData(LocalDate dataBase, FrequenciaRecorrencia frequencia, int indice) {
+        if (frequencia == null || indice == 0) return dataBase;
+        return switch (frequencia) {
+            case SEMANAL -> dataBase.plusWeeks(indice);
+            case QUINZENAL -> dataBase.plusWeeks(indice * 2L);
+            case MENSAL -> dataBase.plusMonths(indice);
+        };
     }
 
     private void adicionarSlotsDoIntervalo(

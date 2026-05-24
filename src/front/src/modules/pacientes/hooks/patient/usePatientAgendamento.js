@@ -25,7 +25,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
     const availableDateKeys = useMemo(() => {
         return new Set(
             monthSlots
-                .filter((slot) => slot.status === 'DISPONIVEL' && new Date(getSlotInicio(slot)).getTime() > Date.now())
+                .filter((slot) => new Date(getSlotInicio(slot)).getTime() > Date.now())
                 .map((slot) => getSlotInicio(slot).slice(0, 10)),
         );
     }, [monthSlots]);

@@ -90,7 +90,27 @@ export function PsychologistAgendaPage({ onToast }) {
         handleCellActionBlock,
         handleUnblockSlot,
         exportFilteredConsultations,
+        handleUpdateStatus,
+        statusSubmitting,
+        handleEditConsultation,
+        editSubmitting,
+        handleDeleteConsultation,
+        deleteSubmitting,
     } = useAgenda({ onToast });
+
+    const todaySummary = (() => {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const todayConsultations = filteredConsultations.filter((item) => item.inicioEm?.slice(0, 10) === todayKey);
+        const todayPending = todayConsultations.filter((item) => item.status === 'AGENDADA' || item.status === 'CONFIRMADA').length;
+        const nextConsultation = filteredConsultations
+            .filter((item) => new Date(item.inicioEm).getTime() > Date.now())
+            .sort((a, b) => new Date(a.inicioEm) - new Date(b.inicioEm))[0] || null;
+        return {
+            total: todayConsultations.length,
+            pending: todayPending,
+            next: nextConsultation,
+        };
+    })();
     return (
         <div className="agenda-page">
             <header className="agenda-page__header panel">
@@ -306,6 +326,22 @@ export function PsychologistAgendaPage({ onToast }) {
                         <p className="eyebrow">Seção 3</p>
                         <h2>Calendário Semanal de Consultas</h2>
                     </div>
+                    <div className="agenda-summary-bar" aria-label="Resumo do dia">
+                        <article className="agenda-summary-chip">
+                            <small>Total hoje</small>
+                            <strong>{todaySummary.total}</strong>
+                        </article>
+                        <article className="agenda-summary-chip">
+                            <small>Pendentes</small>
+                            <strong>{todaySummary.pending}</strong>
+                        </article>
+                        <article className="agenda-summary-chip agenda-summary-chip--wide">
+                            <small>Próxima</small>
+                            <strong>{todaySummary.next
+                                ? `${formatDate(todaySummary.next.inicioEm)} ${formatTime(todaySummary.next.inicioEm)}`
+                                : 'Nenhuma consulta futura'}</strong>
+                        </article>
+                    </div>
                     <div className="week-nav">
                         <button
                             className="ghost-button"
@@ -328,22 +364,36 @@ export function PsychologistAgendaPage({ onToast }) {
 
                 {(loadingConsultations || loadingSlots) && <LoadingState />}
                 {!loadingConsultations && !loadingSlots && (
-                    <WeekCalendar
-                        weekDays={weekDays}
-                        rows={calendarRows}
-                        availabilityByDay={weekAvailabilityByDay}
-                        durationByDay={weekDurationByDay}
-                        consultationBlocks={weekConsultationBlocks}
-                        blockedBlocks={weekBlockedSlots}
-                        breakBlocks={weekBreakBlocks}
-                        readOnly={isPastWeek}
-                        onOpenConsultation={(consultation) => {
-                            setConsultationModal(consultation);
-                            setCancelReason('');
-                        }}
-                        onOpenCellMenu={openCellActionMenu}
-                        onOpenBlockedSlot={setUnblockSlotModal}
-                    />
+                    <div className="week-calendar-shell" key={weekDays[0] ? weekDays[0].toISOString().slice(0, 10) : 'calendar'}>
+                        <WeekCalendar
+                            weekDays={weekDays}
+                            rows={calendarRows}
+                            availabilityByDay={weekAvailabilityByDay}
+                            durationByDay={weekDurationByDay}
+                            consultationBlocks={weekConsultationBlocks}
+                            blockedBlocks={weekBlockedSlots}
+                            breakBlocks={weekBreakBlocks}
+                            readOnly={isPastWeek}
+                            onOpenConsultation={(consultation) => {
+                                setConsultationModal(consultation);
+                                setCancelReason('');
+                            }}
+                            onOpenCellMenu={openCellActionMenu}
+                            onOpenBlockedSlot={setUnblockSlotModal}
+                            onMoveConsultation={(payload, date, minutesFromMidnight) => {
+                                const start = String(Math.floor(minutesFromMidnight / 60)).padStart(2, '0');
+                                const mins = String(minutesFromMidnight % 60).padStart(2, '0');
+                                const targetStart = `${date.toISOString().slice(0, 10)}T${start}:${mins}:00`;
+                                const targetEndDate = new Date(new Date(targetStart).getTime() + (payload.durationMinutes || 50) * 60000);
+                                const targetEnd = targetEndDate.toISOString().slice(0, 19);
+                                handleEditConsultation({
+                                    inicioEm: targetStart,
+                                    fimEm: targetEnd,
+                                    observacoes: null,
+                                }, payload.id);
+                            }}
+                        />
+                    </div>
                 )}
             </section>
 
@@ -409,6 +459,12 @@ export function PsychologistAgendaPage({ onToast }) {
                     onCancelReasonChange={(value) => setCancelReason(value.slice(0, 300))}
                     onConfirmCancel={handleCancelConsultation}
                     cancelSubmitting={cancelSubmitting}
+                    onUpdateStatus={handleUpdateStatus}
+                    statusSubmitting={statusSubmitting}
+                    onEditConsultation={handleEditConsultation}
+                    editSubmitting={editSubmitting}
+                    onDeleteConsultation={handleDeleteConsultation}
+                    deleteSubmitting={deleteSubmitting}
                 />
             )}
         </div>

@@ -15,6 +15,8 @@ const initialForm = {
     biografia: '',
 };
 
+const PSYCHOLOGIST_PENDING_MESSAGE = 'Seu cadastro foi recebido! Aguarde a aprovação do administrador. Você receberá acesso após a análise do seu perfil.';
+
 export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
     const [form, setForm] = useState(initialForm);
     const [submitting, setSubmitting] = useState(false);
@@ -77,7 +79,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
             setRegistered(true);
             onToast?.({
                 type: 'success',
-                message: 'Cadastro profissional criado.',
+                message: PSYCHOLOGIST_PENDING_MESSAGE,
             });
         } catch (err) {
             setError(err.message || 'Não foi possível criar o perfil profissional agora.');
@@ -112,9 +114,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
                         <div className="success-panel">
                             <CheckCircle size={34} />
                             <h2>Cadastro enviado</h2>
-                            <p>
-                                Seu perfil profissional foi criado. Você já pode entrar com seu e-mail e senha.
-                            </p>
+                            <p>{PSYCHOLOGIST_PENDING_MESSAGE}</p>
                             <button type="button" className="primary-button primary-button--fit" onClick={onBack}>
                                 Voltar para início
                             </button>

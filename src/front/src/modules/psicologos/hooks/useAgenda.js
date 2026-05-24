@@ -4,6 +4,7 @@ import { useAgendaExport } from './agenda/useAgendaExport';
 import { useAgendaFiltros } from './agenda/useAgendaFiltros';
 import { useAgendaUiState } from './agenda/useAgendaUiState';
 import { useAgendarConsultaMutation } from './agenda/useAgendarConsultaMutation';
+import { useConsultaActionsMutation } from './agenda/useConsultaActionsMutation';
 import { useCancelarConsultaMutation } from './agenda/useCancelarConsultaMutation';
 import { useConsultasQuery } from './agenda/useConsultasQuery';
 import { useDisponibilidadeMutation } from './agenda/useDisponibilidadeMutation';
@@ -29,6 +30,7 @@ export function useAgenda({ onToast }) {
     const disponibilidadeMutation = useDisponibilidadeMutation({ ...ui, ...disponibilidade, onToast, refreshAll });
     const agendar = useAgendarConsultaMutation({ ...ui, ...calendar, onToast, refreshAll });
     const cancelar = useCancelarConsultaMutation({ ...ui, onToast, refreshAll });
+    const consultaActions = useConsultaActionsMutation({ ...ui, onToast, refreshAll });
     const exportacao = useAgendaExport({ filteredConsultations: filtros.filteredConsultations, onToast });
 
     return {
@@ -41,6 +43,7 @@ export function useAgenda({ onToast }) {
         ...disponibilidadeMutation,
         ...agendar,
         ...cancelar,
+        ...consultaActions,
         ...exportacao,
     };
 }

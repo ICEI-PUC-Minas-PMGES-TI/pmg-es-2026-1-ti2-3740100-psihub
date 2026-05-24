@@ -68,22 +68,55 @@ export const schedulingApi = {
     },
 
     createManualSlot(payload) {
-        return apiRequest('/api/psicologos/me/agenda/slots', {
+        return apiRequest('/api/psicologos/me/agenda/bloqueios', {
             method: 'POST',
             body: payload,
         });
     },
 
     removeMySlot(horarioId) {
-        return apiRequest(`/api/psicologos/me/agenda/slots/${horarioId}/cancelar`, {
+        return apiRequest(`/api/psicologos/me/agenda/bloqueios/${horarioId}/cancelar`, {
             method: 'PATCH',
         });
     },
 
     blockMySlot(horarioId) {
-        return apiRequest(`/api/psicologos/me/agenda/slots/${horarioId}/bloquear`, {
+        return apiRequest(`/api/psicologos/me/agenda/bloqueios/${horarioId}/cancelar`, {
             method: 'PATCH',
-            body: {},
+        });
+    },
+
+    listMyBlocks({ inicio, fim, signal }) {
+        return apiRequest('/api/psicologos/me/agenda/bloqueios', {
+            query: { inicio, fim },
+            signal,
+        });
+    },
+
+    updateConsultation({ consultaId, payload }) {
+        return apiRequest(`/api/consultas/${consultaId}`, {
+            method: 'PUT',
+            body: payload,
+        });
+    },
+
+    updateConsultationStatus({ consultaId, status, motivo }) {
+        return apiRequest(`/api/consultas/${consultaId}/status`, {
+            method: 'PATCH',
+            body: { status, motivo },
+        });
+    },
+
+    deleteConsultation(consultaId) {
+        return apiRequest(`/api/consultas/${consultaId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    scheduleRecurringConsultation(payload) {
+        return apiRequest('/api/consultas/recorrencias', {
+            method: 'POST',
+            body: payload,
         });
     },
 

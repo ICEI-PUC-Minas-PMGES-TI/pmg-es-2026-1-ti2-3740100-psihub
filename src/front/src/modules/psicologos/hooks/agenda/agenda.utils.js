@@ -136,9 +136,11 @@ export function findBlockAtMinute(dayBlocks, minutes) {
 }
 
 export function weekCalendarBlockClass(block) {
+    if (block.status === 'CONFIRMADA') return 'week-calendar__block--confirmed';
     if (block.status === 'EM_ANDAMENTO') return 'week-calendar__block--in-progress';
     if (block.status === 'CONCLUIDA') return 'week-calendar__block--completed';
     if (block.status === 'CANCELADA') return 'week-calendar__block--cancelled';
+    if (block.status === 'FALTOU') return 'week-calendar__block--missed';
     return 'week-calendar__block--scheduled';
 }
 
@@ -154,9 +156,11 @@ export function consultationStatusLabel(status) {
 }
 
 export function statusBadgeClass(status) {
-    if (status === 'AGENDADA' || status === 'CONFIRMADA') return 'status-badge--agendada';
+    if (status === 'AGENDADA') return 'status-badge--agendada';
+    if (status === 'CONFIRMADA') return 'status-badge--confirmada';
     if (status === 'EM_ANDAMENTO') return 'status-badge--em_andamento';
     if (status === 'CONCLUIDA') return 'status-badge--concluida';
+    if (status === 'FALTOU') return 'status-badge--faltou';
     return 'status-badge--cancelada';
 }
 

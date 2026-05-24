@@ -1,8 +1,9 @@
-import { Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, Loader2, LogIn, UserPlus } from 'lucide-react';
 import { useAuthForm } from '@/modules/auth/hooks/useAuthForm';
 
 export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo }) {
     const {
+        confirmationMessage,
         form,
         handleSubmit,
         isRegister,
@@ -24,6 +25,13 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                     <p>Entre para acessar sua agenda de consultas psicológicas.</p>
                 </div>
 
+                {confirmationMessage ? (
+                    <div className="success-panel">
+                        <CheckCircle size={34} />
+                        <h2>Cadastro recebido</h2>
+                        <p>{confirmationMessage}</p>
+                    </div>
+                ) : (
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="segmented-control" role="tablist" aria-label="Modo de acesso">
                         <button
@@ -54,15 +62,17 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                                 />
                             </label>
 
-                            <label className="field">
-                                Data de nascimento
-                                <input
-                                    type="date"
-                                    value={form.dataNascimento}
-                                    onChange={(event) => updateField('dataNascimento', event.target.value)}
-                                    required
-                                />
-                            </label>
+                            {form.tipo === 'paciente' && (
+                                <label className="field">
+                                    Data de nascimento
+                                    <input
+                                        type="date"
+                                        value={form.dataNascimento}
+                                        onChange={(event) => updateField('dataNascimento', event.target.value)}
+                                        required
+                                    />
+                                </label>
+                            )}
                         </>
                     )}
 
@@ -139,6 +149,7 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                         </button>
                     )}
                 </form>
+                )}
             </section>
         </main>
     );
