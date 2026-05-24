@@ -9,6 +9,7 @@ import { PatientsManagementPage } from '@/pages/PatientsManagement';
 import { PsychologistAgendaPage } from '@/pages/PsychologistAgenda';
 import { PsychologistDashboard } from '@/pages/PsychologistDashboard';
 import { PsychologistProfilePage } from '@/pages/PsychologistProfile';
+import { PsychologistRegisterPage } from '@/pages/PsychologistRegister';
 import { ReportsPage } from '@/pages/Reports';
 import { AppShell } from '@/shared/components/AppShell';
 import { Toast } from '@/shared/components/Toast';
@@ -69,6 +70,22 @@ export default function App() {
     }
 
     if (!auth) {
+        if (publicView === 'psychologist-register') {
+            return (
+                <>
+                    <PsychologistRegisterPage
+                        onAuthenticated={handleAuthenticated}
+                        onBack={() => setPublicView('landing')}
+                        onToast={setToast}
+                    />
+                    <Toast
+                        toast={toast}
+                        onClose={() => setToast(null)}
+                    />
+                </>
+            );
+        }
+
         if (publicView === 'auth') {
             return (
                 <>
@@ -94,6 +111,10 @@ export default function App() {
                         setPublicView('auth');
                     }}
                     onRegister={(tipo) => {
+                        if (tipo === 'psicologo') {
+                            setPublicView('psychologist-register');
+                            return;
+                        }
                         setAuthMode('register');
                         setAuthType(tipo);
                         setPublicView('auth');

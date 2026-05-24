@@ -1,7 +1,7 @@
-import { CalendarPlus, Loader2, Save, Search, Trash2, X } from 'lucide-react';
+import { CalendarPlus, Loader2, Save, Trash2, X } from 'lucide-react';
 import { formatDate, formatTime, toIsoDate } from '@/shared/utils/date.utils';
 import { CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, DAY_FULL_LABELS, DAY_OPTIONS, DAY_ORDER, DEFAULT_DURATION } from '@/modules/psicologos/hooks/agenda/agenda.constants';
-import { canCancelConsultation, consultationStatusLabel, dayHeaderLabel, findBlockAtMinute, intervalsOverlap, isSlotWithinAvailability, minutesToTimeLabel, statusBadgeClass, weekCalendarBlockClass } from '@/modules/psicologos/hooks/agenda/agenda.utils';
+import { canCancelConsultation, consultationStatusLabel, dayHeaderLabel, findBlockAtMinute, intervalsOverlap, isSlotWithinAvailability, minutesToTimeLabel, weekCalendarBlockClass } from '@/modules/psicologos/hooks/agenda/agenda.utils';
 import { usePatientSearchField } from '@/modules/psicologos/hooks/agenda/usePatientSearchField';
 
 export function LoadingState() {

@@ -324,7 +324,7 @@ public class AgendaService {
 
     private Psicologo buscarPsicologoAtivo(Long psicologoId) {
         Psicologo psicologo = buscarPsicologo(psicologoId);
-        if (psicologo.getStatusAcesso() != StatusAcesso.ATIVO) {
+        if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
         }
         return psicologo;

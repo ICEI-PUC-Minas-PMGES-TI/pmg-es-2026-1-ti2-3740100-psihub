@@ -13,6 +13,7 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
         submitting,
         updateField,
     } = useAuthForm({ onAuthenticated, onToast, initialMode, initialTipo });
+    const passwordMismatch = isRegister && form.confirmarSenha.length > 0 && form.senha !== form.confirmarSenha;
 
     return (
         <main className="auth-page">
@@ -49,6 +50,16 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                                     value={form.nome}
                                     onChange={(event) => updateField('nome', event.target.value)}
                                     maxLength={150}
+                                    required
+                                />
+                            </label>
+
+                            <label className="field">
+                                Data de nascimento
+                                <input
+                                    type="date"
+                                    value={form.dataNascimento}
+                                    onChange={(event) => updateField('dataNascimento', event.target.value)}
                                     required
                                 />
                             </label>
@@ -95,6 +106,24 @@ export function AuthPage({ onAuthenticated, onToast, initialMode, initialTipo })
                             Mínimo 8 caracteres
                         </span>
                     </label>
+
+                    {isRegister && (
+                        <label className="field">
+                            Confirmar senha
+                            <input
+                                type="password"
+                                value={form.confirmarSenha}
+                                onChange={(event) => updateField('confirmarSenha', event.target.value)}
+                                minLength={8}
+                                maxLength={120}
+                                required
+                                aria-invalid={passwordMismatch}
+                            />
+                            {passwordMismatch && (
+                                <span className="field-hint field-hint--error">As senhas não conferem</span>
+                            )}
+                        </label>
+                    )}
 
                     <button className="primary-button" type="submit" disabled={submitting}>
                         {submitting ? <Loader2 className="spin" size={17} /> : isRegister ? <UserPlus size={17} /> : <LogIn size={17} />}

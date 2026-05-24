@@ -266,7 +266,7 @@ public class ConsultaService {
     }
 
     private void validarPsicologoAtivo(Psicologo psicologo) {
-        if (psicologo.getStatusAcesso() != StatusAcesso.ATIVO) {
+        if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
         }
     }

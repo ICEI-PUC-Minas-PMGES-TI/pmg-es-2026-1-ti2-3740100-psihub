@@ -98,16 +98,16 @@ export function LandingPage({ onLogin, onRegister }) {
                         {/* BUTTONS — também descem até a seção de escolha */}
                         <div className="flex flex-wrap gap-4 mt-10">
                             <button
-                                onClick={scrollToSection}
+                                onClick={() => onRegister("paciente")}
                                 className="px-7 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition font-semibold text-lg shadow-xl shadow-violet-500/30 text-white"
                             >
                                 Encontrar psicólogo
                             </button>
                             <button
-                                onClick={scrollToSection}
+                                onClick={() => onRegister("psicologo")}
                                 className="px-7 py-4 rounded-2xl border border-zinc-200 shadow-sm bg-white hover:bg-zinc-50 transition font-semibold text-lg"
                             >
-                                Sou psicólogo
+                                Criar perfil profissional
                             </button>
                         </div>
                     </div>

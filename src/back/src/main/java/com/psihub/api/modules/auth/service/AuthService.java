@@ -67,9 +67,6 @@ public class AuthService {
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         criarPerfilInicial(usuarioSalvo, request);
 
-        if (tipoUsuario == TipoUsuario.PSICOLOGO) {
-            return new AuthResponse(null, toUserResponse(usuarioSalvo), 0);
-        }
         return toAuthResponse(usuarioSalvo);
     }
 
@@ -92,7 +89,13 @@ public class AuthService {
             pacienteService.criarPerfilInicial(usuario, request.dataNascimento());
             return;
         }
-        psicologoService.criarPerfilInicial(usuario);
+        psicologoService.criarPerfilInicial(
+                usuario,
+                request.crp(),
+                request.valorConsulta(),
+                request.biografia(),
+                request.especialidades()
+        );
     }
 
     private AuthResponse toAuthResponse(Usuario usuario) {
@@ -130,6 +133,16 @@ public class AuthService {
         if (tipoUsuario == TipoUsuario.PACIENTE && request.dataNascimento() == null) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Data de nascimento e obrigatoria para paciente");
         }
+
+        if (tipoUsuario == TipoUsuario.PSICOLOGO) {
+            String crp = sanitizeOptional(request.crp());
+            if (crp == null) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "CRP e obrigatorio para psicologo");
+            }
+            if (psicologoService.existeCrp(crp)) {
+                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicologo cadastrado com este CRP");
+            }
+        }
     }
 
     private void validarAcessoLogin(Usuario usuario) {
@@ -137,11 +150,7 @@ public class AuthService {
             return;
         }
 
-        StatusAcesso status = psicologoService.buscarStatusAcessoPorId(usuario.getId());
-        if (status == StatusAcesso.PENDENTE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro de psicologo pendente de aprovacao administrativa");
-        }
-        if (status == StatusAcesso.REVOGADO) {
+        if (psicologoService.buscarStatusAcessoPorId(usuario.getId()) == StatusAcesso.REVOGADO) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo revogado pelo administrador");
         }
     }

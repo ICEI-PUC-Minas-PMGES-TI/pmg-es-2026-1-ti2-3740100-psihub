@@ -9,15 +9,17 @@ import org.springframework.data.repository.query.Param;
 
 public interface PsicologoRepository extends JpaRepository<Psicologo, Long> {
 
+    boolean existsByCrpIgnoreCase(String crp);
+
     @Query("""
             select distinct psicologo
             from Psicologo psicologo
             join fetch psicologo.usuario usuario
             left join fetch psicologo.especialidades especialidade
-            where psicologo.statusAcesso = :status
+            where psicologo.statusAcesso <> :statusRevogado
               and usuario.ativo = true
             """)
-    List<Psicologo> findDisponiveis(@Param("status") StatusAcesso status);
+    List<Psicologo> findDisponiveis(@Param("statusRevogado") StatusAcesso statusRevogado);
 
     @Query("""
             select distinct psicologo

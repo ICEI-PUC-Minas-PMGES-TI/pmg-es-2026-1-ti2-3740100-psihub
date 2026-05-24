@@ -38,7 +38,7 @@ public class PsicologoService {
 
     @Transactional(readOnly = true)
     public List<PsicologoDisponivelResponse> listarDisponiveis() {
-        return psicologoRepository.findDisponiveis(StatusAcesso.ATIVO)
+        return psicologoRepository.findDisponiveis(StatusAcesso.REVOGADO)
                 .stream()
                 .sorted(Comparator.comparing(psicologo -> psicologo.getUsuario().getNome()))
                 .map(this::toResponse)
@@ -70,18 +70,51 @@ public class PsicologoService {
 
     @Transactional
     public void criarPerfilInicial(Usuario usuario) {
+        criarPerfilInicial(usuario, null, null, null, null);
+    }
+
+    @Transactional
+    public void criarPerfilInicial(
+            Usuario usuario,
+            String crp,
+            BigDecimal valorConsulta,
+            String biografia,
+            List<String> especialidades
+    ) {
         Psicologo psicologo = new Psicologo();
         psicologo.setUsuario(usuario);
-        psicologo.setCrp("CADASTRO-" + usuario.getId());
-        psicologo.setValorConsulta(BigDecimal.ZERO);
-        psicologo.setBiografia("Perfil profissional em configuracao.");
-        psicologo.setStatusAcesso(StatusAcesso.PENDENTE);
+        String crpNormalizado = sanitizeOptional(crp);
+        String biografiaNormalizada = sanitizeOptional(biografia);
+        psicologo.setCrp(crpNormalizado != null ? crpNormalizado : "CADASTRO-" + usuario.getId());
+        psicologo.setValorConsulta(valorConsulta != null ? valorConsulta : BigDecimal.ZERO);
+        psicologo.setBiografia(biografiaNormalizada != null ? biografiaNormalizada : "Perfil profissional em configuracao.");
+        psicologo.setStatusAcesso(StatusAcesso.ATIVO);
         Psicologo psicologoSalvo = psicologoRepository.save(psicologo);
 
-        EspecialidadePsicologo especialidade = new EspecialidadePsicologo();
-        especialidade.setPsicologo(psicologoSalvo);
-        especialidade.setNome("Psicologia");
-        especialidadePsicologoRepository.save(especialidade);
+        List<String> nomes = especialidades == null ? List.of("Psicologia") : especialidades.stream()
+                .map(this::sanitizeOptional)
+                .filter(Objects::nonNull)
+                .collect(LinkedHashMap<String, String>::new, (map, nome) -> map.putIfAbsent(normalizarChave(nome), nome), Map::putAll)
+                .values()
+                .stream()
+                .sorted()
+                .toList();
+        if (nomes.isEmpty()) {
+            nomes = List.of("Psicologia");
+        }
+
+        for (String nome : nomes) {
+            EspecialidadePsicologo especialidade = new EspecialidadePsicologo();
+            especialidade.setPsicologo(psicologoSalvo);
+            especialidade.setNome(nome);
+            especialidadePsicologoRepository.save(especialidade);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existeCrp(String crp) {
+        String normalized = sanitizeOptional(crp);
+        return normalized != null && psicologoRepository.existsByCrpIgnoreCase(normalized);
     }
 
     @Transactional
@@ -204,7 +237,7 @@ public class PsicologoService {
     }
 
     private void validarStatusAtivo(Psicologo psicologo) {
-        if (psicologo.getStatusAcesso() != StatusAcesso.ATIVO) {
+        if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
         }
     }

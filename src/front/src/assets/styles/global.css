@@ -463,11 +463,30 @@ button:disabled {
   background: var(--color-bg);
 }
 
+.professional-register-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: var(--color-bg);
+}
+
 .auth-panel {
   display: grid;
   width: min(920px, 100%);
   grid-template-columns: minmax(260px, 0.9fr) minmax(300px, 1fr);
   overflow: hidden;
+}
+
+.professional-register-panel {
+  display: grid;
+  width: min(1080px, 100%);
+  grid-template-columns: minmax(280px, 0.75fr) minmax(360px, 1.25fr);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .auth-panel__intro {
@@ -480,8 +499,28 @@ button:disabled {
   background: var(--color-primary-light);
 }
 
+.professional-register-panel__intro {
+  display: flex;
+  min-height: 560px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 34px;
+  background: var(--color-primary-light);
+}
+
+.professional-register-panel__back {
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.6);
+}
+
 .auth-panel__intro h1,
 .auth-panel__intro p {
+  margin: 0;
+}
+
+.professional-register-panel__intro h1,
+.professional-register-panel__intro p {
   margin: 0;
 }
 
@@ -491,9 +530,27 @@ button:disabled {
   font-weight: 800;
 }
 
+.professional-register-panel__intro h1 {
+  color: var(--color-primary);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
 .auth-panel__intro p {
   max-width: 320px;
   color: var(--color-text-secondary);
+}
+
+.professional-register-panel__intro p {
+  max-width: 360px;
+  color: var(--color-text-secondary);
+}
+
+.professional-register-panel__body {
+  display: grid;
+  align-content: center;
+  padding: 34px;
 }
 
 .auth-form,
@@ -506,6 +563,19 @@ button:disabled {
 .auth-form {
   align-content: center;
   padding: 34px;
+}
+
+.inline-alert {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inline-alert--error {
+  border: 1px solid var(--color-danger-light);
+  background: #FEF2F2;
+  color: var(--color-danger);
 }
 
 .segmented-control {
@@ -2268,13 +2338,19 @@ textarea:focus {
   }
 
   .auth-panel,
+  .professional-register-panel,
   .form-grid,
   .summary-list div {
     grid-template-columns: 1fr;
   }
 
-  .auth-panel__intro {
+  .auth-panel__intro,
+  .professional-register-panel__intro {
     min-height: auto;
+  }
+
+  .professional-register-panel__body {
+    padding: 24px;
   }
 
   .modal-backdrop {

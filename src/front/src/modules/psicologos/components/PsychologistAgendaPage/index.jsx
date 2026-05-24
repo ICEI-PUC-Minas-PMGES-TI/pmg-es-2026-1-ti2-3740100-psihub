@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Download, Edit3, Search, SlidersHorizontal } from 'lucide-react';
-import { addDays, formatDate, formatTime, toIsoDate } from '@/shared/utils/date.utils';
+import { addDays, formatDate, formatTime } from '@/shared/utils/date.utils';
 import {
     DAY_FULL_LABELS,
     DAY_ORDER,

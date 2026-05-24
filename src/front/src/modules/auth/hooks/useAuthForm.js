@@ -6,6 +6,8 @@ const initialForm = {
     nome: '',
     email: '',
     senha: '',
+    confirmarSenha: '',
+    dataNascimento: '',
     tipo: 'paciente',
 };
 
@@ -25,11 +27,23 @@ export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', i
             return;
         }
 
+        if (isRegister && form.senha !== form.confirmarSenha) {
+            onToast({ type: 'error', message: 'A confirmação de senha não confere.' });
+            return;
+        }
+
         setSubmitting(true);
 
         try {
             const payload = isRegister
-                ? { nome: form.nome, email: form.email, senha: form.senha, tipo: form.tipo }
+                ? {
+                    nome: form.nome,
+                    email: form.email,
+                    senha: form.senha,
+                    confirmarSenha: form.confirmarSenha,
+                    dataNascimento: form.dataNascimento,
+                    tipo: form.tipo,
+                }
                 : { email: form.email, senha: form.senha };
             const response = isRegister ? await authApi.register(payload) : await authApi.login(payload);
             const tokenPayload = decodeJwtPayload(response.token);
@@ -66,5 +80,7 @@ export function useAuthForm({ onAuthenticated, onToast, initialMode = 'login', i
 function friendlyError(error, isRegister) {
     if (error?.status === 401) return 'E-mail ou senha não conferem.';
     if (error?.status === 409) return 'Já existe uma conta com este e-mail.';
+    if (error?.status === 403 && error?.message) return error.message;
+    if (error?.status === 400 && error?.message) return error.message;
     return isRegister ? 'Não foi possível criar sua conta agora.' : 'Não foi possível entrar agora.';
 }

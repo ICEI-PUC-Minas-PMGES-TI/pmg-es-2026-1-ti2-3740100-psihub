@@ -47,7 +47,7 @@ public class Psicologo extends AuditableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_acesso", nullable = false, length = 20)
-    private StatusAcesso statusAcesso = StatusAcesso.PENDENTE;
+    private StatusAcesso statusAcesso = StatusAcesso.ATIVO;
 
     @Column(name = "motivo_revogacao", length = 300)
     private String motivoRevogacao;
