@@ -1,9 +1,13 @@
 ### 3.3.2 Processo 2 – Gestão do Paciente
 
 Este processo descreve todas as interações realizadas pelo paciente dentro da plataforma PsiHub. Ele contempla desde o cadastro e autenticação até o registro emocional contínuo, agendamento de consultas e acompanhamento do próprio histórico terapêutico.
-
 A principal oportunidade de melhoria está na centralização dessas ações em um único ambiente digital, permitindo que o paciente tenha maior autonomia no acompanhamento da sua saúde mental, além de fornecer dados contínuos ao psicólogo, reduzindo a dependência de relatos pontuais em sessão.
 
+
+new
+<img width="1205" height="1170" alt="image" src="https://github.com/user-attachments/assets/c010b3c7-7fb9-431c-95ab-0917f40464e5" />
+
+old
 ![Modelo BPMN do Processo 2 – Gestão do Paciente](images/gestao-do-paciente.png)
 
 ---
@@ -13,6 +17,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 1 – Cadastro do Paciente**
+O paciente acessa a plataforma e preenche o formulário de cadastro com seus dados pessoais. O sistema valida os dados informados; caso haja inconsistência, uma mensagem de erro de validação é exibida e o paciente pode corrigir e tentar novamente.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -31,6 +36,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 2 – Realizar Login**
+Após o cadastro ou em acessos posteriores, o paciente informa suas credenciais. O sistema verifica os dados; caso inválidos, exibe uma mensagem de erro e permite nova tentativa no mesmo fluxo.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -46,6 +52,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 3 – Acessar Dashboard do Paciente**
+Autenticado com sucesso, o paciente acessa o painel do paciente, que exibe as próximas consultas agendadas, o humor recente registrado e notificações pendentes. A partir daqui o paciente pode acessar todas as funcionalidades do sistema.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -64,6 +71,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 4 – Registrar Estado Emocional**
+O paciente acessa a opção Registrar humor e preenche as informações do estado emocional do dia. O sistema verifica a restrição de 24h: caso o registro já tenha sido criado há mais de 24 horas, a edição é bloqueada para garantir a integridade dos dados.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -80,6 +88,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 5 – Agendar Consulta**
+O paciente seleciona o psicólogo desejado, a data e o horário pretendidos. O sistema verifica a disponibilidade do horário: caso indisponível, exibe aviso e solicita nova escolha. Caso disponível, o paciente confirma o agendamento
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -96,6 +105,7 @@ A principal oportunidade de melhoria está na centralização dessas ações em 
 ---
 
 ### **Atividade 6 – Visualizar Histórico**
+O paciente acessa o histórico completo, que exibe o histórico de consultas realizadas, os registros emocionais anteriores e o gráfico de evolução emocional gerado automaticamente.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
