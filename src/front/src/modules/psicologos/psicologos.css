@@ -13,20 +13,20 @@
 .agenda-toggle__button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding: 0 14px;
+  gap: var(--space-sm);
+  min-height: 40px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 12px;
-  background: #F3F4F6;
-  color: #4B5563;
+  border-radius: 6px;
+  background: var(--color-background-secondary);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 800;
 }
 
 .agenda-toggle__button--active {
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: var(--color-surface);
 }
 
 .agenda-row {
@@ -35,7 +35,7 @@
 
 .agenda-row__meta {
   display: grid;
-  margin-top: 6px;
+  margin-top: var(--space-sm);
   gap: 2px;
   color: var(--color-text-secondary);
   font-size: 12px;
@@ -55,11 +55,11 @@
   display: none;
   width: min(260px, 70vw);
   transform: translateX(-50%);
-  gap: 6px;
-  padding: 12px 14px;
+  gap: var(--space-sm);
+  padding: 12px 16px;
   border: 1px solid #E9D5FF;
   border-radius: 14px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   box-shadow: 0 12px 30px rgba(124, 58, 237, 0.14);
 }
 
@@ -71,12 +71,12 @@
 }
 
 .agenda-row__tooltip strong {
-  color: #6D28D9;
+  color: var(--color-primary-hover);
   font-size: 14px;
 }
 
 .agenda-row__tooltip span {
-  color: #7C3AED;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 800;
 }
@@ -153,14 +153,14 @@
   display: grid;
   grid-template-columns: 82px repeat(7, minmax(180px, 1fr));
   min-height: 860px;
-  background: #FFFFFF;
+  background: var(--color-surface);
 }
 
 .week-agenda__times {
   display: grid;
   grid-template-rows: repeat(30, 44px);
   border-right: 1px solid var(--color-border);
-  background: #F9FAFB;
+  background: var(--color-bg);
 }
 
 .week-agenda__time-cell {
@@ -176,7 +176,7 @@
   display: grid;
   grid-template-rows: repeat(30, 44px);
   border-right: 1px solid #EEF2F7;
-  background: #FFFFFF;
+  background: var(--color-surface);
 }
 
 .week-agenda__column:last-child {
@@ -313,19 +313,19 @@
 }
 
 .agenda-page__subtitle {
-  margin: 6px 0 0;
+  margin: var(--space-sm) 0 0;
   color: var(--color-text-secondary);
 }
 
 .agenda-page__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .agenda-section {
   display: grid;
-  gap: 18px;
+  gap: var(--space-md);
 }
 
 .availability-grid {
@@ -336,8 +336,8 @@
 
 .availability-card {
   display: grid;
-  gap: 8px;
-  padding: 14px;
+  gap: var(--space-sm);
+  padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFF 100%);
@@ -347,7 +347,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .availability-card__hours {
@@ -406,7 +406,7 @@
 .availability-warning__days {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-sm);
 }
 
 .availability-warning mark {
@@ -419,7 +419,7 @@
 
 .availability-break {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -446,23 +446,23 @@
 
 .agenda-mini-list {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .manual-slot-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .manual-slot-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 12px;
+  padding: 12px 16px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: #FFFFFF;
+  background: var(--color-surface);
 }
 
 .manual-slot-item strong,
@@ -478,7 +478,7 @@
 .manual-slot-item__actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .agenda-calendar-toolbar {
@@ -487,7 +487,7 @@
 
 .agenda-calendar-filters {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   justify-items: end;
 }
 
@@ -504,30 +504,31 @@
 }
 
 .agenda-filter-button {
-  min-height: 34px;
-  padding: 7px 12px;
-  border: 1px solid #E5E7EB;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-input);
   border-radius: 999px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   font-weight: 800;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 
 .agenda-filter-button--active {
   border-color: var(--color-primary);
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: var(--color-surface);
 }
 
 .agenda-search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   min-width: min(320px, 100%);
   padding: 0 12px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--color-border-input);
   border-radius: 999px;
-  background: #FFFFFF;
+  background: var(--color-surface);
 }
 
 .agenda-search input {
@@ -540,7 +541,7 @@
 .agenda-search-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   justify-content: flex-end;
 }
@@ -548,12 +549,12 @@
 .agenda-date-filter {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   min-height: 40px;
   padding: 0 12px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--color-border-input);
   border-radius: 999px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 800;
@@ -586,14 +587,14 @@
 }
 
 .agenda-more-filters__trigger--open {
-  background: #F5F3FF;
+  background: var(--color-surface-hover);
   color: var(--color-primary);
 }
 
 .agenda-summary-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .agenda-summary-chip {
@@ -630,7 +631,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
+  gap: 12px;
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 800;
@@ -680,7 +681,7 @@
   overflow: auto;
   border: 1px solid var(--color-border);
   border-radius: 18px;
-  background: #FFFFFF;
+  background: var(--color-surface);
 }
 
 .week-calendar__header,
@@ -728,7 +729,7 @@
   display: grid;
   grid-template-rows: repeat(30, 44px);
   border-right: 1px solid var(--color-border);
-  background: #FAFAFB;
+  background: var(--color-background-secondary);
 }
 
 .week-calendar__time-cell {
@@ -962,14 +963,14 @@
   gap: 12px;
   align-items: center;
   min-width: 980px;
-  padding: 12px 14px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--color-border);
-  color: #374151;
+  color: var(--color-text);
   font-size: 14px;
 }
 
 .agenda-table__row--head {
-  background: #FAFAFB;
+  background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 800;
@@ -1041,12 +1042,12 @@
 }
 
 .agenda-modal__status-actions {
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-start;
 }
 
 .agenda-modal__edit-form {
-  padding: 14px;
+  padding: 12px;
   border: 1px solid #DDE7EE;
   border-radius: 14px;
   background: #F9FCFD;
@@ -1090,13 +1091,13 @@
   right: 0;
   z-index: 100;
   margin: 0;
-  padding: 6px;
+  padding: var(--space-sm);
   list-style: none;
   max-height: 220px;
   overflow-y: auto;
   border: 1px solid #DDE3EA;
   border-radius: 10px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
 }
 
@@ -1108,11 +1109,11 @@
 
 .patient-search-field__option {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px;
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #1F2937;
+  color: var(--color-text);
   text-align: left;
   font-size: 14px;
 }
@@ -1127,10 +1128,10 @@
 
 .details-cancel__notice {
   margin: 0;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid var(--color-primary-light);
   border-radius: 12px;
-  background: #F5F3FF;
+  background: var(--color-surface-hover);
   color: var(--color-primary-dark);
   font-size: 13px;
   font-weight: 700;
@@ -1149,9 +1150,9 @@
 
 .cell-action-context {
   margin: 0;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 12px;
-  background: #F5F3FF;
+  background: var(--color-surface-hover);
   color: var(--color-primary-dark);
   font-size: 14px;
   font-weight: 800;
