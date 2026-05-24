@@ -122,139 +122,139 @@ export default function App() {
         <>
             <Suspense fallback={<div className="page-loading-fallback" aria-hidden="true" />}>
                 <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route
-                    path="/auth/login"
-                    element={(
-                        <AuthRoute
-                            auth={auth}
-                            initialMode="login"
-                            initialTipo="paciente"
-                            onAuthenticated={handleAuthenticated}
-                            onToast={setToast}
-                        />
-                    )}
-                />
-                <Route
-                    path="/auth/cadastro/paciente"
-                    element={(
-                        <AuthRoute
-                            auth={auth}
-                            initialMode="register"
-                            initialTipo="paciente"
-                            onAuthenticated={handleAuthenticated}
-                            onToast={setToast}
-                        />
-                    )}
-                />
-                <Route
-                    path="/auth/cadastro/psicologo"
-                    element={(
-                        <AuthRoute
-                            auth={auth}
-                            initialMode="register"
-                            initialTipo="psicologo"
-                            onAuthenticated={handleAuthenticated}
-                            onToast={setToast}
-                        />
-                    )}
-                />
-
-                <Route
-                    path="/paciente/dashboard"
-                    element={(
-                        <PrivateRoute allowedRoles={['paciente']}>
-                            <PatientDashboardRoute
+                    <Route path="/" element={<LandingPage />} />
+                    <Route
+                        path="/auth/login"
+                        element={(
+                            <AuthRoute
                                 auth={auth}
-                                onNavigate={navigateByView}
+                                initialMode="login"
+                                initialTipo="paciente"
+                                onAuthenticated={handleAuthenticated}
                                 onToast={setToast}
-                                renderShell={renderShell}
                             />
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/paciente/emocoes"
-                    element={(
-                        <PrivateRoute allowedRoles={['paciente']}>
-                            {renderShell('emotions', <PatientEmotionPage onToast={setToast} />)}
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/paciente/perfil"
-                    element={(
-                        <PrivateRoute allowedRoles={['paciente']}>
-                            {renderShell('patient-profile', <PatientProfilePage onToast={setToast} />)}
-                        </PrivateRoute>
-                    )}
-                />
+                        )}
+                    />
+                    <Route
+                        path="/auth/cadastro/paciente"
+                        element={(
+                            <AuthRoute
+                                auth={auth}
+                                initialMode="register"
+                                initialTipo="paciente"
+                                onAuthenticated={handleAuthenticated}
+                                onToast={setToast}
+                            />
+                        )}
+                    />
+                    <Route
+                        path="/auth/cadastro/psicologo"
+                        element={(
+                            <AuthRoute
+                                auth={auth}
+                                initialMode="register"
+                                initialTipo="psicologo"
+                                onAuthenticated={handleAuthenticated}
+                                onToast={setToast}
+                            />
+                        )}
+                    />
 
-                <Route
-                    path="/psicologo/dashboard"
-                    element={(
-                        <PrivateRoute allowedRoles={['psicologo']}>
-                            {renderShell(
-                                'dashboard',
-                                <PsychologistDashboard activeView="dashboard" onToast={setToast} onNavigate={navigateByView} />,
-                            )}
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/psicologo/agenda"
-                    element={(
-                        <PrivateRoute allowedRoles={['psicologo']}>
-                            {renderShell('agenda', <PsychologistAgendaPage onToast={setToast} />)}
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/psicologo/pacientes"
-                    element={(
-                        <PrivateRoute allowedRoles={['psicologo']}>
-                            {renderShell(
-                                'patients',
-                                <PatientsManagementPage
+                    <Route
+                        path="/paciente/dashboard"
+                        element={(
+                            <PrivateRoute allowedRoles={['paciente']}>
+                                <PatientDashboardRoute
+                                    auth={auth}
+                                    onNavigate={navigateByView}
                                     onToast={setToast}
-                                    onSelectPatient={(id) => {
-                                        setPreselectedPatient(id);
-                                        navigate('/psicologo/relatorios');
-                                    }}
-                                />,
-                            )}
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/psicologo/relatorios"
-                    element={(
-                        <PrivateRoute allowedRoles={['psicologo']}>
-                            {renderShell('reports', <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />)}
-                        </PrivateRoute>
-                    )}
-                />
-                <Route
-                    path="/psicologo/perfil"
-                    element={(
-                        <PrivateRoute allowedRoles={['psicologo']}>
-                            {renderShell('psychologist-profile', <PsychologistProfilePage onToast={setToast} />)}
-                        </PrivateRoute>
-                    )}
-                />
+                                    renderShell={renderShell}
+                                />
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/paciente/emocoes"
+                        element={(
+                            <PrivateRoute allowedRoles={['paciente']}>
+                                {renderShell('emotions', <PatientEmotionPage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/paciente/perfil"
+                        element={(
+                            <PrivateRoute allowedRoles={['paciente']}>
+                                {renderShell('patient-profile', <PatientProfilePage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
 
-                <Route
-                    path="/admin/psicologos"
-                    element={(
-                        <PrivateRoute allowedRoles={['admin']}>
-                            {renderShell('admin-psychologists', <AdminPsychologistsPage onToast={setToast} />)}
-                        </PrivateRoute>
-                    )}
-                />
+                    <Route
+                        path="/psicologo/dashboard"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell(
+                                    'dashboard',
+                                    <PsychologistDashboard activeView="dashboard" onToast={setToast} onNavigate={navigateByView} />,
+                                )}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/psicologo/agenda"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell('agenda', <PsychologistAgendaPage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/psicologo/pacientes"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell(
+                                    'patients',
+                                    <PatientsManagementPage
+                                        onToast={setToast}
+                                        onSelectPatient={(id) => {
+                                            setPreselectedPatient(id);
+                                            navigate('/psicologo/relatorios');
+                                        }}
+                                    />,
+                                )}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/psicologo/relatorios"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell('reports', <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/psicologo/perfil"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell('psychologist-profile', <PsychologistProfilePage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
 
-                <Route path="/forbidden" element={<ForbiddenPage auth={auth} />} />
-                <Route path="*" element={<Navigate to={auth ? getDefaultRoute(auth.tipo) : '/'} replace />} />
-            </Routes>
+                    <Route
+                        path="/admin/psicologos"
+                        element={(
+                            <PrivateRoute allowedRoles={['admin']}>
+                                {renderShell('admin-psychologists', <AdminPsychologistsPage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+
+                    <Route path="/forbidden" element={<ForbiddenPage auth={auth} />} />
+                    <Route path="*" element={<Navigate to={auth ? getDefaultRoute(auth.tipo) : '/'} replace />} />
+                </Routes>
             </Suspense>
 
             <Toast
