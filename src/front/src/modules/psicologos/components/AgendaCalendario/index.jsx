@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { CalendarPlus, Loader2, Save, Trash2, X } from 'lucide-react';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { formatDate, formatTime, toIsoDate } from '@/shared/utils/date.utils';
 import { CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, DAY_FULL_LABELS, DAY_OPTIONS, DAY_ORDER, DEFAULT_DURATION } from '@/modules/psicologos/hooks/agenda/agenda.constants';
 import { canCancelConsultation, consultationStatusLabel, dayHeaderLabel, findBlockAtMinute, intervalsOverlap, isSlotWithinAvailability, minutesToTimeLabel, statusBadgeClass, weekCalendarBlockClass } from '@/modules/psicologos/hooks/agenda/agenda.utils';
@@ -70,61 +71,61 @@ export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay,
                         const nowDayKey = toIsoDate(now);
                         const nowMinutes = now.getHours() * 60 + now.getMinutes();
                         const isTodayColumn = dayKey === nowDayKey;
-                    const dayAvailability = availabilityByDay.get(dayKey) || [];
-                    const slotDuration = durationByDay.get(dayKey) || DEFAULT_DURATION;
-                    const dayBlocks = consultationBlocks.filter((block) => block.dayKey === dayKey);
-                    const dayBlockedSlots = (blockedBlocks || []).filter((slot) => slot.dayKey === dayKey);
-                    const dayBreakBlocks = (breakBlocks || []).filter((block) => block.dayKey === dayKey);
-                    return (
-                        <div className="week-calendar__column" key={dayKey}>
-                            {rows.map((row) => {
-                                const breakBlocked = dayBreakBlocks.some((block) => intervalsOverlap(row.minutes, row.minutes + CALENDAR_SLOT_MINUTES, block.startMinutes, block.startMinutes + block.durationMinutes));
-                                const available = isSlotWithinAvailability(row.minutes, slotDuration, dayAvailability);
-                                const consultation = findBlockAtMinute(dayBlocks, row.minutes);
-                                const blocked = dayBlockedSlots.some((slot) => row.minutes >= slot.startMinutes && row.minutes < slot.startMinutes + slot.durationMinutes);
-                                const isPast = dayKey < nowDayKey || (dayKey === nowDayKey && row.minutes < nowMinutes);
-                                const disabled = readOnly || !available || Boolean(consultation) || blocked || breakBlocked || isPast;
-                                const isCurrentSlot = isTodayColumn && row.minutes <= nowMinutes && nowMinutes < row.minutes + CALENDAR_SLOT_MINUTES;
-                                return (
-                                    <button
-                                        key={row.minutes}
-                                        type="button"
-                                        className={available && !breakBlocked
-                                            ? `week-calendar__cell week-calendar__cell--available${isCurrentSlot ? ' week-calendar__cell--now' : ''}`
-                                            : `week-calendar__cell week-calendar__cell--blocked${isCurrentSlot ? ' week-calendar__cell--now' : ''}`}
-                                        disabled={disabled}
-                                        onClick={() => !disabled && onOpenCellMenu(date, row.minutes)}
-                                        onDragOver={(event) => {
-                                            if (!disabled && onMoveConsultation) {
-                                                event.preventDefault();
-                                            }
-                                        }}
-                                        onDrop={(event) => {
-                                            if (disabled || !onMoveConsultation) return;
-                                            const payload = event.dataTransfer.getData('application/psihub-consultation');
-                                            if (!payload) return;
-                                            try {
-                                                const parsed = JSON.parse(payload);
-                                                onMoveConsultation(parsed, date, row.minutes);
-                                            } catch {
-                                                // no-op
-                                            }
-                                        }}
-                                        data-hint={available && !disabled ? 'Clique para agendar' : null}
-                                        title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
-                                    />
+                        const dayAvailability = availabilityByDay.get(dayKey) || [];
+                        const slotDuration = durationByDay.get(dayKey) || DEFAULT_DURATION;
+                        const dayBlocks = consultationBlocks.filter((block) => block.dayKey === dayKey);
+                        const dayBlockedSlots = (blockedBlocks || []).filter((slot) => slot.dayKey === dayKey);
+                        const dayBreakBlocks = (breakBlocks || []).filter((block) => block.dayKey === dayKey);
+                        return (
+                            <div className="week-calendar__column" key={dayKey}>
+                                {rows.map((row) => {
+                                    const breakBlocked = dayBreakBlocks.some((block) => intervalsOverlap(row.minutes, row.minutes + CALENDAR_SLOT_MINUTES, block.startMinutes, block.startMinutes + block.durationMinutes));
+                                    const available = isSlotWithinAvailability(row.minutes, slotDuration, dayAvailability);
+                                    const consultation = findBlockAtMinute(dayBlocks, row.minutes);
+                                    const blocked = dayBlockedSlots.some((slot) => row.minutes >= slot.startMinutes && row.minutes < slot.startMinutes + slot.durationMinutes);
+                                    const isPast = dayKey < nowDayKey || (dayKey === nowDayKey && row.minutes < nowMinutes);
+                                    const disabled = readOnly || !available || Boolean(consultation) || blocked || breakBlocked || isPast;
+                                    const isCurrentSlot = isTodayColumn && row.minutes <= nowMinutes && nowMinutes < row.minutes + CALENDAR_SLOT_MINUTES;
+                                    return (
+                                        <button
+                                            key={row.minutes}
+                                            type="button"
+                                            className={available && !breakBlocked
+                                                ? `week-calendar__cell week-calendar__cell--available${isCurrentSlot ? ' week-calendar__cell--now' : ''}`
+                                                : `week-calendar__cell week-calendar__cell--blocked${isCurrentSlot ? ' week-calendar__cell--now' : ''}`}
+                                            disabled={disabled}
+                                            onClick={() => !disabled && onOpenCellMenu(date, row.minutes)}
+                                            onDragOver={(event) => {
+                                                if (!disabled && onMoveConsultation) {
+                                                    event.preventDefault();
+                                                }
+                                            }}
+                                            onDrop={(event) => {
+                                                if (disabled || !onMoveConsultation) return;
+                                                const payload = event.dataTransfer.getData('application/psihub-consultation');
+                                                if (!payload) return;
+                                                try {
+                                                    const parsed = JSON.parse(payload);
+                                                    onMoveConsultation(parsed, date, row.minutes);
+                                                } catch {
+                                                    // no-op
+                                                }
+                                            }}
+                                            data-hint={available && !disabled ? 'Clique para agendar' : null}
+                                            title={available ? 'Clique para agendar ou bloquear este horário' : 'Fora da disponibilidade'}
+                                        />
                                     );
                                 })}
 
-                            {isTodayColumn && (
-                                <div
-                                    className="week-calendar__now-line"
-                                    aria-hidden="true"
-                                    style={{
-                                        top: `${((nowMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
-                                    }}
-                                />
-                            )}
+                                {isTodayColumn && (
+                                    <div
+                                        className="week-calendar__now-line"
+                                        aria-hidden="true"
+                                        style={{
+                                            top: `${((nowMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                        }}
+                                    />
+                                )}
 
                                 {dayBlocks.map((block) => (
                                     <button
@@ -154,25 +155,25 @@ export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay,
                                         <span className="status-badge status-badge--type">
                                             {block.tipoAtendimento === 'PRESENCIAL' ? 'Presencial' : 'Online'}
                                         </span>
-                                </button>
-                            ))}
+                                    </button>
+                                ))}
 
-                            {dayBreakBlocks.map((block) => (
-                                <div
-                                    key={`break-${block.dayKey}`}
-                                    className="week-calendar__block week-calendar__block--meal-break"
-                                    style={{
-                                        top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
-                                        height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
-                                    }}
-                                    title="Horário reservado para intervalo"
-                                >
-                                    <span className="week-calendar__block-title">🍽️ Intervalo / Refeição</span>
-                                    <strong>{block.startLabel} – {block.endLabel}</strong>
-                                </div>
-                            ))}
+                                {dayBreakBlocks.map((block) => (
+                                    <div
+                                        key={`break-${block.dayKey}`}
+                                        className="week-calendar__block week-calendar__block--meal-break"
+                                        style={{
+                                            top: `${((block.startMinutes - CALENDAR_START_HOUR * 60) / CALENDAR_SLOT_MINUTES) * 44}px`,
+                                            height: `${Math.max(44, Math.ceil(block.durationMinutes / CALENDAR_SLOT_MINUTES) * 44)}px`,
+                                        }}
+                                        title="Horário reservado para intervalo"
+                                    >
+                                        <span className="week-calendar__block-title">🍽️ Intervalo / Refeição</span>
+                                        <strong>{block.startLabel} – {block.endLabel}</strong>
+                                    </div>
+                                ))}
 
-                            {dayBlockedSlots.map((slot) => (
+                                {dayBlockedSlots.map((slot) => (
                                     <button
                                         type="button"
                                         key={`blocked-${slot.id}`}
@@ -199,6 +200,8 @@ export function WeekCalendar({ weekDays, rows, availabilityByDay, durationByDay,
 }
 
 export function AvailabilityEditorModal({ state, activeDayKeys, onClose, onChange, onSubmit, saving }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     const affectedDays = state.selectedDays.filter((day) => activeDayKeys.includes(day));
 
     function toggleDay(day) {
@@ -212,7 +215,7 @@ export function AvailabilityEditorModal({ state, activeDayKeys, onClose, onChang
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Editar disponibilidade" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" aria-label="Editar disponibilidade" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Minha Disponibilidade Semanal</p>
@@ -290,11 +293,13 @@ export function AvailabilityEditorModal({ state, activeDayKeys, onClose, onChang
 }
 
 export function SingleDayAvailabilityModal({ state, onClose, onChange, onSubmit, saving }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     const dayLabel = state.dayKey ? DAY_FULL_LABELS[state.dayKey] : '';
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" aria-label={`Editar disponibilidade de ${dayLabel}`} onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" aria-label={`Editar disponibilidade de ${dayLabel}`} onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Editar disponibilidade</p>
@@ -444,9 +449,11 @@ function PatientSearchField({ value, selectedId, onSelect, onClear }) {
 }
 
 export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, saving }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Agendar Consulta" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" aria-label="Agendar Consulta" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Nova consulta</p>
@@ -546,6 +553,8 @@ export function ScheduleConsultationModal({ state, onClose, onChange, onSubmit, 
 }
 
 export function ConsultationDetailsModal({ consultation, cancelReason, onClose, onCancelReasonChange, onConfirmCancel, cancelSubmitting, onUpdateStatus, statusSubmitting, onEditConsultation, editSubmitting, onDeleteConsultation, deleteSubmitting }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     const canCancel = canCancelConsultation(consultation);
     const cancelLimitReached = cancelReason.length >= 300;
     const hasPatientContact = Boolean(consultation.pacienteTelefone || consultation.pacienteEmail);
@@ -566,7 +575,7 @@ export function ConsultationDetailsModal({ consultation, cancelReason, onClose, 
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Detalhes da consulta" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" aria-label="Detalhes da consulta" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Consulta</p>
@@ -708,13 +717,15 @@ export function ConsultationDetailsModal({ consultation, cancelReason, onClose, 
 }
 
 export function CellActionMenuModal({ date, minutesFromMidnight, duration, loading, onSchedule, onBlock, onClose }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     const timeLabel = minutesToTimeLabel(minutesFromMidnight);
     const endLabel = minutesToTimeLabel(minutesFromMidnight + duration);
     const dateLabel = date ? formatDate(date) : '';
 
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel modal-panel--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel modal-panel--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Horário disponível</p>
@@ -742,9 +753,11 @@ export function CellActionMenuModal({ date, minutesFromMidnight, duration, loadi
 }
 
 export function UnblockSlotModal({ slot, onClose, onConfirm }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel modal-panel--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel modal-panel--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Horário bloqueado</p>

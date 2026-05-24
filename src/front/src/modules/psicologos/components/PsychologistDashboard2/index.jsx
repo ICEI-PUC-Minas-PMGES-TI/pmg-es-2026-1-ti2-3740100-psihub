@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Clock3, Loader2, Save, Trash2, X } from 'lucide-react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, formatDate, formatDateTime, formatTime, toIsoDate } from '@/shared/utils/date.utils';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 const days = [
     { value: 'SEGUNDA', label: 'Segunda' },
@@ -635,9 +636,11 @@ function WeekAgendaGrid({ days, timeRows, slotsByStart, onSlotClick }) {
 }
 
 function SlotDetailsModal({ slot, onClose }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Detalhes da consulta" onClick={(event) => event.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" aria-label="Detalhes da consulta" onClick={(event) => event.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div>
                         <p className="eyebrow">Consulta</p>

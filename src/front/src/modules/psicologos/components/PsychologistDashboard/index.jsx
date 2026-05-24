@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     CalendarDays, CalendarPlus, ChevronLeft, ChevronRight,
     Clock3, Loader2, Save, Trash2, X,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, formatDate, formatDateTime, formatTime, toIsoDate } from '@/shared/utils/date.utils';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 /* ─── constantes ────────────────────────────────────────────────── */
 
@@ -668,9 +669,11 @@ function WeekAgendaGrid({ days, timeRows, slotsByStart, onSlotClick }) {
 }
 
 function SlotDetailsModal({ slot, onClose }) {
+    const panelRef = useRef(null);
+    useFocusTrap(panelRef, onClose);
     return (
         <div className="modal-backdrop" role="presentation" onClick={onClose}>
-            <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div ref={panelRef} className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-panel__header">
                     <div><p className="eyebrow">Consulta</p><h3>{slot.pacienteNome}</h3></div>
                     <button className="icon-button" type="button" onClick={onClose} aria-label="Fechar"><X size={18} /></button>

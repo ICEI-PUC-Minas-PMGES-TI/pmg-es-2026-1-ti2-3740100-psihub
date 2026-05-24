@@ -13,6 +13,7 @@
  * @see services/clinical.service.js para perfil, vinculos e linha do tempo clinica.
  * @see shared/utils/date.utils.js para formatacao e calculos de datas.
  */
+import './psicologos.css';
 export { PsychologistAgendaPage } from './components/PsychologistAgendaPage';
 export { PsychologistDashboard } from './components/PsychologistDashboard';
 export { PatientsManagementPage } from './components/PatientsManagementPage';

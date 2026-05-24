@@ -1,16 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
-import { AuthPage } from '@/pages/Auth';
-import { LandingPage } from '@/pages/Landing';
-import { PatientDashboard } from '@/pages/PatientDashboard';
-import { PatientEmotionPage } from '@/pages/PatientEmotion';
-import { PatientProfilePage } from '@/pages/PatientProfile';
-import { PatientsManagementPage } from '@/pages/PatientsManagement';
-import { PsychologistAgendaPage } from '@/pages/PsychologistAgenda';
-import { PsychologistDashboard } from '@/pages/PsychologistDashboard';
-import { PsychologistProfilePage } from '@/pages/PsychologistProfile';
-import { ReportsPage } from '@/pages/Reports';
 import { AppShell } from '@/shared/components/AppShell';
 import { Toast } from '@/shared/components/Toast';
 import {
@@ -19,6 +8,18 @@ import {
     storeAuthSession,
 } from '@/modules/auth';
 import { trackUiEvent } from '@/shared/utils/metrics.utils';
+
+const AdminPsychologistsPage = lazy(() => import('@/pages/AdminPsychologists').then(m => ({ default: m.AdminPsychologistsPage })));
+const AuthPage = lazy(() => import('@/pages/Auth').then(m => ({ default: m.AuthPage })));
+const LandingPage = lazy(() => import('@/pages/Landing').then(m => ({ default: m.LandingPage })));
+const PatientDashboard = lazy(() => import('@/pages/PatientDashboard').then(m => ({ default: m.PatientDashboard })));
+const PatientEmotionPage = lazy(() => import('@/pages/PatientEmotion').then(m => ({ default: m.PatientEmotionPage })));
+const PatientProfilePage = lazy(() => import('@/pages/PatientProfile').then(m => ({ default: m.PatientProfilePage })));
+const PatientsManagementPage = lazy(() => import('@/pages/PatientsManagement').then(m => ({ default: m.PatientsManagementPage })));
+const PsychologistAgendaPage = lazy(() => import('@/pages/PsychologistAgenda').then(m => ({ default: m.PsychologistAgendaPage })));
+const PsychologistDashboard = lazy(() => import('@/pages/PsychologistDashboard').then(m => ({ default: m.PsychologistDashboard })));
+const PsychologistProfilePage = lazy(() => import('@/pages/PsychologistProfile').then(m => ({ default: m.PsychologistProfilePage })));
+const ReportsPage = lazy(() => import('@/pages/Reports').then(m => ({ default: m.ReportsPage })));
 
 const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
 
@@ -119,7 +120,8 @@ export default function App() {
 
     return (
         <>
-            <Routes>
+            <Suspense fallback={<div className="page-loading-fallback" aria-hidden="true" />}>
+                <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route
                     path="/auth/login"
@@ -253,6 +255,7 @@ export default function App() {
                 <Route path="/forbidden" element={<ForbiddenPage auth={auth} />} />
                 <Route path="*" element={<Navigate to={auth ? getDefaultRoute(auth.tipo) : '/'} replace />} />
             </Routes>
+            </Suspense>
 
             <Toast
                 toast={toast}
