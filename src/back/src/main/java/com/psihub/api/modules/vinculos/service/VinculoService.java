@@ -105,7 +105,7 @@ public class VinculoService {
 
         vinculo.setStatus(StatusVinculo.ACEITO);
         vinculo.setRespondidoEm(LocalDateTime.now());
-        return toResponse(vinculo);
+        return toResponse(vinculoRepository.save(vinculo));
     }
 
     @Transactional
@@ -117,7 +117,7 @@ public class VinculoService {
 
         vinculo.setStatus(StatusVinculo.RECUSADO);
         vinculo.setRespondidoEm(LocalDateTime.now());
-        return toResponse(vinculo);
+        return toResponse(vinculoRepository.save(vinculo));
     }
 
     @Transactional(readOnly = true)

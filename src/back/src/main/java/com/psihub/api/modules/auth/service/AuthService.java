@@ -150,7 +150,11 @@ public class AuthService {
             return;
         }
 
-        if (psicologoService.buscarStatusAcessoPorId(usuario.getId()) == StatusAcesso.REVOGADO) {
+        StatusAcesso status = psicologoService.buscarStatusAcessoPorId(usuario.getId());
+        if (status == StatusAcesso.PENDENTE) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro aguarda aprovacao pelo administrador");
+        }
+        if (status == StatusAcesso.REVOGADO) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo revogado pelo administrador");
         }
     }

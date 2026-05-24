@@ -38,7 +38,9 @@ public class PsicologoService {
 
     @Transactional(readOnly = true)
     public List<PsicologoDisponivelResponse> listarDisponiveis() {
-        return psicologoRepository.findDisponiveis(StatusAcesso.REVOGADO)
+        // Apenas psicólogos com acesso ATIVO são exibidos publicamente.
+        // PENDENTE e REVOGADO não aparecem para pacientes.
+        return psicologoRepository.findDisponiveis(StatusAcesso.ATIVO)
                 .stream()
                 .sorted(Comparator.comparing(psicologo -> psicologo.getUsuario().getNome()))
                 .map(this::toResponse)
@@ -88,7 +90,9 @@ public class PsicologoService {
         psicologo.setCrp(crpNormalizado != null ? crpNormalizado : "CADASTRO-" + usuario.getId());
         psicologo.setValorConsulta(valorConsulta != null ? valorConsulta : BigDecimal.ZERO);
         psicologo.setBiografia(biografiaNormalizada != null ? biografiaNormalizada : "Perfil profissional em configuracao.");
-        psicologo.setStatusAcesso(StatusAcesso.ATIVO);
+        // Novo psicólogo começa como PENDENTE e só acessa após aprovação do admin.
+        // Para aprovar, utilize o endpoint PATCH /api/admin/psicologos/{id}/aprovar.
+        psicologo.setStatusAcesso(StatusAcesso.PENDENTE);
         Psicologo psicologoSalvo = psicologoRepository.save(psicologo);
 
         List<String> nomes = especialidades == null ? List.of("Psicologia") : especialidades.stream()
@@ -131,6 +135,10 @@ public class PsicologoService {
 
         String crp = sanitizeOptional(request.crp());
         if (crp != null) {
+            // Valida unicidade do CRP apenas quando o valor muda.
+            if (!crp.equalsIgnoreCase(psicologo.getCrp()) && existeCrp(crp)) {
+                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicologo cadastrado com este CRP");
+            }
             psicologo.setCrp(crp);
         }
         if (request.valorConsulta() != null) {
@@ -237,8 +245,11 @@ public class PsicologoService {
     }
 
     private void validarStatusAtivo(Psicologo psicologo) {
+        if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+        }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
         }
     }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AdminPsychologistsPage } from '@/pages/AdminPsychologists';
 import { AuthPage } from '@/pages/Auth';
@@ -46,10 +46,14 @@ export default function App() {
     const [preselectedPatient, setPreselectedPatient] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
+    const lastTrackedRoute = useRef('');
 
     const role = normalizeRole(auth?.tipo);
 
     useEffect(() => {
+        const routeKey = `${role || 'public'}:${location.pathname}${location.search}`;
+        if (lastTrackedRoute.current === routeKey) return;
+        lastTrackedRoute.current = routeKey; // Evita duplicar evento de rota em StrictMode/hot reload.
         trackUiEvent('route_change', { role: role || 'public', path: location.pathname, search: location.search || undefined }); // Registra navegacao para medir abandono e uso por perfil sem depender de ferramenta externa.
     }, [location.pathname, location.search, role]);
 

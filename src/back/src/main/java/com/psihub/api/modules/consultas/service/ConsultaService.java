@@ -398,8 +398,11 @@ public class ConsultaService {
     }
 
     private void validarPsicologoAtivo(Psicologo psicologo) {
+        if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+        }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
         }
     }
 

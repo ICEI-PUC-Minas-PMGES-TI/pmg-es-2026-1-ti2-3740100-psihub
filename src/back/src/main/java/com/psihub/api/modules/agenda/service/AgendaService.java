@@ -246,9 +246,16 @@ public class AgendaService {
         Psicologo psicologo = buscarPsicologoAtivo(psicologoId);
         validarPeriodo(request.horaInicio(), request.horaFim());
 
-        int ocorrencias = request.ocorrencias() == null ? 1 : request.ocorrencias();
+        // Se não há frequência definida, apenas um bloqueio pontual faz sentido.
+        // Enviar ocorrencias > 1 sem frequência é um erro de negócio explícito.
+        final int ocorrencias;
         if (request.frequencia() == null) {
+            if (request.ocorrencias() != null && request.ocorrencias() > 1) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Defina a frequencia para criar multiplos bloqueios recorrentes");
+            }
             ocorrencias = 1;
+        } else {
+            ocorrencias = request.ocorrencias() == null ? 1 : request.ocorrencias();
         }
 
         List<BloqueioSlotResponse> criados = new ArrayList<>();
@@ -257,7 +264,7 @@ public class AgendaService {
             LocalDateTime inicio = data.atTime(request.horaInicio());
             LocalDateTime fim = data.atTime(request.horaFim());
             validarSemConflitoComConsulta(psicologoId, inicio, fim);
-
+            validarSemConflitoComPausa(psicologoId, data, request.horaInicio(), request.horaFim());
             ExcecaoDisponibilidade excecao = new ExcecaoDisponibilidade();
             excecao.setPsicologo(psicologo);
             excecao.setData(data);
@@ -294,6 +301,7 @@ public class AgendaService {
                 .findByIdAndPsicologoIdAndAtivoTrue(bloqueioId, psicologoId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bloqueio nao encontrado"));
         excecao.setAtivo(false);
+        excecaoDisponibilidadeRepository.save(excecao);
     }
 
     private RegraDisponibilidade criarRegra(
@@ -409,8 +417,11 @@ public class AgendaService {
 
     private Psicologo buscarPsicologoAtivo(Long psicologoId) {
         Psicologo psicologo = buscarPsicologo(psicologoId);
+        if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+        }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Psicologo ainda nao possui acesso ativo");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
         }
         return psicologo;
     }
@@ -439,7 +450,6 @@ public class AgendaService {
         }
     }
 
-    @SuppressWarnings("unused")
     private void validarSemConflitoComPausa(Long psicologoId, LocalDate data, LocalTime inicio, LocalTime fim) {
         regraDisponibilidadeRepository.findByPsicologoIdAndDiaSemanaAndAtivoTrueOrderByIdDesc(psicologoId, toDiaSemana(data.getDayOfWeek()))
                 .stream()
