@@ -4,7 +4,8 @@ Este processo centraliza todas as ações administrativas e de configuração re
 A principal oportunidade de melhoria em relação ao modelo atual é a centralização de todas essas atividades em um único ambiente digital seguro, eliminando o uso de ferramentas genéricas e registros dispersos.
 
 New
-<img width="1205" height="1170" alt="image" src="https://github.com/user-attachments/assets/6274dc5a-9801-432b-a769-4bba275b0772" />
+<img width="1205" height="1170" alt="image" src="https://github.com/user-attachments/assets/84919d47-a846-4a37-9018-de2eb51f1933" />
+
 
 old 
 ![Modelo BPMN do Processo 1 – Gestão do Psicólogo](images/diagrama-psicologo-att.svg "Modelo BPMN do Processo 1.")
