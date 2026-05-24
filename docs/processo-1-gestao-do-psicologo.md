@@ -1,9 +1,13 @@
 ### 3.3.1 Processo 1 – Gestão do Psicólogo
 
-Este processo centraliza todas as ações administrativas e de configuração realizadas pelo psicólogo na plataforma PsiHub. O fluxo inicia com a autenticação do profissional e dá acesso a um painel central (dashboard), a partir do qual é possível editar o perfil profissional, configurar a disponibilidade na agenda, gerenciar pacientes e visualizar relatórios de evolução clínica. O psicólogo que também atua como **administrador da clínica** possui, adicionalmente, a capacidade de aprovar ou revogar o acesso de outros psicólogos à plataforma — porém, em cumprimento ao **Art. 9º do Código de Ética Profissional do Psicólogo** e à **LGPD**, o administrador **não tem acesso a dados clínicos, prontuários ou registros emocionais** de pacientes vinculados a outros profissionais.
-
+Este processo centraliza todas as ações administrativas e de configuração realizadas pelo psicólogo na plataforma PsiHub. O fluxo inicia com a autenticação do profissional, que informar credenciais e acessa um painel central (dashboard), a partir do qual é possível editar o perfil profissional, configurar a disponibilidade na agenda, gerenciar pacientes e visualizar relatórios de evolução clínica. O psicólogo que também atua como administrador da clínica possui, adicionalmente, a capacidade de aprovar ou revogar o acesso de outros psicólogos à plataforma — porém, em cumprimento ao Art. 9º do Código de Ética Profissional do Psicólogo e à LGPD, o administrador não tem acesso a dados clínicos, pronúntuarios ou registros emocionais de pacientes vinculados a outros profissionais.
 A principal oportunidade de melhoria em relação ao modelo atual é a centralização de todas essas atividades em um único ambiente digital seguro, eliminando o uso de ferramentas genéricas e registros dispersos.
 
+New
+<img width="1205" height="1170" alt="image" src="https://github.com/user-attachments/assets/84919d47-a846-4a37-9018-de2eb51f1933" />
+
+
+old 
 ![Modelo BPMN do Processo 1 – Gestão do Psicólogo](images/diagrama-psicologo-att.svg "Modelo BPMN do Processo 1.")
 
 ---
@@ -30,6 +34,7 @@ A principal oportunidade de melhoria em relação ao modelo atual é a centraliz
 ---
 
 **Atividade 2 – Acessar Dashboard**
+Após autenticação bem-sucedida, o psicólogo acessa o Painel de Controle (dashboard), que apresenta as próximas consultas do dia, notificações pendentes e atalhos para as funcionalidades principais: Agenda, Editar Perfil, Gerenciar Pacientes e Relatórios.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -49,6 +54,7 @@ A principal oportunidade de melhoria em relação ao modelo atual é a centraliz
 ---
 
 **Atividade 3 – Cadastrar/Editar Perfil Profissional**
+A partir do dashboard, o psicólogo acessa a opção Editar Perfil, onde informa seus dados profissionais e, ao concluir, salva as alterações.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -67,7 +73,6 @@ A principal oportunidade de melhoria em relação ao modelo atual é a centraliz
 ---
 
 **Atividade 4 – Gerenciar Agenda**
-
 O psicólogo pode configurar sua disponibilidade por dois modos complementares:
 
 **4a – Definir Blocos Recorrentes**
@@ -99,7 +104,6 @@ O psicólogo pode configurar sua disponibilidade por dois modos complementares:
 ---
 
 **Atividade 5 – Cadastrar/Gerenciar Pacientes**
-
 Dois fluxos são possíveis:
 
 **5a – Cadastro manual pelo psicólogo**
@@ -113,6 +117,7 @@ Dois fluxos são possíveis:
 | Observações iniciais | Área de Texto | Opcional; máximo de 300 caracteres | — |
 
 **5b – Aceite de vínculo (paciente auto-cadastrado)**
+O psicólogo visualiza as solicitações pendentes de vínculo e também os pacientes já vinculados, podendo aceitar ou recusar cada solicitação.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
@@ -129,6 +134,7 @@ Dois fluxos são possíveis:
 ---
 
 **Atividade 6 – Visualizar Relatórios e Evolução**
+O psicólogo acessa a opção Visualizar Relatórios, aplica os filtros desejados, visualiza o relatório gerado dinamicamente e, opcionalmente, exporta o relatório em PDF.
 
 | **Campo** | **Tipo** | **Restrições** | **Valor default** |
 | --- | --- | --- | --- |
