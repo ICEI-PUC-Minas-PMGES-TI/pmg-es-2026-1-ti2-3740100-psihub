@@ -82,8 +82,13 @@ export function PatientEmotionPage({ onToast }) {
 
     return (
         <div className="psihome">
-            <h1>Registro Emocional</h1>
-            <p>Registre humor e emocoes do dia. Edicao permitida somente nas primeiras 24 horas.</p>
+            <header className="agenda-page__header panel">
+                <div>
+                    <p className="eyebrow">Saúde emocional</p>
+                    <h1>Registro Emocional</h1>
+                    <p className="agenda-page__subtitle">Registre seu humor e emoções do dia. Edição permitida somente nas primeiras 24 horas.</p>
+                </div>
+            </header>
 
             {error && <div className="inline-alert inline-alert--error">{error}</div>}
 
@@ -116,7 +121,7 @@ export function PatientEmotionPage({ onToast }) {
                         <textarea rows="4" maxLength={500} value={form.descricao} onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))} />
                     </label>
                     <div className="form-actions">
-                        <button className="btn btn--primary" type="submit" disabled={saving}>
+                        <button className="primary-button primary-button--fit" type="submit" disabled={saving}>
                             {saving ? <Loader2 className="spin" size={18} /> : <Save size={18} />} Salvar
                         </button>
                     </div>
@@ -139,7 +144,7 @@ export function PatientEmotionPage({ onToast }) {
                                     {record.descricao && <span>{record.descricao}</span>}
                                 </div>
                                 {isEditable(record.registradoEm) && (
-                                    <button className="btn btn--secondary" type="button" onClick={() => startEdit(record)}>Editar</button>
+                                    <button className="secondary-button" type="button" onClick={() => startEdit(record)}>Editar</button>
                                 )}
                             </article>
                         ))}

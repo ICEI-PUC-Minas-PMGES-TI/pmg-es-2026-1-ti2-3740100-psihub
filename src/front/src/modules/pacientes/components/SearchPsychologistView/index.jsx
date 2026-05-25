@@ -3,47 +3,53 @@ import { EmptyState, LoadingState } from '../PatientStates';
 
 export function SearchPsychologistView({ psychologists, loading, onOpenAgenda }) {
     return (
-        <section className="panel">
-            <div className="panel__header">
+        <div className="psihome">
+            <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Agendamento</p>
-                    <h2>Buscar psicologo</h2>
+                    <h1>Agendar Consulta</h1>
+                    <p className="agenda-page__subtitle">Encontre um psicólogo disponível e escolha um horário.</p>
                 </div>
-            </div>
+            </header>
+            <section className="panel">
+                <div className="panel__header">
+                    <h2>Psicólogos disponíveis</h2>
+                </div>
 
-            {loading && <LoadingState />}
+                {loading && <LoadingState />}
 
-            {!loading && psychologists.length === 0 && (
-                <EmptyState icon={SearchX} title="Nenhum psicologo disponivel no momento." />
-            )}
+                {!loading && psychologists.length === 0 && (
+                    <EmptyState icon={SearchX} title="Nenhum psicologo disponivel no momento." />
+                )}
 
-            {!loading && psychologists.length > 0 && (
-                <table className="data-table data-table--native">
-                    <caption className="sr-only">Psicologos disponiveis para agendamento</caption> {/* Usa tabela nativa para leitores de tela anunciarem cabecalhos e linhas corretamente. */}
-                    <thead>
-                        <tr className="data-table__row data-table__row--head">
-                            <th scope="col">Nome</th>
-                            <th scope="col">Especialidade</th>
-                            <th scope="col">Avaliacao</th>
-                            <th scope="col">Acoes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {psychologists.map((psychologist) => (
-                            <tr className="data-table__row" key={psychologist.id}>
-                                <td>{psychologist.nome}</td>
-                                <td>{psychologist.especialidades?.[0] || 'Psicologia'}</td>
-                                <td>Ainda sem avaliacao</td>
-                                <td>
-                                    <button className="secondary-button" type="button" onClick={() => onOpenAgenda(psychologist)}>
-                                        Ver agenda
-                                    </button>
-                                </td>
+                {!loading && psychologists.length > 0 && (
+                    <table className="data-table data-table--native">
+                        <caption className="sr-only">Psicologos disponiveis para agendamento</caption> {/* Usa tabela nativa para leitores de tela anunciarem cabecalhos e linhas corretamente. */}
+                        <thead>
+                            <tr className="data-table__row data-table__row--head">
+                                <th scope="col">Nome</th>
+                                <th scope="col">Especialidade</th>
+                                <th scope="col">Avaliacao</th>
+                                <th scope="col">Acoes</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </section>
+                        </thead>
+                        <tbody>
+                            {psychologists.map((psychologist) => (
+                                <tr className="data-table__row" key={psychologist.id}>
+                                    <td>{psychologist.nome}</td>
+                                    <td>{psychologist.especialidades?.[0] || 'Psicologia'}</td>
+                                    <td>Ainda sem avaliacao</td>
+                                    <td>
+                                        <button className="secondary-button" type="button" onClick={() => onOpenAgenda(psychologist)}>
+                                            Ver agenda
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </section>
+        </div>
     );
 }

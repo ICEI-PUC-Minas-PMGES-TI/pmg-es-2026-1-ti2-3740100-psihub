@@ -65,13 +65,31 @@ export function PatientProfilePage({ onToast }) {
     }
 
     if (loading) {
-        return <section className="panel"><p className="state-row"><Loader2 className="spin" size={16} /> Carregando perfil</p></section>;
+        return (
+            <div className="psihome">
+                <header className="agenda-page__header panel">
+                    <div>
+                        <p className="eyebrow">Minha conta</p>
+                        <h1>Perfil</h1>
+                        <p className="agenda-page__subtitle">Atualize seus dados cadastrais usados no atendimento.</p>
+                    </div>
+                </header>
+                <section className="panel">
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando perfil…</p>
+                </section>
+            </div>
+        );
     }
 
     return (
         <div className="psihome">
-            <h1>Perfil</h1>
-            <p>Atualize seus dados cadastrais usados no atendimento.</p>
+            <header className="agenda-page__header panel">
+                <div>
+                    <p className="eyebrow">Minha conta</p>
+                    <h1>Perfil</h1>
+                    <p className="agenda-page__subtitle">Atualize seus dados cadastrais usados no atendimento.</p>
+                </div>
+            </header>
 
             <section className="panel">
                 {error && <div className="inline-alert inline-alert--error">{error}</div>}
@@ -97,7 +115,7 @@ export function PatientProfilePage({ onToast }) {
                         <textarea rows="4" maxLength={300} value={form.observacoesIniciais} onChange={(event) => updateField('observacoesIniciais', event.target.value)} />
                     </label>
                     <div className="form-actions">
-                        <button className="btn btn--primary" type="submit" disabled={saving}>
+                        <button className="primary-button primary-button--fit" type="submit" disabled={saving}>
                             {saving ? <Loader2 className="spin" size={18} /> : <Save size={18} />} Salvar
                         </button>
                     </div>
