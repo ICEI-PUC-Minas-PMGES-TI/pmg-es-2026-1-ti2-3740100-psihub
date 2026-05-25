@@ -22,7 +22,7 @@ export function ReportsPage({ onToast, initialPatientId }) {
                 setSelectedPatient((prev) => prev || (data?.[0]?.id ? String(data[0].id) : ''));
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar pacientes.');
+                if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar pacientes.');
             })
             .finally(() => setLoadingPatients(false));
         return () => controller.abort();
@@ -42,8 +42,8 @@ export function ReportsPage({ onToast, initialPatientId }) {
             })
             .catch((err) => {
                 if (err.name !== 'AbortError') {
-                    setError(err.message || 'Nao foi possivel carregar a evolucao.');
-                    onToast?.({ type: 'error', message: 'Acesso clinico negado sem vinculo aceito.' });
+                    setError(err.message || 'Não foi possível carregar a evolução.');
+                    onToast?.({ type: 'error', message: 'Acesso clínico negado sem vínculo aceito.' });
                 }
             })
             .finally(() => setLoadingTimeline(false));
@@ -52,19 +52,26 @@ export function ReportsPage({ onToast, initialPatientId }) {
 
     return (
         <div className="psihome">
-            <h1>Relatorios e Evolucao</h1>
-            <p>Consulte linha do tempo clinica somente para pacientes com vinculo aceito.</p>
+            <header>
+                <h1>Relatórios e Evolução</h1>
+                <p>Consulte a linha do tempo clínica somente para pacientes com vínculo aceito.</p>
+            </header>
 
             {error && <div className="inline-alert inline-alert--error">{error}</div>}
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2><FileText size={20} /> Linha do tempo</h2>
+                    <h2>Linha do tempo</h2>
+                    <FileText size={20} />
                 </div>
 
                 <label className="field">
                     Paciente vinculado
-                    <select value={selectedPatient} onChange={(event) => setSelectedPatient(event.target.value)} disabled={loadingPatients}>
+                    <select
+                        value={selectedPatient}
+                        onChange={(event) => setSelectedPatient(event.target.value)}
+                        disabled={loadingPatients}
+                    >
                         <option value="">Selecione</option>
                         {patients.map((patient) => (
                             <option key={patient.id} value={patient.id}>{patient.nome}</option>
@@ -72,18 +79,20 @@ export function ReportsPage({ onToast, initialPatientId }) {
                     </select>
                 </label>
 
-                {loadingTimeline ? <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evolucao</p> : timeline.length === 0 ? (
-                    <p className="empty-state">Nenhum registro de evolucao para o filtro atual.</p>
+                {loadingTimeline ? (
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evolução…</p>
+                ) : timeline.length === 0 ? (
+                    <p className="empty-state">Nenhum registro de evolução para o filtro atual.</p>
                 ) : (
-                    <div className="simple-list">
+                    <div className="simple-list" style={{ marginTop: '12px' }}>
                         {timeline.map((item) => (
-                            <article className="simple-list__item" key={item.id}>
+                            <div className="simple-list__item" key={item.id}>
                                 <div>
                                     <strong>{formatDateTime(item.inicioEm)}</strong>
                                     <span>{(item.temasSessao || []).join(', ') || 'Sem temas registrados'}</span>
                                 </div>
                                 <span>Progresso: {item.nivelProgresso != null ? `${item.nivelProgresso}/10` : 'Não informado'}</span>
-                            </article>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -91,5 +100,4 @@ export function ReportsPage({ onToast, initialPatientId }) {
         </div>
     );
 }
-
 

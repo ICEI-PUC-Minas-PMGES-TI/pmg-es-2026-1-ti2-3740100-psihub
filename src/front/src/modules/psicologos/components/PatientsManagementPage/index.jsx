@@ -21,7 +21,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
             setLinks(linkList || []);
             setError('');
         } catch (err) {
-            if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar pacientes.');
+            if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar pacientes.');
         } finally {
             setLoading(false);
         }
@@ -40,7 +40,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
             setPatients(await schedulingApi.listMyPatients({ nome: search.trim() }));
             setError('');
         } catch (err) {
-            setError(err.message || 'Nao foi possivel buscar pacientes.');
+            setError(err.message || 'Não foi possível buscar pacientes.');
         } finally {
             setLoading(false);
         }
@@ -50,41 +50,56 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
         try {
             if (action === 'accept') await clinicalApi.acceptLink(vinculoId);
             if (action === 'reject') await clinicalApi.rejectLink(vinculoId);
-            onToast?.({ type: 'success', message: 'Solicitacao atualizada.' });
+            onToast?.({ type: 'success', message: 'Solicitação atualizada.' });
             await load();
         } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Nao foi possivel atualizar o vinculo.' });
+            onToast?.({ type: 'error', message: err.message || 'Não foi possível atualizar o vínculo.' });
         }
     }
 
     return (
         <div className="psihome">
-            <h1>Pacientes</h1>
-            <p>Gerencie vinculos aceitos e solicitacoes de atendimento.</p>
+            <header>
+                <h1>Pacientes</h1>
+                <p>Gerencie vínculos aceitos e solicitações de atendimento.</p>
+            </header>
 
             {error && <div className="inline-alert inline-alert--error">{error}</div>}
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>Solicitacoes pendentes</h2>
+                    <h2>Solicitações pendentes</h2>
                 </div>
-                {loading ? <LoadingRow /> : links.length === 0 ? <p className="empty-state">Nenhuma solicitacao pendente.</p> : (
+
+                {loading ? (
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
+                ) : links.length === 0 ? (
+                    <p className="empty-state">Nenhuma solicitação pendente.</p>
+                ) : (
                     <div className="simple-list">
                         {links.map((link) => (
-                            <article className="simple-list__item" key={link.id}>
+                            <div className="simple-list__item" key={link.id}>
                                 <div>
                                     <strong>{link.pacienteNome}</strong>
                                     <span>{link.pacienteEmail}</span>
                                 </div>
-                                <div className="row-actions">
-                                    <button className="btn btn--primary" type="button" onClick={() => respond(link.id, 'accept')}>
+                                <div className="inline-actions">
+                                    <button
+                                        className="primary-button primary-button--fit"
+                                        type="button"
+                                        onClick={() => respond(link.id, 'accept')}
+                                    >
                                         <Check size={16} /> Aceitar
                                     </button>
-                                    <button className="btn btn--secondary" type="button" onClick={() => respond(link.id, 'reject')}>
+                                    <button
+                                        className="secondary-button"
+                                        type="button"
+                                        onClick={() => respond(link.id, 'reject')}
+                                    >
                                         <X size={16} /> Recusar
                                     </button>
                                 </div>
-                            </article>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -94,19 +109,29 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                 <div className="panel__header">
                     <h2>Pacientes vinculados</h2>
                 </div>
+
                 <form className="search-bar" onSubmit={reloadBySearch}>
                     <label className="field">
                         Buscar por nome
-                        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome do paciente" />
+                        <input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Nome do paciente"
+                        />
                     </label>
                     <button className="primary-button primary-button--fit" type="submit">
                         <Search size={16} /> Buscar
                     </button>
                 </form>
-                {loading ? <LoadingRow /> : patients.length === 0 ? <p className="empty-state">Nenhum paciente com vinculo aceito.</p> : (
-                    <div className="simple-list">
+
+                {loading ? (
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
+                ) : patients.length === 0 ? (
+                    <p className="empty-state">Nenhum paciente com vínculo aceito.</p>
+                ) : (
+                    <div className="simple-list" style={{ marginTop: '12px' }}>
                         {patients.map((patient) => (
-                            <article className="simple-list__item" key={patient.id}>
+                            <div className="simple-list__item" key={patient.id}>
                                 <strong>{patient.nome}</strong>
                                 <button
                                     className="secondary-button"
@@ -115,7 +140,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                                 >
                                     Ver relatório
                                 </button>
-                            </article>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -124,6 +149,3 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
     );
 }
 
-function LoadingRow() {
-    return <p className="state-row"><Loader2 className="spin" size={16} /> Carregando</p>;
-}

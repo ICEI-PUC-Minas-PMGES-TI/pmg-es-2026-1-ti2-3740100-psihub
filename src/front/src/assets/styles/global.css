@@ -1017,6 +1017,71 @@ textarea:focus {
   text-transform: uppercase;
 }
 
+/* === lista simples (pendências, pacientes, timeline) === */
+.simple-list {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.simple-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.simple-list__item:last-child {
+  border-bottom: 0;
+}
+
+.simple-list__item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.simple-list__item strong {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.simple-list__item span {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* estado de carregamento em linha */
+.state-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 12px 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* ações ao final de formulário */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+  grid-column: 1 / -1;
+}
+
+/* campo que ocupa as duas colunas do form-grid */
+.form-group--full {
+  grid-column: 1 / -1;
+}
+
 .calendar-panel__header {
   display: grid;
   grid-template-columns: 40px 1fr 40px;
