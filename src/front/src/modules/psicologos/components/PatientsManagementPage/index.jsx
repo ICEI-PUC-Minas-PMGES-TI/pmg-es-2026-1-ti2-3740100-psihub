@@ -59,9 +59,12 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
 
     return (
         <div className="psihome">
-            <header>
-                <h1>Pacientes</h1>
-                <p>Gerencie vínculos aceitos e solicitações de atendimento.</p>
+            <header className="agenda-page__header panel">
+                <div>
+                    <p className="eyebrow">Pacientes</p>
+                    <h1>Pacientes</h1>
+                    <p className="agenda-page__subtitle">Gerencie vínculos aceitos e solicitações de atendimento.</p>
+                </div>
             </header>
 
             {error && <div className="inline-alert inline-alert--error">{error}</div>}

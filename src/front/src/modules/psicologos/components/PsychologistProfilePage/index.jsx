@@ -72,13 +72,21 @@ export function PsychologistProfilePage({ onToast }) {
         setForm((current) => ({ ...current, [field]: value }));
     }
 
+    const pageHeader = (
+        <header className="agenda-page__header panel">
+            <div>
+                <p className="eyebrow">Configurações</p>
+                <h1>Perfil Profissional</h1>
+                <p className="agenda-page__subtitle">Atualize os dados exibidos para pacientes e usados no agendamento.</p>
+            </div>
+        </header>
+    );
+
     if (loading) {
         return (
             <div className="psihome">
+                {pageHeader}
                 <section className="panel">
-                    <div className="panel__header">
-                        <h2>Perfil Profissional</h2>
-                    </div>
                     <p className="state-row"><Loader2 className="spin" size={18} /> Carregando perfil…</p>
                 </section>
             </div>
@@ -87,10 +95,7 @@ export function PsychologistProfilePage({ onToast }) {
 
     return (
         <div className="psihome">
-            <header>
-                <h1>Perfil Profissional</h1>
-                <p>Atualize os dados exibidos para pacientes e usados no agendamento.</p>
-            </header>
+            {pageHeader}
 
             <section className="panel">
                 <div className="panel__header">

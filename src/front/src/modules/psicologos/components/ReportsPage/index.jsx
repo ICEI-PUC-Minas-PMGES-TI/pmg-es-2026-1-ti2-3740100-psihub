@@ -52,9 +52,12 @@ export function ReportsPage({ onToast, initialPatientId }) {
 
     return (
         <div className="psihome">
-            <header>
-                <h1>Relatórios e Evolução</h1>
-                <p>Consulte a linha do tempo clínica somente para pacientes com vínculo aceito.</p>
+            <header className="agenda-page__header panel">
+                <div>
+                    <p className="eyebrow">Relatórios</p>
+                    <h1>Relatórios e Evolução</h1>
+                    <p className="agenda-page__subtitle">Consulte a linha do tempo clínica somente para pacientes com vínculo aceito.</p>
+                </div>
             </header>
 
             {error && <div className="inline-alert inline-alert--error">{error}</div>}
