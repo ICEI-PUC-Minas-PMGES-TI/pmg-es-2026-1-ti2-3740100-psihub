@@ -19,7 +19,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                 <div>
                     <p className="eyebrow">Pacientes</p>
                     <h1>Pacientes</h1>
-                    <p className="agenda-page__subtitle">Gerencie vÃ­nculos aceitos e solicitaÃ§Ãµes de atendimento.</p>
+                    <p className="agenda-page__subtitle">Gerencie vínculos aceitos e solicitações de atendimento.</p>
                 </div>
             </header>
 
@@ -27,13 +27,13 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>SolicitaÃ§Ãµes pendentes</h2>
+                    <h2>Solicitações pendentes</h2>
                 </div>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregandoâ€¦</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
                 ) : links.length === 0 ? (
-                    <p className="empty-state">Nenhuma solicitaÃ§Ã£o pendente.</p>
+                    <p className="empty-state">Nenhuma solicitação pendente.</p>
                 ) : (
                     <div className="simple-list">
                         {links.map((link) => (
@@ -84,9 +84,9 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                 </form>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregandoâ€¦</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
                 ) : patients.length === 0 ? (
-                    <p className="empty-state">Nenhum paciente com vÃ­nculo aceito.</p>
+                    <p className="empty-state">Nenhum paciente com vínculo aceito.</p>
                 ) : (
                     <div className="simple-list" style={{ marginTop: '12px' }}>
                         {patients.map((patient) => (
@@ -97,7 +97,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                                     type="button"
                                     onClick={() => onSelectPatient?.(patient.id)}
                                 >
-                                    Ver relatÃ³rio
+                                    Ver relatório
                                 </button>
                             </div>
                         ))}

@@ -124,7 +124,7 @@ export function PsychologistAgendaPage({ onToast }) {
             <section className="panel agenda-section">
                 <div className="panel__header">
                     <div>
-                        <p className="eyebrow">Seção 1</p>
+                        <p className="eyebrow">SeÃ§Ã£o 1</p>
                         <h2>Minha Disponibilidade Semanal</h2>
                     </div>
                     <button className="secondary-button secondary-button--outline" type="button" onClick={() => setAvailabilityModal(defaultWeeklyAvailabilityModal(availabilitySummary))}>
@@ -168,7 +168,7 @@ export function PsychologistAgendaPage({ onToast }) {
             <section className="panel agenda-section">
                 <div className="panel__header">
                     <div>
-                        <p className="eyebrow">Seção 2</p>
+                        <p className="eyebrow">SeÃ§Ã£o 2</p>
                         <h2>Lista de Consultas Agendadas</h2>
                     </div>
                     <div className="agenda-table__summary">
@@ -307,7 +307,7 @@ export function PsychologistAgendaPage({ onToast }) {
                             <button className="ghost-button" type="button" onClick={() => setConsultationPage((current) => Math.max(1, current - 1))} disabled={consultationPage === 1}>
                                 Anterior
                             </button>
-                            <span>Página {consultationPage} de {consultationPages}</span>
+                            <span>PÃ¡gina {consultationPage} de {consultationPages}</span>
                             <button className="ghost-button" type="button" onClick={() => setConsultationPage((current) => Math.min(consultationPages, current + 1))} disabled={consultationPage >= consultationPages}>
                                 Próxima
                             </button>
@@ -323,7 +323,7 @@ export function PsychologistAgendaPage({ onToast }) {
             <section className="panel agenda-section">
                 <div className="panel__header">
                     <div>
-                        <p className="eyebrow">Seção 3</p>
+                        <p className="eyebrow">SeÃ§Ã£o 3</p>
                         <h2>Calendário Semanal de Consultas</h2>
                     </div>
                     <div className="agenda-summary-bar" aria-label="Resumo do dia">
@@ -470,4 +470,3 @@ export function PsychologistAgendaPage({ onToast }) {
         </div>
     );
 }
-
