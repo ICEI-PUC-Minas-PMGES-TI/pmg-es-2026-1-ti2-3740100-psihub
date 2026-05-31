@@ -260,14 +260,14 @@ public class MockDataSeeder implements ApplicationRunner {
         createPayment(c19, ana.getValorConsulta(),   FormaPagamento.CARTAO,  StatusPagamento.PENDENTE, null);
 
         // --- Registros emocionais ---
-        createEmotionalRecords(joao,     today, 14, new int[]{7, 6, 8, 5, 7, 9, 8, 6, 7, 5, 8, 9, 7, 6}, new String[]{"Bem disposto", "Cansativo", "Ótimo dia", "Ansioso", "Tranquilo", "Muito bem", "Produtivo", "Stressado", "Calmo", "Triste", "Animado", "Feliz", "Equilibrado", "Cansado"});
-        createEmotionalRecords(maria,    today, 12, new int[]{5, 6, 4, 7, 8, 6, 5, 7, 9, 8, 6, 7},       new String[]{"Dia difícil", "Melhorando", "Ansiosa", "Boa conversa", "Muito bem", "Normal", "Cansada", "Animada", "Excelente", "Feliz", "Tranquila", "Bem"});
-        createEmotionalRecords(fernanda, today, 10, new int[]{8, 7, 9, 6, 8, 7, 9, 8, 7, 6},             new String[]{"Ótimo", "Bem", "Excelente", "Cansada", "Animada", "Tranquila", "Feliz", "Produtiva", "Bem", "Estressada"});
-        createEmotionalRecords(pedro,    today, 10, new int[]{4, 5, 3, 6, 7, 5, 6, 8, 7, 6},             new String[]{"Ansioso", "Um pouco melhor", "Difícil", "Melhorando", "Bem", "Tranquilo", "Animado", "Ótimo", "Bom dia", "Normal"});
-        createEmotionalRecords(luciana,  today, 7,  new int[]{6, 7, 8, 6, 9, 7, 8},                      new String[]{"Bem", "Animada", "Excelente", "Tranquila", "Muito bem", "Boa energia", "Feliz"});
-        createEmotionalRecords(rafaelPac, today, 8, new int[]{5, 6, 7, 5, 8, 6, 7, 9},                   new String[]{"Cansado", "Melhorando", "Bem", "Ansioso", "Animado", "Normal", "Bom", "Ótimo"});
-        createEmotionalRecords(isabela,  today, 12, new int[]{8, 9, 7, 8, 6, 9, 8, 7, 9, 8, 7, 9},      new String[]{"Feliz", "Excelente", "Bem", "Animada", "Cansada", "Muito bem", "Ótimo", "Tranquila", "Feliz", "Bem disposta", "Produtiva", "Excelente"});
-        createEmotionalRecords(gustavo,  today, 8,  new int[]{6, 5, 7, 8, 6, 7, 9, 8},                   new String[]{"Normal", "Cansado", "Melhorando", "Bem", "Ansioso", "Tranquilo", "Animado", "Ótimo"});
+        createEmotionalRecords(joao,     today, 14, new int[]{4, 3, 4, 2, 4, 5, 4, 3, 4, 2, 4, 5, 4, 3}, new String[]{"Bem disposto", "Cansativo", "Ótimo dia", "Ansioso", "Tranquilo", "Muito bem", "Produtivo", "Stressado", "Calmo", "Triste", "Animado", "Feliz", "Equilibrado", "Cansado"});
+        createEmotionalRecords(maria,    today, 12, new int[]{3, 3, 2, 4, 4, 3, 3, 4, 5, 4, 3, 4},       new String[]{"Dia difícil", "Melhorando", "Ansiosa", "Boa conversa", "Muito bem", "Normal", "Cansada", "Animada", "Excelente", "Feliz", "Tranquila", "Bem"});
+        createEmotionalRecords(fernanda, today, 10, new int[]{4, 4, 5, 3, 4, 4, 5, 4, 4, 3},             new String[]{"Ótimo", "Bem", "Excelente", "Cansada", "Animada", "Tranquila", "Feliz", "Produtiva", "Bem", "Estressada"});
+        createEmotionalRecords(pedro,    today, 10, new int[]{2, 3, 2, 3, 4, 3, 3, 4, 4, 3},             new String[]{"Ansioso", "Um pouco melhor", "Difícil", "Melhorando", "Bem", "Tranquilo", "Animado", "Ótimo", "Bom dia", "Normal"});
+        createEmotionalRecords(luciana,  today, 7,  new int[]{3, 4, 4, 3, 5, 4, 4},                      new String[]{"Bem", "Animada", "Excelente", "Tranquila", "Muito bem", "Boa energia", "Feliz"});
+        createEmotionalRecords(rafaelPac, today, 8, new int[]{3, 3, 4, 3, 4, 3, 4, 5},                   new String[]{"Cansado", "Melhorando", "Bem", "Ansioso", "Animado", "Normal", "Bom", "Ótimo"});
+        createEmotionalRecords(isabela,  today, 12, new int[]{4, 5, 4, 4, 3, 5, 4, 4, 5, 4, 4, 5},      new String[]{"Feliz", "Excelente", "Bem", "Animada", "Cansada", "Muito bem", "Ótimo", "Tranquila", "Feliz", "Bem disposta", "Produtiva", "Excelente"});
+        createEmotionalRecords(gustavo,  today, 8,  new int[]{3, 3, 4, 4, 3, 4, 5, 4},                   new String[]{"Normal", "Cansado", "Melhorando", "Bem", "Ansioso", "Tranquilo", "Animado", "Ótimo"});
     }
 
     private Psicologo createPsychologist(
