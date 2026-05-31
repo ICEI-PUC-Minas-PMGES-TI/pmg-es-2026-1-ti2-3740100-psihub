@@ -21,6 +21,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
     const [observacoes, setObservacoes] = useState('');
     const [loadingAgendamento, setLoadingAgendamento] = useState(false);
     const [submittingAgendamento, setSubmittingAgendamento] = useState(false);
+    const [bookedConsulta, setBookedConsulta] = useState(null);
 
     const availableDateKeys = useMemo(() => {
         return new Set(
@@ -89,6 +90,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
         setDaySlots([]);
         setObservacoes('');
         setTipoAtendimento('ONLINE');
+        setBookedConsulta(null);
     }
 
     function selectDate(dateKey) {
@@ -107,6 +109,11 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
                 inicioEm: getSlotInicio(selectedSlot),
                 tipoAtendimento,
                 observacoes: observacoes.trim() || null,
+            });
+            setBookedConsulta({
+                psicologoNome: selectedPsychologist.nome,
+                inicioEm: getSlotInicio(selectedSlot),
+                tipoAtendimento,
             });
             setStep('success');
             onScheduled?.();
@@ -137,6 +144,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
         setTipoAtendimento,
         observacoes,
         setObservacoes,
+        bookedConsulta,
         loadingAgendamento: activeView === 'schedule' && loadingAgendamento,
         submittingAgendamento,
         openAgenda,

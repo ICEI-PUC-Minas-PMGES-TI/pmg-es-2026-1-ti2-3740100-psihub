@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CalendarioConsultas } from '../CalendarioConsultas';
 import { ListaConsultasRecentes } from '../ListaConsultasRecentes';
 import { ModalAgendarConsulta } from '../ModalAgendarConsulta';
-import { ProximaConsultaCard } from '../ProximaConsultaCard';
+import { ModalConfirmacaoAgendamento } from '../ModalConfirmacaoAgendamento';
 import { SearchPsychologistView } from '../SearchPsychologistView';
 import { usePatientAgendamento } from '../../hooks/patient/usePatientAgendamento';
 import { usePatientCancelamento } from '../../hooks/patient/usePatientCancelamento';
@@ -72,7 +72,7 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
     }
 
     if (agendamento.step === 'success') {
-        return <ProximaConsultaCard psychologist={agendamento.selectedPsychologist} slot={agendamento.selectedSlot} onHome={agendamento.goHome} />;
+        return <ModalConfirmacaoAgendamento consulta={agendamento.bookedConsulta} onClose={agendamento.goHome} />;
     }
 
     return <SearchPsychologistView psychologists={data.psychologists} loading={loading} onOpenAgenda={agendamento.openAgenda} />;
