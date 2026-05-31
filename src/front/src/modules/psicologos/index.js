@@ -19,4 +19,5 @@ export { PsychologistDashboard } from './components/PsychologistDashboard';
 export { PatientsManagementPage } from './components/PatientsManagementPage';
 export { PsychologistProfilePage } from './components/PsychologistProfilePage';
 export { ReportsPage } from './components/ReportsPage';
+export { PsychologistFinancialPage } from './components/PsychologistFinancialPage';
 export { useAgenda } from './hooks/useAgenda';

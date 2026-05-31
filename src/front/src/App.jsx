@@ -21,6 +21,8 @@ const PsychologistDashboard = lazy(() => import('@/pages/PsychologistDashboard')
 const PsychologistProfilePage = lazy(() => import('@/pages/PsychologistProfile').then(m => ({ default: m.PsychologistProfilePage })));
 const PsychologistRegisterPage = lazy(() => import('@/pages/PsychologistRegister').then(m => ({ default: m.PsychologistRegisterPage })));
 const ReportsPage = lazy(() => import('@/pages/Reports').then(m => ({ default: m.ReportsPage })));
+const PsychologistFinancialPage = lazy(() => import('@/pages/PsychologistFinancial').then(m => ({ default: m.PsychologistFinancialPage })));
+const PatientPaymentsPage = lazy(() => import('@/pages/PatientPayments').then(m => ({ default: m.PatientPaymentsPage })));
 
 const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
 
@@ -40,6 +42,8 @@ const ROUTES_BY_VIEW = {
     notificacoes: '/psicologo/pacientes',
     'admin-psychologists': '/admin/psicologos',
     psicologos: '/admin/psicologos',
+    financeiro: '/psicologo/financeiro',
+    'meus-pagamentos': '/paciente/pagamentos',
 };
 
 export default function App() {
@@ -70,6 +74,7 @@ export default function App() {
                 { key: 'agenda', label: 'Agenda' },
                 { key: 'patients', label: 'Pacientes' },
                 { key: 'reports', label: 'Relatorios' },
+                { key: 'financeiro', label: 'Financeiro' },
                 { key: 'psychologist-profile', label: 'Perfil Profissional' },
             ];
         }
@@ -78,6 +83,7 @@ export default function App() {
             { key: 'schedule', label: 'Agendar consulta' },
             { key: 'appointments', label: 'Minhas consultas' },
             { key: 'emotions', label: 'Registro emocional' },
+            { key: 'meus-pagamentos', label: 'Meus Pagamentos' },
             { key: 'patient-profile', label: 'Perfil' },
         ];
     }, [role]);
@@ -181,6 +187,14 @@ export default function App() {
                         )}
                     />
                     <Route
+                        path="/paciente/pagamentos"
+                        element={(
+                            <PrivateRoute allowedRoles={['paciente']}>
+                                {renderShell('meus-pagamentos', <PatientPaymentsPage onToast={setToast} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
                         path="/paciente/perfil"
                         element={(
                             <PrivateRoute allowedRoles={['paciente']}>
@@ -230,6 +244,14 @@ export default function App() {
                         element={(
                             <PrivateRoute allowedRoles={['psicologo']}>
                                 {renderShell('reports', <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />)}
+                            </PrivateRoute>
+                        )}
+                    />
+                    <Route
+                        path="/psicologo/financeiro"
+                        element={(
+                            <PrivateRoute allowedRoles={['psicologo']}>
+                                {renderShell('financeiro', <PsychologistFinancialPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
                     />
