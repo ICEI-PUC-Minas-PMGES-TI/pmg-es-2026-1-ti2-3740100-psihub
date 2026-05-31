@@ -1,0 +1,17 @@
+# docker-compose.override.yml é carregado automaticamente pelo Docker Compose
+# quando você roda "docker compose up" — NÃO precisa de -f extra.
+#
+# Este arquivo sobrescreve configurações do docker-compose.yml para o
+# ambiente de desenvolvimento local:
+#
+#   restart: on-failure:3  →  o container tenta reiniciar no máximo 3 vezes
+#                              antes de parar definitivamente, evitando o
+#                              loop infinito que acontecia com "unless-stopped"
+#                              quando o Spring Boot falha na inicialização.
+#
+# Em produção, use o docker-compose.yml diretamente (sem este override) ou
+# forneça seu próprio override com as políticas desejadas.
+
+services:
+  backend:
+    restart: "on-failure:3"

@@ -5,28 +5,29 @@
 
 spring:
   flyway:
-    # Permite que o Flyway execute "clean" (apaga tudo e recria) quando
-    # detecta checksum inválido — ou seja, quando um script de migration
-    # já aplicado foi editado. Resolve o erro:
-    #   "Migration checksum mismatch for migration version X"
-    clean-disabled: false
-    clean-on-validation-error: true
+    # [FIX 1] repair-on-migrate substitui o antigo cleanOnValidationError
+    # (removido no Flyway 9+). Quando um script de migration já aplicado
+    # é editado, o Flyway atualiza o checksum na tabela de histórico e
+    # continua sem erro. O schema em si é atualizado pelo ddl-auto: update.
+    repair-on-migrate: true
+
+    # [FIX 2] Garante que arquivos com nome fora do padrão
+    # (ex: V1_sem_dois_underscores.sql) causem erro imediato, em vez de
+    # serem silenciosamente ignorados pelo Flyway.
+    validate-migration-naming: true
 
   jpa:
     # Em dev, "update" é mais tolerante: o Hibernate aplica ALTER TABLE
     # automaticamente para cobrir diferenças menores entre entidade e banco.
-    # Em prod usa-se "validate" (application.yml) para garantir que nada
-    # inesperado aconteça no schema.
+    # Em prod usa-se "validate" (application.yml).
     hibernate:
       ddl-auto: update
 
-  # Log SQL detalhado para facilitar debug local.
-  sql:
-    init:
-      mode: never
-
 logging:
   level:
-    org.flywaydb: DEBUG
+    # [FIX 3] INFO é suficiente para ver o que o Flyway está fazendo;
+    # DEBUG gerava dezenas de linhas de scanner por migration.
+    org.flywaydb: INFO
+    # SQL das queries visível sem o TRACE de bind parameters,
+    # que é extremamente verboso e raramente necessário.
     org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
