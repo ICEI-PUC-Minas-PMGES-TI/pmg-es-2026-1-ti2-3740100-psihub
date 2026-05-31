@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bell } from 'lucide-react';
-import { useNotifications } from '@/shared/hooks/useNotifications';
+import { useNotifications } from '@/modules/psicologos/hooks/useNotifications';
 
 function relativeTime(dateStr) {
     if (!dateStr) return '';

@@ -3,7 +3,7 @@
  * @description Modulo responsavel pela experiencia do paciente autenticado: agenda, consultas, perfil e registros emocionais.
  *
  * Componentes publicos: PatientDashboard, PatientEmotionPage, PatientProfilePage.
- * Hooks publicos: nenhum nesta versao.
+ * Hooks publicos: usePatientEmotion, usePatientProfile.
  * Utils publicos: nenhum nesta versao.
  *
  * @example
@@ -18,3 +18,5 @@ export { PatientEmotionPage } from './components/PatientEmotionPage';
 export { PatientProfilePage } from './components/PatientProfilePage';
 export { PatientPaymentsPage } from './components/PatientPaymentsPage';
 export { AvaliacaoConsultaModal } from './components/AvaliacaoConsultaModal';
+export { usePatientEmotion } from './hooks/patient/usePatientEmotion';
+export { usePatientProfile } from './hooks/patient/usePatientProfile';

@@ -1,9 +1,12 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AppShell } from '@/shared/components/AppShell';
+import { AuthRoute } from '@/shared/components/AuthRoute';
+import { PrivateRoute } from '@/shared/components/PrivateRoute';
 import { Toast } from '@/shared/components/Toast';
 import {
     clearAuthSession,
+    getMenuItems,
     getStoredAuthSession,
     storeAuthSession,
 } from '@/modules/auth';
@@ -54,7 +57,9 @@ export default function App() {
     const location = useLocation();
     const lastTrackedRoute = useRef('');
 
-    const role = normalizeRole(auth?.tipo);
+    const session = auth || getStoredAuthSession();
+    const role = normalizeRole(session?.tipo);
+    const menuItems = useMemo(() => getMenuItems(role), [role]);
 
     useEffect(() => {
         const routeKey = `${role || 'public'}:${location.pathname}${location.search}`;
@@ -62,31 +67,6 @@ export default function App() {
         lastTrackedRoute.current = routeKey; // Evita duplicar evento de rota em StrictMode/hot reload.
         trackUiEvent('route_change', { role: role || 'public', path: location.pathname, search: location.search || undefined }); // Registra navegacao para medir abandono e uso por perfil sem depender de ferramenta externa.
     }, [location.pathname, location.search, role]);
-
-    const menuItems = useMemo(() => {
-        if (role === 'admin') {
-            return [{ key: 'admin-psychologists', label: 'Psicologos' }];
-        }
-
-        if (role === 'psicologo') {
-            return [
-                { key: 'dashboard', label: 'Dashboard' },
-                { key: 'agenda', label: 'Agenda' },
-                { key: 'patients', label: 'Pacientes' },
-                { key: 'reports', label: 'Relatorios' },
-                { key: 'financeiro', label: 'Financeiro' },
-                { key: 'psychologist-profile', label: 'Perfil Profissional' },
-            ];
-        }
-
-        return [
-            { key: 'schedule', label: 'Agendar consulta' },
-            { key: 'appointments', label: 'Minhas consultas' },
-            { key: 'emotions', label: 'Registro emocional' },
-            { key: 'meus-pagamentos', label: 'Meus Pagamentos' },
-            { key: 'patient-profile', label: 'Perfil' },
-        ];
-    }, [role]);
 
     function handleAuthenticated(session) {
         storeAuthSession(session);
@@ -134,41 +114,55 @@ export default function App() {
                         path="/auth/login"
                         element={(
                             <AuthRoute
-                                auth={auth}
-                                initialMode="login"
-                                initialTipo="paciente"
-                                onAuthenticated={handleAuthenticated}
-                                onToast={setToast}
-                            />
+                                session={session}
+                                redirectTo={getDefaultRoute(session?.tipo)}
+                            >
+                                <AuthPage
+                                    key="login-paciente"
+                                    onAuthenticated={handleAuthenticated}
+                                    onToast={setToast}
+                                    initialMode="login"
+                                    initialTipo="paciente"
+                                />
+                            </AuthRoute>
                         )}
                     />
                     <Route
                         path="/auth/cadastro/paciente"
                         element={(
                             <AuthRoute
-                                auth={auth}
-                                initialMode="register"
-                                initialTipo="paciente"
-                                onAuthenticated={handleAuthenticated}
-                                onToast={setToast}
-                            />
+                                session={session}
+                                redirectTo={getDefaultRoute(session?.tipo)}
+                            >
+                                <AuthPage
+                                    key="register-paciente"
+                                    onAuthenticated={handleAuthenticated}
+                                    onToast={setToast}
+                                    initialMode="register"
+                                    initialTipo="paciente"
+                                />
+                            </AuthRoute>
                         )}
                     />
                     <Route
                         path="/auth/cadastro/psicologo"
                         element={(
-                            <PsychologistRegisterRoute
-                                auth={auth}
-                                onAuthenticated={handleAuthenticated}
-                                onToast={setToast}
-                            />
+                            <AuthRoute
+                                session={session}
+                                redirectTo={getDefaultRoute(session?.tipo)}
+                            >
+                                <PsychologistRegisterRoute
+                                    onAuthenticated={handleAuthenticated}
+                                    onToast={setToast}
+                                />
+                            </AuthRoute>
                         )}
                     />
 
                     <Route
                         path="/paciente/dashboard"
                         element={(
-                            <PrivateRoute allowedRoles={['paciente']}>
+                            <PrivateRoute session={session} allowedRoles={['paciente']}>
                                 <PatientDashboardRoute
                                     auth={auth}
                                     onNavigate={navigateByView}
@@ -181,7 +175,7 @@ export default function App() {
                     <Route
                         path="/paciente/emocoes"
                         element={(
-                            <PrivateRoute allowedRoles={['paciente']}>
+                            <PrivateRoute session={session} allowedRoles={['paciente']}>
                                 {renderShell('emotions', <PatientEmotionPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -189,7 +183,7 @@ export default function App() {
                     <Route
                         path="/paciente/pagamentos"
                         element={(
-                            <PrivateRoute allowedRoles={['paciente']}>
+                            <PrivateRoute session={session} allowedRoles={['paciente']}>
                                 {renderShell('meus-pagamentos', <PatientPaymentsPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -197,7 +191,7 @@ export default function App() {
                     <Route
                         path="/paciente/perfil"
                         element={(
-                            <PrivateRoute allowedRoles={['paciente']}>
+                            <PrivateRoute session={session} allowedRoles={['paciente']}>
                                 {renderShell('patient-profile', <PatientProfilePage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -206,7 +200,7 @@ export default function App() {
                     <Route
                         path="/psicologo/dashboard"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell(
                                     'dashboard',
                                     <PsychologistDashboard activeView="dashboard" onToast={setToast} onNavigate={navigateByView} />,
@@ -217,7 +211,7 @@ export default function App() {
                     <Route
                         path="/psicologo/agenda"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell('agenda', <PsychologistAgendaPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -225,7 +219,7 @@ export default function App() {
                     <Route
                         path="/psicologo/pacientes"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell(
                                     'patients',
                                     <PatientsManagementPage
@@ -242,7 +236,7 @@ export default function App() {
                     <Route
                         path="/psicologo/relatorios"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell('reports', <ReportsPage onToast={setToast} initialPatientId={preselectedPatient} />)}
                             </PrivateRoute>
                         )}
@@ -250,7 +244,7 @@ export default function App() {
                     <Route
                         path="/psicologo/financeiro"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell('financeiro', <PsychologistFinancialPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -258,7 +252,7 @@ export default function App() {
                     <Route
                         path="/psicologo/perfil"
                         element={(
-                            <PrivateRoute allowedRoles={['psicologo']}>
+                            <PrivateRoute session={session} allowedRoles={['psicologo']}>
                                 {renderShell('psychologist-profile', <PsychologistProfilePage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -267,7 +261,7 @@ export default function App() {
                     <Route
                         path="/admin/psicologos"
                         element={(
-                            <PrivateRoute allowedRoles={['admin']}>
+                            <PrivateRoute session={session} allowedRoles={['admin']}>
                                 {renderShell('admin-psychologists', <AdminPsychologistsPage onToast={setToast} />)}
                             </PrivateRoute>
                         )}
@@ -286,37 +280,14 @@ export default function App() {
     );
 }
 
-function PsychologistRegisterRoute({ auth, onAuthenticated, onToast }) {
+function PsychologistRegisterRoute({ onAuthenticated, onToast }) {
     const navigate = useNavigate();
-    const session = auth || getStoredAuthSession();
-
-    if (session?.token) {
-        return <Navigate to={getDefaultRoute(session.tipo)} replace />;
-    }
 
     return (
         <PsychologistRegisterPage
             onAuthenticated={onAuthenticated}
             onToast={onToast}
             onBack={() => navigate('/')}
-        />
-    );
-}
-
-function AuthRoute({ auth, initialMode, initialTipo, onAuthenticated, onToast }) {
-    const session = auth || getStoredAuthSession();
-
-    if (session?.token) {
-        return <Navigate to={getDefaultRoute(session.tipo)} replace />;
-    }
-
-    return (
-        <AuthPage
-            key={`${initialMode}-${initialTipo}`}
-            onAuthenticated={onAuthenticated}
-            onToast={onToast}
-            initialMode={initialMode}
-            initialTipo={initialTipo}
         />
     );
 }
@@ -335,24 +306,6 @@ function PatientDashboardRoute({ auth, onNavigate, onToast, renderShell }) {
             onToast={onToast}
         />,
     );
-}
-
-function PrivateRoute({ allowedRoles, children }) {
-    const location = useLocation();
-    const session = getStoredAuthSession();
-
-    if (!session?.token) {
-        return <Navigate to="/auth/login" replace state={{ from: location }} />;
-    }
-
-    const role = normalizeRole(session.tipo);
-    const allowed = allowedRoles.map(normalizeRole);
-
-    if (!allowed.includes(role)) {
-        return <Navigate to="/forbidden" replace />;
-    }
-
-    return children;
 }
 
 function ForbiddenPage({ auth }) {

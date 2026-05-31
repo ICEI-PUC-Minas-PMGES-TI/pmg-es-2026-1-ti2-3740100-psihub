@@ -3,7 +3,7 @@
  * @description Modulo responsavel pelas operacoes administrativas do PsiHub no frontend.
  *
  * Componentes publicos: AdminPsychologistsPage.
- * Hooks publicos: nenhum nesta versao.
+ * Hooks publicos: useAdminPsychologists.
  * Utils publicos: nenhum nesta versao.
  *
  * @example
@@ -13,3 +13,4 @@
  * @see pages/AdminPsychologists para a montagem da rota administrativa.
  */
 export { AdminPsychologistsPage } from './components/AdminPsychologistsPage';
+export { useAdminPsychologists } from './hooks/useAdminPsychologists';

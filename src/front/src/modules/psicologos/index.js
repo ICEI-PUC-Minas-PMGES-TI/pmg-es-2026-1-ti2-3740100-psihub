@@ -3,7 +3,7 @@
  * @description Modulo responsavel pela experiencia do psicologo autenticado: agenda, disponibilidade, pacientes, perfil e relatorios.
  *
  * Componentes publicos: PsychologistAgendaPage, PsychologistDashboard, PatientsManagementPage, PsychologistProfilePage, ReportsPage.
- * Hooks publicos: useAgenda.
+ * Hooks publicos: useAgenda, usePsychologistDashboard, usePsychologistFinancial, usePatientsManagement, usePsychologistProfile, useReports, useNotifications.
  * Utils publicos: nenhum nesta versao.
  *
  * @example
@@ -21,3 +21,9 @@ export { PsychologistProfilePage } from './components/PsychologistProfilePage';
 export { ReportsPage } from './components/ReportsPage';
 export { PsychologistFinancialPage } from './components/PsychologistFinancialPage';
 export { useAgenda } from './hooks/useAgenda';
+export { usePsychologistDashboard } from './hooks/usePsychologistDashboard';
+export { usePsychologistFinancial } from './hooks/usePsychologistFinancial';
+export { usePatientsManagement } from './hooks/usePatientsManagement';
+export { usePsychologistProfile } from './hooks/usePsychologistProfile';
+export { useReports } from './hooks/useReports';
+export { useNotifications } from './hooks/useNotifications';
