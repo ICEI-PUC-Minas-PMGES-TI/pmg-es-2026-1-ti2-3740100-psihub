@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { financialApi } from '@/services/financial.service';
+import { notificationApi } from '@/services/notification.service.js';
 
 // TODO: move to a dedicated notifications module if this cross-role domain grows.
 export function useNotifications() {
@@ -8,7 +8,7 @@ export function useNotifications() {
 
     const fetchAll = useCallback((signal) => {
         setLoading(true);
-        return financialApi.listNotifications({ signal })
+        return notificationApi.listNotifications({ signal })
             .then((data) => {
                 setNotifications(data || []);
             })
@@ -33,7 +33,7 @@ export function useNotifications() {
 
     const markAsRead = useCallback(async (id) => {
         try {
-            const updated = await financialApi.markNotificationRead(id);
+            const updated = await notificationApi.markNotificationRead(id);
             setNotifications((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, lida: true, ...updated } : n))
             );
@@ -44,7 +44,7 @@ export function useNotifications() {
 
     const markAllAsRead = useCallback(async () => {
         try {
-            await financialApi.markAllNotificationsRead();
+            await notificationApi.markAllNotificationsRead();
             setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
         } catch {
             // silently ignore
