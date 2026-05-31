@@ -1,4 +1,5 @@
-import { Bell, CalendarDays, CircleHelp } from 'lucide-react';
+import { CalendarDays, CircleHelp } from 'lucide-react';
+import { NotificacoesDropdown } from '@/shared/components/NotificacoesDropdown';
 
 export function TopBar({ user, role }) {
   const subtitle = role === 'admin'
@@ -20,9 +21,7 @@ export function TopBar({ user, role }) {
       </div>
 
       <div className="topbar__actions">
-        <button className="topbar__icon-button" type="button" aria-label="Notificacoes">
-          <Bell size={24} />
-        </button>
+        <NotificacoesDropdown />
         <button className="topbar__icon-button" type="button" aria-label="Ajuda">
           <CircleHelp size={24} />
         </button>
