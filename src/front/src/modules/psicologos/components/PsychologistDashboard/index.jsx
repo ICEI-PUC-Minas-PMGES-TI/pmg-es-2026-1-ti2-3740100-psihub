@@ -271,14 +271,6 @@ function PsychologistHome({ onNavigate }) {
                                 <ChevronRightIcon size={15} className="psihome__shortcut-chevron" />
                             </button>
                         ))}
-
-                        <button className="psihome__shortcut" onClick={() => onNavigate?.('psicologos')}>
-                            <span className="psihome__shortcut-left">
-                                <ShieldCheck size={15} />
-                                Gerenciar psicólogos
-                            </span>
-                            <span className="psihome__admin-badge">Apenas admin</span>
-                        </button>
                     </div>
 
                 </section>

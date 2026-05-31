@@ -27,9 +27,9 @@ export function PatientEmotionPage({ onToast }) {
         <div className="psihome">
             <header className="agenda-page__header panel">
                 <div>
-                    <p className="eyebrow">SaÃºde emocional</p>
+                    <p className="eyebrow">Saúde emocional</p>
                     <h1>Registro Emocional</h1>
-                    <p className="agenda-page__subtitle">Registre seu humor e emoÃ§Ãµes do dia. EdiÃ§Ã£o permitida somente nas primeiras 24 horas.</p>
+                    <p className="agenda-page__subtitle">Registre seu humor e emoções do dia. Edição permitida somente nas primeiras 24 horas.</p>
                 </div>
             </header>
 
@@ -56,11 +56,11 @@ export function PatientEmotionPage({ onToast }) {
                         </div>
                     </div>
                     <label className="form-group">
-                        Emocoes
-                        <input value={form.emocoes} onChange={(event) => setForm((current) => ({ ...current, emocoes: event.target.value }))} placeholder="Separe por virgula" />
+                        Emoções
+                        <input value={form.emocoes} onChange={(event) => setForm((current) => ({ ...current, emocoes: event.target.value }))} placeholder="Separe por vírgula" />
                     </label>
                     <label className="form-group form-group--full">
-                        Descricao
+                        Descrição
                         <textarea rows="4" maxLength={500} value={form.descricao} onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))} />
                     </label>
                     <div className="form-actions">
@@ -73,7 +73,7 @@ export function PatientEmotionPage({ onToast }) {
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>Historico emocional</h2>
+                    <h2>Histórico emocional</h2>
                 </div>
                 {loading ? <p className="state-row"><Loader2 className="spin" size={16} /> Carregando</p> : records.length === 0 ? (
                     <p className="empty-state">Nenhum registro emocional encontrado.</p>
@@ -83,7 +83,7 @@ export function PatientEmotionPage({ onToast }) {
                             <article className="simple-list__item" key={record.id}>
                                 <div>
                                     <strong>{formatDateTime(record.registradoEm)} | Humor {record.humorDia}/5</strong>
-                                    <span>{(record.emocoes || []).join(', ') || 'Sem emocoes informadas'}</span>
+                                    <span>{(record.emocoes || []).join(', ') || 'Sem emoções informadas'}</span>
                                     {record.descricao && <span>{record.descricao}</span>}
                                 </div>
                                 {isEditable(record.registradoEm) && (

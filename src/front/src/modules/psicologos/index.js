@@ -14,8 +14,8 @@
  * @see shared/utils/date.utils.js para formatacao e calculos de datas.
  */
 import './psicologos.css';
-export { PsychologistAgendaPage } from './components/PsychologistAgendaPage';
 export { PsychologistDashboard } from './components/PsychologistDashboard';
+export { PsychologistAgendaPage } from './components/PsychologistAgendaPage';
 export { PatientsManagementPage } from './components/PatientsManagementPage';
 export { PsychologistProfilePage } from './components/PsychologistProfilePage';
 export { ReportsPage } from './components/ReportsPage';

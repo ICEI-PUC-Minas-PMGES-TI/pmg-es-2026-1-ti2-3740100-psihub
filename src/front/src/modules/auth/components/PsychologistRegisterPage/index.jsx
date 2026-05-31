@@ -15,7 +15,7 @@ const initialForm = {
     biografia: '',
 };
 
-const PSYCHOLOGIST_PENDING_MESSAGE = 'Seu cadastro foi recebido! Aguarde a aprovaÃ§Ã£o do administrador. VocÃª receberÃ¡ acesso apÃ³s a anÃ¡lise do seu perfil.';
+const PSYCHOLOGIST_PENDING_MESSAGE = 'Seu cadastro foi recebido! Aguarde a aprovação do administrador. Você receberá acesso após a análise do seu perfil.';
 
 export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
     const [form, setForm] = useState(initialForm);
@@ -37,7 +37,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
         }
 
         if (form.senha !== form.confirmarSenha) {
-            setError('A confirmaÃ§Ã£o de senha nÃ£o confere.');
+            setError('A confirmação de senha não confere.');
             return;
         }
 
@@ -82,7 +82,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
                 message: PSYCHOLOGIST_PENDING_MESSAGE,
             });
         } catch (err) {
-            setError(err.message || 'NÃ£o foi possÃ­vel criar o perfil profissional agora.');
+            setError(err.message || 'Não foi possível criar o perfil profissional agora.');
         } finally {
             setSubmitting(false);
         }
@@ -103,7 +103,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
 
                     <div className="brand-mark" aria-hidden="true"></div>
                     <p className="eyebrow">Cadastro profissional</p>
-                    <h1>Crie seu perfil de psicÃ³logo</h1>
+                    <h1>Crie seu perfil de psicólogo</h1>
                     <p>
                         Preencha seus dados profissionais para acessar sua agenda e gerenciar seus pacientes no PsiHub.
                     </p>
@@ -116,7 +116,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
                             <h2>Cadastro enviado</h2>
                             <p>{PSYCHOLOGIST_PENDING_MESSAGE}</p>
                             <button type="button" className="primary-button primary-button--fit" onClick={onBack}>
-                                Voltar para inÃ­cio
+                                Voltar para início
                             </button>
                         </div>
                     ) : (
@@ -186,7 +186,7 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
                                         </button>
                                     </span>
                                     <span className={passwordTooShort ? 'field-hint field-hint--error' : 'field-hint'}>
-                                        MÃ­nimo 8 caracteres
+                                        Mínimo 8 caracteres
                                     </span>
                                 </label>
 
@@ -211,11 +211,11 @@ export function PsychologistRegisterPage({ onAuthenticated, onBack, onToast }) {
                                             {showConfirmation ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </span>
-                                    {passwordMismatch && <span className="field-hint field-hint--error">As senhas nÃ£o conferem</span>}
+                                    {passwordMismatch && <span className="field-hint field-hint--error">As senhas não conferem</span>}
                                 </label>
 
                                 <label className="field">
-                                    Valor da sessÃ£o
+                                    Valor da sessão
                                     <input
                                         type="number"
                                         min="0"

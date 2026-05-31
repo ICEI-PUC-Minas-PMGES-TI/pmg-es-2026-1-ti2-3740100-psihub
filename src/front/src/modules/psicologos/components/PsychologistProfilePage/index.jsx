@@ -14,7 +14,7 @@ export function PsychologistProfilePage({ onToast }) {
     const pageHeader = (
         <header className="agenda-page__header panel">
             <div>
-                <p className="eyebrow">ConfiguraÃ§Ãµes</p>
+                <p className="eyebrow">Configurações</p>
                 <h1>Perfil Profissional</h1>
                 <p className="agenda-page__subtitle">
                     Atualize os dados exibidos para pacientes e usados no agendamento.
@@ -44,7 +44,7 @@ export function PsychologistProfilePage({ onToast }) {
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>Dados do Psicologo</h2>
+                    <h2>Dados do Psicólogo</h2>
                     <User size={20} />
                 </div>
 

@@ -17,9 +17,9 @@ export function ReportsPage({ onToast, initialPatientId }) {
         <div className="psihome">
             <header className="agenda-page__header panel">
                 <div>
-                    <p className="eyebrow">RelatÃ³rios</p>
-                    <h1>RelatÃ³rios e EvoluÃ§Ã£o</h1>
-                    <p className="agenda-page__subtitle">Consulte a linha do tempo clÃ­nica somente para pacientes com vÃ­nculo aceito.</p>
+                    <p className="eyebrow">Relatórios</p>
+                    <h1>Relatórios e Evolução</h1>
+                    <p className="agenda-page__subtitle">Consulte a linha do tempo clínica somente para pacientes com vínculo aceito.</p>
                 </div>
             </header>
 
@@ -46,9 +46,9 @@ export function ReportsPage({ onToast, initialPatientId }) {
                 </label>
 
                 {loadingTimeline ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evoluÃ§Ã£oâ€¦</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evolução…</p>
                 ) : timeline.length === 0 ? (
-                    <p className="empty-state">Nenhum registro de evoluÃ§Ã£o para o filtro atual.</p>
+                    <p className="empty-state">Nenhum registro de evolução para o filtro atual.</p>
                 ) : (
                     <div className="simple-list" style={{ marginTop: '12px' }}>
                         {timeline.map((item) => (

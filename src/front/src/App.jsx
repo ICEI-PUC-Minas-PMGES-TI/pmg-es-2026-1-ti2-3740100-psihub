@@ -317,7 +317,7 @@ function ForbiddenPage({ auth }) {
                 <div className="auth-panel__intro">
                     <div className="brand-mark" aria-hidden="true"></div>
                     <h1>Acesso negado</h1>
-                    <p>Seu perfil nao tem permissao para acessar esta pagina.</p>
+                    <p>Seu perfil não tem permissão para acessar esta página.</p>
                 </div>
                 <Link className="primary-button" to={session ? getDefaultRoute(session.tipo) : '/auth/login'}>
                     Voltar
@@ -331,7 +331,7 @@ function getDefaultRoute(role) {
     const normalized = normalizeRole(role);
 
     if (normalized === 'admin') return '/admin/psicologos';
-    if (normalized === 'psicologo') return '/psicologo/agenda';
+    if (normalized === 'psicologo') return '/psicologo/dashboard';
     if (normalized === 'paciente') return '/paciente/dashboard';
     return '/';
 }

@@ -19,7 +19,7 @@ const STATUS_BADGE_CLASS = {
 
 const FORMA_LABELS = {
     PIX: 'PIX',
-    CARTAO: 'CartÃ£o',
+    CARTAO: 'Cartão',
     DINHEIRO: 'Dinheiro',
 };
 
@@ -49,8 +49,8 @@ export function PsychologistFinancialPage({ onToast }) {
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Financeiro</p>
-                    <h1>GestÃ£o Financeira</h1>
-                    <p className="agenda-page__subtitle">Registre e acompanhe os pagamentos das consultas concluÃ­das.</p>
+                    <h1>Gestão Financeira</h1>
+                    <p className="agenda-page__subtitle">Registre e acompanhe os pagamentos das consultas concluídas.</p>
                 </div>
                 <button
                     className="primary-button primary-button--fit"
@@ -98,7 +98,7 @@ export function PsychologistFinancialPage({ onToast }) {
                         </select>
                     </label>
                     <label className="field">
-                        PerÃ­odo inÃ­cio
+                        Período início
                         <input
                             type="date"
                             value={filtroInicio}
@@ -106,7 +106,7 @@ export function PsychologistFinancialPage({ onToast }) {
                         />
                     </label>
                     <label className="field">
-                        PerÃ­odo fim
+                        Período fim
                         <input
                             type="date"
                             value={filtroFim}
@@ -116,7 +116,7 @@ export function PsychologistFinancialPage({ onToast }) {
                 </div>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando pagamentosâ€¦</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando pagamentos…</p>
                 ) : pagamentos.length === 0 ? (
                     <p className="empty-state">Nenhum pagamento registrado ainda.</p>
                 ) : (
@@ -129,7 +129,7 @@ export function PsychologistFinancialPage({ onToast }) {
                                     <th className="py-2 pr-4 font-medium">Valor</th>
                                     <th className="py-2 pr-4 font-medium">Forma</th>
                                     <th className="py-2 pr-4 font-medium">Status</th>
-                                    <th className="py-2 font-medium">AÃ§Ãµes</th>
+                                    <th className="py-2 font-medium">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -140,12 +140,12 @@ export function PsychologistFinancialPage({ onToast }) {
                                                 {pagamento.pacienteNome ?? `Consulta #${pagamento.consultaId}`}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
-                                                {pagamento.inicioEm ? formatDateTime(pagamento.inicioEm) : 'â€”'}
+                                                {pagamento.inicioEm ? formatDateTime(pagamento.inicioEm) : '—'}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
                                                 {pagamento.valor != null
                                                     ? `R$ ${Number(pagamento.valor).toFixed(2).replace('.', ',')}`
-                                                    : 'â€”'}
+                                                    : '—'}
                                             </td>
                                             <td className="py-3 pr-4">
                                                 {FORMA_LABELS[pagamento.formaPagamento] ?? pagamento.formaPagamento}
