@@ -42,6 +42,20 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
             @Param("status") StatusPagamento status
     );
 
+    @Query("""
+            select p from Pagamento p
+            where p.consulta.psicologo.id = :psicologoId
+              and (:status is null or p.statusPagamento = :status)
+              and (:inicio is null or p.consulta.inicioEm >= :inicio)
+              and (:fim is null or p.consulta.inicioEm < :fim)
+            """)
+    List<Pagamento> findByFiltrosCompleto(
+            @Param("psicologoId") Long psicologoId,
+            @Param("status") StatusPagamento status,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
+    );
+
     @Query("select p from Pagamento p where p.consulta.paciente.id = :pacienteId")
     List<Pagamento> findByPacienteId(@Param("pacienteId") Long pacienteId);
 }

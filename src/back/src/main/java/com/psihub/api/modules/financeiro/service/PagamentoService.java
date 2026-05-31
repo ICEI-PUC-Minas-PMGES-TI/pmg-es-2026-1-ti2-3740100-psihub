@@ -6,6 +6,7 @@ import com.psihub.api.modules.financeiro.dto.ConfirmarPagamentoRequest;
 import com.psihub.api.modules.financeiro.dto.PagamentoResponse;
 import com.psihub.api.modules.financeiro.dto.ReciboResponse;
 import com.psihub.api.modules.financeiro.dto.RegistrarPagamentoRequest;
+import com.psihub.api.modules.financeiro.dto.ResumoFinanceiroResponse;
 import com.psihub.api.modules.financeiro.entity.Pagamento;
 import com.psihub.api.modules.financeiro.entity.Recibo;
 import com.psihub.api.modules.financeiro.entity.StatusPagamento;
@@ -92,10 +93,12 @@ public class PagamentoService {
         String uuid8 = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         String numeroRecibo = "REC-" + ano + "-" + uuid8;
 
+        String arquivoUrl = "/api/psicologos/me/financeiro/pagamentos/" + pagamentoId + "/recibo/download";
+
         Recibo recibo = new Recibo();
         recibo.setPagamento(pagamento);
         recibo.setNumeroRecibo(numeroRecibo);
-        recibo.setArquivoUrl("pending");
+        recibo.setArquivoUrl(arquivoUrl);
 
         reciboRepository.save(recibo);
     }
@@ -114,19 +117,10 @@ public class PagamentoService {
 
     @Transactional(readOnly = true)
     public List<PagamentoResponse> listar(Long psicologoId, StatusPagamento status, LocalDate inicio, LocalDate fim) {
-        List<Pagamento> pagamentos;
-
-        if (inicio != null && fim != null) {
-            pagamentos = pagamentoRepository.findByPsicologoIdAndPagoEmBetween(
-                    psicologoId,
-                    inicio.atStartOfDay(),
-                    fim.plusDays(1).atStartOfDay()
-            );
-        } else {
-            pagamentos = pagamentoRepository.findByFiltros(psicologoId, status);
-        }
-
-        return pagamentos.stream().map(this::toResponse).toList();
+        LocalDateTime inicioEm = inicio != null ? inicio.atStartOfDay() : null;
+        LocalDateTime fimEm = fim != null ? fim.plusDays(1).atStartOfDay() : null;
+        return pagamentoRepository.findByFiltrosCompleto(psicologoId, status, inicioEm, fimEm)
+                .stream().map(this::toResponse).toList();
     }
 
     @Transactional
@@ -186,8 +180,31 @@ public class PagamentoService {
         return toReciboResponse(recibo);
     }
 
-    private Pagamento buscarPagamentoDoPsicologo(Long psicologoId, Long pagamentoId) {
-        Pagamento pagamento = pagamentoRepository.findById(Objects.requireNonNull(pagamentoId))
+    @Transactional(readOnly = true)
+    public ResumoFinanceiroResponse resumo(Long psicologoId, LocalDate inicio, LocalDate fim) {
+        LocalDateTime inicioEm = inicio != null ? inicio.atStartOfDay() : null;
+        LocalDateTime fimEm = fim != null ? fim.plusDays(1).atStartOfDay() : null;
+        List<Pagamento> pagamentos = pagamentoRepository.findByFiltrosCompleto(psicologoId, null, inicioEm, fimEm);
+
+        java.math.BigDecimal totalPago = pagamentos.stream()
+                .filter(p -> p.getStatusPagamento() == StatusPagamento.PAGO)
+                .map(Pagamento::getValor)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal totalPendente = pagamentos.stream()
+                .filter(p -> p.getStatusPagamento() == StatusPagamento.PENDENTE)
+                .map(Pagamento::getValor)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal totalEstornado = pagamentos.stream()
+                .filter(p -> p.getStatusPagamento() == StatusPagamento.ESTORNADO)
+                .map(Pagamento::getValor)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        return new ResumoFinanceiroResponse(totalPago, totalPendente, totalEstornado, pagamentos.size());
+    }
+
+    private Pagamento buscarPagamentoDoPsicologo(Long psicologoId, Long pagamentoId) {        Pagamento pagamento = pagamentoRepository.findById(Objects.requireNonNull(pagamentoId))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento nao encontrado"));
 
         if (!pagamento.getConsulta().getPsicologo().getId().equals(psicologoId)) {
@@ -204,9 +221,16 @@ public class PagamentoService {
             reciboResponse = toReciboResponse(recibo);
         }
 
+        var consulta = pagamento.getConsulta();
+        String pacienteNome = consulta.getPaciente().getUsuario().getNome();
+        String psicologoNome = consulta.getPsicologo().getUsuario().getNome();
+
         return new PagamentoResponse(
                 pagamento.getId(),
-                pagamento.getConsulta().getId(),
+                consulta.getId(),
+                pacienteNome,
+                psicologoNome,
+                consulta.getInicioEm(),
                 pagamento.getValor(),
                 pagamento.getFormaPagamento(),
                 pagamento.getStatusPagamento(),

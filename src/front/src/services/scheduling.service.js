@@ -126,4 +126,15 @@ export const schedulingApi = {
             signal,
         });
     },
+
+    submitAvaliacao({ consultaId, nota, comentario }) {
+        return apiRequest(`/api/consultas/${consultaId}/avaliacao`, {
+            method: 'POST',
+            body: { nota, comentario },
+        });
+    },
+
+    getPsychologistAvaliacoes(psicologoId) {
+        return apiRequest(`/api/psicologos/${psicologoId}/avaliacoes/media`);
+    },
 };

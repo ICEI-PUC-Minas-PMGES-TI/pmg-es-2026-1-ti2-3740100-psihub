@@ -17,3 +17,4 @@ export { PatientDashboard } from './components/PatientDashboard';
 export { PatientEmotionPage } from './components/PatientEmotionPage';
 export { PatientProfilePage } from './components/PatientProfilePage';
 export { PatientPaymentsPage } from './components/PatientPaymentsPage';
+export { AvaliacaoConsultaModal } from './components/AvaliacaoConsultaModal';

@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 public record PagamentoResponse(
         Long id,
         Long consultaId,
+        String pacienteNome,
+        String psicologoNome,
+        LocalDateTime inicioEm,
         BigDecimal valor,
         FormaPagamento formaPagamento,
         StatusPagamento statusPagamento,

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { DollarSign, Loader2 } from 'lucide-react';
 import { financialApi } from '@/services/financial.service';
 import { schedulingApi } from '@/services/scheduling.service';
-import { formatDateTime } from '@/shared/utils/date.utils';
+import { currencyFormatter, formatDateTime } from '@/shared/utils/date.utils';
 import { ModalRegistrarPagamento } from '../ModalRegistrarPagamento';
 
 const STATUS_LABELS = {
@@ -28,6 +28,7 @@ const FORMA_LABELS = {
 export function PsychologistFinancialPage({ onToast }) {
     const [pagamentos, setPagamentos] = useState([]);
     const [consultasSemPagamento, setConsultasSemPagamento] = useState([]);
+    const [resumo, setResumo] = useState(null);
     const [filtroStatus, setFiltroStatus] = useState('');
     const [filtroInicio, setFiltroInicio] = useState('');
     const [filtroFim, setFiltroFim] = useState('');
@@ -52,12 +53,14 @@ export function PsychologistFinancialPage({ onToast }) {
         Promise.all([
             carregarPagamentos(controller.signal),
             schedulingApi.listConsultations({ status: 'CONCLUIDA', signal: controller.signal }),
+            financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined, signal: controller.signal }),
         ])
-            .then(([listaPagamentos, listaConsultas]) => {
+            .then(([listaPagamentos, listaConsultas, resumoData]) => {
                 const lista = listaPagamentos || [];
                 setPagamentos(lista);
                 const idsPagos = new Set(lista.map((p) => p.consultaId));
                 setConsultasSemPagamento((listaConsultas || []).filter((c) => !idsPagos.has(c.id)));
+                setResumo(resumoData || null);
                 setErro('');
             })
             .catch((err) => {
@@ -74,14 +77,16 @@ export function PsychologistFinancialPage({ onToast }) {
             onToast?.({ type: 'success', message: 'Pagamento registrado com sucesso.' });
             setModalAberto(false);
             // Reload
-            const [listaPagamentos, listaConsultas] = await Promise.all([
+            const [listaPagamentos, listaConsultas, resumoData] = await Promise.all([
                 financialApi.listPsychologistPayments({ status: filtroStatus || undefined, inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
                 schedulingApi.listConsultations({ status: 'CONCLUIDA' }),
+                financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
             ]);
             const lista = listaPagamentos || [];
             setPagamentos(lista);
             const idsPagos = new Set(lista.map((p) => p.consultaId));
             setConsultasSemPagamento((listaConsultas || []).filter((c) => !idsPagos.has(c.id)));
+            setResumo(resumoData || null);
         } catch (err) {
             onToast?.({ type: 'error', message: err.message || 'Erro ao registrar pagamento.' });
         }
@@ -115,7 +120,11 @@ export function PsychologistFinancialPage({ onToast }) {
     async function handleVerRecibo(pagamentoId) {
         try {
             const recibo = await financialApi.getPsychologistReceipt(pagamentoId);
-            onToast?.({ type: 'success', message: `Recibo: ${recibo.numeroRecibo}` });
+            if (!recibo?.arquivoUrl || recibo.arquivoUrl === 'pending') {
+                onToast?.({ type: 'error', message: 'Recibo ainda não disponível para download.' });
+                return;
+            }
+            window.open(recibo.arquivoUrl, '_blank');
         } catch (err) {
             onToast?.({ type: 'error', message: err.message || 'Erro ao buscar recibo.' });
         }
@@ -140,6 +149,23 @@ export function PsychologistFinancialPage({ onToast }) {
             </header>
 
             {erro && <div className="inline-alert inline-alert--error">{erro}</div>}
+
+            {resumo && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 8 }}>
+                    <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
+                        <p className="eyebrow">Total Recebido</p>
+                        <strong style={{ fontSize: 20, color: '#16a34a' }}>{currencyFormatter.format(resumo.totalPago ?? 0)}</strong>
+                    </div>
+                    <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
+                        <p className="eyebrow">Pendentes</p>
+                        <strong style={{ fontSize: 20, color: '#ca8a04' }}>{currencyFormatter.format(resumo.totalPendente ?? 0)}</strong>
+                    </div>
+                    <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
+                        <p className="eyebrow">Estornados</p>
+                        <strong style={{ fontSize: 20, color: '#dc2626' }}>{currencyFormatter.format(resumo.totalEstornado ?? 0)}</strong>
+                    </div>
+                </div>
+            )}
 
             <section className="panel">
                 <div className="panel__header">
@@ -194,14 +220,13 @@ export function PsychologistFinancialPage({ onToast }) {
                             </thead>
                             <tbody>
                                 {pagamentos.map((pagamento) => {
-                                    const consulta = consultasSemPagamento.find((c) => c.id === pagamento.consultaId);
                                     return (
                                         <tr key={pagamento.id} className="border-b border-gray-100 hover:bg-gray-50">
                                             <td className="py-3 pr-4">
-                                                {consulta?.pacienteNome ?? `Consulta #${pagamento.consultaId}`}
+                                                {pagamento.pacienteNome ?? `Consulta #${pagamento.consultaId}`}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
-                                                {consulta ? formatDateTime(consulta.inicioEm) : '—'}
+                                                {pagamento.inicioEm ? formatDateTime(pagamento.inicioEm) : '—'}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
                                                 {pagamento.valor != null

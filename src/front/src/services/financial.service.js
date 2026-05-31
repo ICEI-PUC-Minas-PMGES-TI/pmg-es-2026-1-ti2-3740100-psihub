@@ -52,6 +52,13 @@ export const financialApi = {
         return apiRequest(`${PACIENTE_BASE}/${pagamentoId}/recibo`, { signal });
     },
 
+    getFinancialSummary({ inicio, fim, signal } = {}) {
+        return apiRequest(`${PSICOLOGO_BASE.replace('/pagamentos', '')}/resumo`, {
+            query: { inicio, fim },
+            signal,
+        });
+    },
+
     // ---- Notificações (ambos os perfis) ----
 
     listNotifications({ lida, signal } = {}) {

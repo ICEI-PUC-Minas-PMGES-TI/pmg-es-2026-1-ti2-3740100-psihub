@@ -4,6 +4,7 @@ import com.psihub.api.modules.financeiro.dto.ConfirmarPagamentoRequest;
 import com.psihub.api.modules.financeiro.dto.PagamentoResponse;
 import com.psihub.api.modules.financeiro.dto.ReciboResponse;
 import com.psihub.api.modules.financeiro.dto.RegistrarPagamentoRequest;
+import com.psihub.api.modules.financeiro.dto.ResumoFinanceiroResponse;
 import com.psihub.api.modules.financeiro.entity.StatusPagamento;
 import com.psihub.api.modules.financeiro.service.PagamentoService;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
@@ -83,5 +84,22 @@ public class FinanceiroController {
             @PathVariable Long id
     ) {
         return pagamentoService.buscarReciboPorPagamento(user.userId(), id);
+    }
+
+    @GetMapping("/pagamentos/{id}/recibo/download")
+    public ReciboResponse downloadRecibo(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long id
+    ) {
+        return pagamentoService.buscarReciboPorPagamento(user.userId(), id);
+    }
+
+    @GetMapping("/resumo")
+    public ResumoFinanceiroResponse resumo(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
+    ) {
+        return pagamentoService.resumo(user.userId(), inicio, fim);
     }
 }
