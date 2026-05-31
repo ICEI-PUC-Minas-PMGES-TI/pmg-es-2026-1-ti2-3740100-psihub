@@ -1,5 +1,6 @@
 import { SearchX } from 'lucide-react';
-import { EmptyState, LoadingState } from '../PatientStates';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { LoadingState } from '@/shared/components/LoadingState';
 
 export function SearchPsychologistView({ psychologists, loading, onOpenAgenda }) {
     return (

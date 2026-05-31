@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
 import { DollarSign, Loader2 } from 'lucide-react';
-import { financialApi } from '@/services/financial.service';
-import { schedulingApi } from '@/services/scheduling.service';
 import { currencyFormatter, formatDateTime } from '@/shared/utils/date.utils';
+import { usePsychologistFinancial } from '../../hooks/usePsychologistFinancial';
 import { ModalRegistrarPagamento } from '../ModalRegistrarPagamento';
 
 const STATUS_LABELS = {
@@ -21,122 +19,38 @@ const STATUS_BADGE_CLASS = {
 
 const FORMA_LABELS = {
     PIX: 'PIX',
-    CARTAO: 'Cartão',
+    CARTAO: 'CartÃ£o',
     DINHEIRO: 'Dinheiro',
 };
 
 export function PsychologistFinancialPage({ onToast }) {
-    const [pagamentos, setPagamentos] = useState([]);
-    const [consultasSemPagamento, setConsultasSemPagamento] = useState([]);
-    const [resumo, setResumo] = useState(null);
-    const [filtroStatus, setFiltroStatus] = useState('');
-    const [filtroInicio, setFiltroInicio] = useState('');
-    const [filtroFim, setFiltroFim] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [erro, setErro] = useState('');
-    const [modalAberto, setModalAberto] = useState(false);
-
-    const carregarPagamentos = useCallback((signal) => {
-        const query = {
-            status: filtroStatus || undefined,
-            inicio: filtroInicio || undefined,
-            fim: filtroFim || undefined,
-            signal,
-        };
-        return financialApi.listPsychologistPayments(query);
-    }, [filtroStatus, filtroInicio, filtroFim]);
-
-    useEffect(() => {
-        const controller = new AbortController();
-        setLoading(true);
-
-        Promise.all([
-            carregarPagamentos(controller.signal),
-            schedulingApi.listConsultations({ status: 'CONCLUIDA', signal: controller.signal }),
-            financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined, signal: controller.signal }),
-        ])
-            .then(([listaPagamentos, listaConsultas, resumoData]) => {
-                const lista = listaPagamentos || [];
-                setPagamentos(lista);
-                const idsPagos = new Set(lista.map((p) => p.consultaId));
-                setConsultasSemPagamento((listaConsultas || []).filter((c) => !idsPagos.has(c.id)));
-                setResumo(resumoData || null);
-                setErro('');
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') setErro(err.message || 'Não foi possível carregar os pagamentos.');
-            })
-            .finally(() => setLoading(false));
-
-        return () => controller.abort();
-    }, [carregarPagamentos]);
-
-    async function handleRegistrar(payload) {
-        try {
-            await financialApi.registerPayment(payload);
-            onToast?.({ type: 'success', message: 'Pagamento registrado com sucesso.' });
-            setModalAberto(false);
-            // Reload
-            const [listaPagamentos, listaConsultas, resumoData] = await Promise.all([
-                financialApi.listPsychologistPayments({ status: filtroStatus || undefined, inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
-                schedulingApi.listConsultations({ status: 'CONCLUIDA' }),
-                financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
-            ]);
-            const lista = listaPagamentos || [];
-            setPagamentos(lista);
-            const idsPagos = new Set(lista.map((p) => p.consultaId));
-            setConsultasSemPagamento((listaConsultas || []).filter((c) => !idsPagos.has(c.id)));
-            setResumo(resumoData || null);
-        } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Erro ao registrar pagamento.' });
-        }
-    }
-
-    async function handleConfirmar(pagamentoId) {
-        try {
-            await financialApi.confirmPayment(pagamentoId, { statusPagamento: 'PAGO' });
-            onToast?.({ type: 'success', message: 'Pagamento confirmado.' });
-            setPagamentos((prev) =>
-                prev.map((p) => (p.id === pagamentoId ? { ...p, statusPagamento: 'PAGO' } : p))
-            );
-        } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Erro ao confirmar pagamento.' });
-        }
-    }
-
-    async function handleEstornar(pagamentoId) {
-        if (!window.confirm('Confirmar estorno deste pagamento?')) return;
-        try {
-            await financialApi.refundPayment(pagamentoId);
-            onToast?.({ type: 'success', message: 'Pagamento estornado.' });
-            setPagamentos((prev) =>
-                prev.map((p) => (p.id === pagamentoId ? { ...p, statusPagamento: 'ESTORNADO' } : p))
-            );
-        } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Erro ao estornar pagamento.' });
-        }
-    }
-
-    async function handleVerRecibo(pagamentoId) {
-        try {
-            const recibo = await financialApi.getPsychologistReceipt(pagamentoId);
-            if (!recibo?.arquivoUrl || recibo.arquivoUrl === 'pending') {
-                onToast?.({ type: 'error', message: 'Recibo ainda não disponível para download.' });
-                return;
-            }
-            window.open(recibo.arquivoUrl, '_blank');
-        } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Erro ao buscar recibo.' });
-        }
-    }
+    const {
+        pagamentos,
+        consultasSemPagamento,
+        resumo,
+        filtroStatus,
+        setFiltroStatus,
+        filtroInicio,
+        setFiltroInicio,
+        filtroFim,
+        setFiltroFim,
+        loading,
+        erro,
+        modalAberto,
+        setModalAberto,
+        handleRegistrar,
+        handleConfirmar,
+        handleEstornar,
+        handleVerRecibo,
+    } = usePsychologistFinancial(onToast);
 
     return (
         <div className="psihome">
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Financeiro</p>
-                    <h1>Gestão Financeira</h1>
-                    <p className="agenda-page__subtitle">Registre e acompanhe os pagamentos das consultas concluídas.</p>
+                    <h1>GestÃ£o Financeira</h1>
+                    <p className="agenda-page__subtitle">Registre e acompanhe os pagamentos das consultas concluÃ­das.</p>
                 </div>
                 <button
                     className="primary-button primary-button--fit"
@@ -184,7 +98,7 @@ export function PsychologistFinancialPage({ onToast }) {
                         </select>
                     </label>
                     <label className="field">
-                        Período início
+                        PerÃ­odo inÃ­cio
                         <input
                             type="date"
                             value={filtroInicio}
@@ -192,7 +106,7 @@ export function PsychologistFinancialPage({ onToast }) {
                         />
                     </label>
                     <label className="field">
-                        Período fim
+                        PerÃ­odo fim
                         <input
                             type="date"
                             value={filtroFim}
@@ -202,7 +116,7 @@ export function PsychologistFinancialPage({ onToast }) {
                 </div>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando pagamentos…</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando pagamentosâ€¦</p>
                 ) : pagamentos.length === 0 ? (
                     <p className="empty-state">Nenhum pagamento registrado ainda.</p>
                 ) : (
@@ -215,7 +129,7 @@ export function PsychologistFinancialPage({ onToast }) {
                                     <th className="py-2 pr-4 font-medium">Valor</th>
                                     <th className="py-2 pr-4 font-medium">Forma</th>
                                     <th className="py-2 pr-4 font-medium">Status</th>
-                                    <th className="py-2 font-medium">Ações</th>
+                                    <th className="py-2 font-medium">AÃ§Ãµes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -226,12 +140,12 @@ export function PsychologistFinancialPage({ onToast }) {
                                                 {pagamento.pacienteNome ?? `Consulta #${pagamento.consultaId}`}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
-                                                {pagamento.inicioEm ? formatDateTime(pagamento.inicioEm) : '—'}
+                                                {pagamento.inicioEm ? formatDateTime(pagamento.inicioEm) : 'â€”'}
                                             </td>
                                             <td className="py-3 pr-4 whitespace-nowrap">
                                                 {pagamento.valor != null
                                                     ? `R$ ${Number(pagamento.valor).toFixed(2).replace('.', ',')}`
-                                                    : '—'}
+                                                    : 'â€”'}
                                             </td>
                                             <td className="py-3 pr-4">
                                                 {FORMA_LABELS[pagamento.formaPagamento] ?? pagamento.formaPagamento}

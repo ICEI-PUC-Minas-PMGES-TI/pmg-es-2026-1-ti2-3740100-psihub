@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { addDays, toIsoDate } from '@/shared/utils/date.utils';
-import { CALENDAR_END_HOUR, CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, DEFAULT_DURATION, GRID_CONSULTATION_STATUSES } from './agenda.constants';
+import { CALENDAR_END_HOUR, CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, DEFAULT_DURATION, GRID_CONSULTATION_STATUSES } from '../../utils/agenda.constants';
 import {
     buildAvailabilitySummary,
     buildCalendarRows,
@@ -12,7 +12,7 @@ import {
     dayValueFromDate,
     latestRulesByDay,
     startOfWeek,
-} from './agenda.utils';
+} from '../../utils/agenda.utils';
 
 /**
  * Deriva todos os dados de calendario semanal a partir das regras, consultas e bloqueios.

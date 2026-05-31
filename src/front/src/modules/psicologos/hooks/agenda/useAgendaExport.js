@@ -1,5 +1,5 @@
 import { formatDate, formatTime, toIsoDate } from '@/shared/utils/date.utils';
-import { consultationStatusLabel } from './agenda.utils';
+import { consultationStatusLabel } from '../../utils/agenda.utils';
 
 /**
  * Gera exportacao CSV da lista filtrada de consultas.

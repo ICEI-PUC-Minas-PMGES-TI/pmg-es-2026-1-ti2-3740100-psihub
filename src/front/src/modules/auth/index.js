@@ -3,7 +3,7 @@
  * @description Modulo responsavel por entrada publica, login, cadastro, sessao autenticada e utilitarios de JWT/localStorage.
  *
  * Componentes publicos: AuthPage, LandingPage.
- * Hooks publicos: useAuthForm, useAuthSession.
+ * Hooks publicos: useAuthForm.
  * Utils publicos: storeAuthSession, clearAuthSession, getStoredAuthSession, decodeJwtPayload.
  *
  * @example
@@ -15,7 +15,6 @@
 export { AuthPage } from './components/AuthPage';
 export { LandingPage } from './components/LandingPage';
 export { useAuthForm } from './hooks/useAuthForm';
-export { useAuthSession } from './hooks/useAuthSession';
 export {
   clearAuthSession,
   decodeJwtPayload,

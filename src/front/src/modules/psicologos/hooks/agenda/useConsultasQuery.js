@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, toIsoDate } from '@/shared/utils/date.utils';
-import { CONSULTATION_RANGE_FUTURE_DAYS, CONSULTATION_RANGE_PAST_DAYS } from './agenda.constants';
+import { CONSULTATION_RANGE_FUTURE_DAYS, CONSULTATION_RANGE_PAST_DAYS } from '../../utils/agenda.constants';
 
 /**
  * Busca consultas do usuario autenticado no intervalo padrao da agenda.

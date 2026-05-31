@@ -24,6 +24,7 @@ import com.psihub.api.shared.enums.DiaSemana;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.exception.ApiException;
+import com.psihub.api.shared.middleware.AuthenticatedUser;
 import com.psihub.api.shared.utils.ApiResponseMapper;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -75,6 +76,12 @@ public class AgendaService {
     this.consultaRepository = consultaRepository;
         this.pacienteService = pacienteService;
         this.mapper = mapper;
+    }
+
+    public void validarPsicologoAutenticado(AuthenticatedUser user, Long psicologoId) {
+        if (!user.isPsicologo() || !user.userId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Voce nao tem permissao para acessar esta agenda");
+        }
     }
 
     @Transactional

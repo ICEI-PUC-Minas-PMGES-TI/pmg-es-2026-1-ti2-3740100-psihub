@@ -1,61 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Check, Loader2, Search, X } from 'lucide-react';
-import { clinicalApi } from '@/services/clinical.service';
-import { schedulingApi } from '@/services/scheduling.service';
+import { usePatientsManagement } from '../../hooks/usePatientsManagement';
 
 export function PatientsManagementPage({ onToast, onSelectPatient }) {
-    const [patients, setPatients] = useState([]);
-    const [links, setLinks] = useState([]);
-    const [search, setSearch] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    const load = useCallback(async (signal) => {
-        setLoading(true);
-        try {
-            const [patientList, linkList] = await Promise.all([
-                schedulingApi.listMyPatients({ signal }),
-                clinicalApi.listPsychologistLinks({ status: 'SOLICITADO', signal }),
-            ]);
-            setPatients(patientList || []);
-            setLinks(linkList || []);
-            setError('');
-        } catch (err) {
-            if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar pacientes.');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const controller = new AbortController();
-        load(controller.signal);
-        return () => controller.abort();
-    }, [load]);
-
-    async function reloadBySearch(event) {
-        event.preventDefault();
-        setLoading(true);
-        try {
-            setPatients(await schedulingApi.listMyPatients({ nome: search.trim() }));
-            setError('');
-        } catch (err) {
-            setError(err.message || 'Não foi possível buscar pacientes.');
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function respond(vinculoId, action) {
-        try {
-            if (action === 'accept') await clinicalApi.acceptLink(vinculoId);
-            if (action === 'reject') await clinicalApi.rejectLink(vinculoId);
-            onToast?.({ type: 'success', message: 'Solicitação atualizada.' });
-            await load();
-        } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Não foi possível atualizar o vínculo.' });
-        }
-    }
+    const {
+        patients,
+        links,
+        search,
+        setSearch,
+        loading,
+        error,
+        reloadBySearch,
+        respond,
+    } = usePatientsManagement(onToast);
 
     return (
         <div className="psihome">
@@ -63,7 +19,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                 <div>
                     <p className="eyebrow">Pacientes</p>
                     <h1>Pacientes</h1>
-                    <p className="agenda-page__subtitle">Gerencie vínculos aceitos e solicitações de atendimento.</p>
+                    <p className="agenda-page__subtitle">Gerencie vÃ­nculos aceitos e solicitaÃ§Ãµes de atendimento.</p>
                 </div>
             </header>
 
@@ -71,13 +27,13 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>Solicitações pendentes</h2>
+                    <h2>SolicitaÃ§Ãµes pendentes</h2>
                 </div>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregandoâ€¦</p>
                 ) : links.length === 0 ? (
-                    <p className="empty-state">Nenhuma solicitação pendente.</p>
+                    <p className="empty-state">Nenhuma solicitaÃ§Ã£o pendente.</p>
                 ) : (
                     <div className="simple-list">
                         {links.map((link) => (
@@ -128,9 +84,9 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                 </form>
 
                 {loading ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregandoâ€¦</p>
                 ) : patients.length === 0 ? (
-                    <p className="empty-state">Nenhum paciente com vínculo aceito.</p>
+                    <p className="empty-state">Nenhum paciente com vÃ­nculo aceito.</p>
                 ) : (
                     <div className="simple-list" style={{ marginTop: '12px' }}>
                         {patients.map((patient) => (
@@ -141,7 +97,7 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
                                     type="button"
                                     onClick={() => onSelectPatient?.(patient.id)}
                                 >
-                                    Ver relatório
+                                    Ver relatÃ³rio
                                 </button>
                             </div>
                         ))}
@@ -151,4 +107,3 @@ export function PatientsManagementPage({ onToast, onSelectPatient }) {
         </div>
     );
 }
-

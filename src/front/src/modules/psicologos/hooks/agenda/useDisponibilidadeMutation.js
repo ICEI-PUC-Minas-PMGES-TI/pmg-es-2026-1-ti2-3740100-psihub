@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, toIsoDate } from '@/shared/utils/date.utils';
-import { DAY_FULL_LABELS } from './agenda.constants';
-import { validateAvailabilityBreak } from './agenda.utils';
+import { DAY_FULL_LABELS } from '../../utils/agenda.constants';
+import { validateAvailabilityBreak } from '../../utils/agenda.utils';
 
 /**
  * Salva regras de disponibilidade semanal e de dia unico.

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toIsoDate } from '@/shared/utils/date.utils';
-import { ACTIVE_STATUSES, CONSULTATION_PAGE_SIZE } from './agenda.constants';
-import { normalizeText } from './agenda.utils';
+import { ACTIVE_STATUSES, CONSULTATION_PAGE_SIZE } from '../../utils/agenda.constants';
+import { normalizeText } from '../../utils/agenda.utils';
 
 /**
  * Controla filtros, paginacao e ordenacao da lista de consultas.

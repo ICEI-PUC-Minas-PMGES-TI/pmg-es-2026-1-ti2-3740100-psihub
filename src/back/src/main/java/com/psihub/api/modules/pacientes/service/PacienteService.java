@@ -7,6 +7,7 @@ import com.psihub.api.modules.pacientes.entity.Paciente;
 import com.psihub.api.modules.pacientes.repository.PacienteRepository;
 import com.psihub.api.modules.vinculos.entity.StatusVinculo;
 import com.psihub.api.shared.exception.ApiException;
+import com.psihub.api.shared.utils.StringUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -47,16 +48,16 @@ public class PacienteService {
         Paciente paciente = buscarPorId(pacienteId);
         Usuario usuario = paciente.getUsuario();
 
-        String nome = sanitizeOptional(request.nome());
+        String nome = StringUtils.sanitizeOptional(request.nome());
         if (nome != null) {
             usuario.setNome(nome);
         }
-        usuario.setTelefone(sanitizeOptional(request.telefone()));
-        usuario.setFotoUrl(sanitizeOptional(request.fotoPerfilUrl()));
+        usuario.setTelefone(StringUtils.sanitizeOptional(request.telefone()));
+        usuario.setFotoUrl(StringUtils.sanitizeOptional(request.fotoPerfilUrl()));
         if (request.dataNascimento() != null) {
             paciente.setDataNascimento(request.dataNascimento());
         }
-        paciente.setObservacoesIniciais(sanitizeOptional(request.observacoesIniciais()));
+        paciente.setObservacoesIniciais(StringUtils.sanitizeOptional(request.observacoesIniciais()));
 
         return toPerfilResponse(paciente);
     }
@@ -78,11 +79,4 @@ public class PacienteService {
         );
     }
 
-    private String sanitizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        return normalized.isBlank() ? null : normalized;
-    }
 }

@@ -9,7 +9,7 @@ import {
     toIsoDate,
 } from '@/shared/utils/date.utils';
 import { getSlotInicio, getSlotKey } from '../../utils/patient.utils';
-import { EmptyState } from '../PatientStates';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export function CalendarioConsultas({
     psychologist,

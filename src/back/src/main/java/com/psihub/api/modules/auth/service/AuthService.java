@@ -11,6 +11,7 @@ import com.psihub.api.modules.psicologos.service.PsicologoService;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.TipoUsuario;
 import com.psihub.api.shared.exception.ApiException;
+import com.psihub.api.shared.utils.StringUtils;
 import java.util.Locale;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +60,7 @@ public class AuthService {
         Usuario usuario = new Usuario();
         usuario.setNome(nome);
         usuario.setEmail(email);
-        usuario.setTelefone(sanitizeOptional(request.telefone()));
+        usuario.setTelefone(StringUtils.sanitizeOptional(request.telefone()));
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
         usuario.setTipoUsuario(tipoUsuario);
         usuario.setAtivo(true);
@@ -135,7 +136,7 @@ public class AuthService {
         }
 
         if (tipoUsuario == TipoUsuario.PSICOLOGO) {
-            String crp = sanitizeOptional(request.crp());
+            String crp = StringUtils.sanitizeOptional(request.crp());
             if (crp == null) {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "CRP e obrigatorio para psicologo");
             }
@@ -177,14 +178,6 @@ public class AuthService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Informe um e-mail valido");
         }
         return normalized;
-    }
-
-    private String sanitizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        return normalized.isBlank() ? null : normalized;
     }
 
     private TipoUsuario parseTipo(String value) {

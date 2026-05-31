@@ -8,13 +8,3 @@ export function EmptyState({ icon: Icon, title }) {
         </div>
     );
 }
-
-export function LoadingState() {
-    return (
-        <div className="loading-rows">
-            <span />
-            <span />
-            <span />
-        </div>
-    );
-}

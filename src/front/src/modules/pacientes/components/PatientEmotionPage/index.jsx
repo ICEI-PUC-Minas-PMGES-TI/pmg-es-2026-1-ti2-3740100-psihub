@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { clinicalApi } from '@/services/clinical.service';
 import { formatDateTime } from '@/shared/utils/date.utils';
+import { usePatientEmotion } from '../../hooks/patient/usePatientEmotion';
 
 const HUMOR_OPTIONS = [
     { value: 1, label: 'Muito ruim' },
@@ -11,82 +10,26 @@ const HUMOR_OPTIONS = [
     { value: 5, label: 'Muito bom' },
 ];
 
-const initialForm = {
-    humorDia: 3,
-    emocoes: '',
-    descricao: '',
-};
-
 export function PatientEmotionPage({ onToast }) {
-    const [records, setRecords] = useState([]);
-    const [form, setForm] = useState(initialForm);
-    const [editingId, setEditingId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const controller = new AbortController();
-        clinicalApi.listEmotionRecords(controller.signal)
-            .then((data) => {
-                setRecords(data || []);
-                setError('');
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar registros.');
-            })
-            .finally(() => setLoading(false));
-        return () => controller.abort();
-    }, []);
-
-    async function handleSubmit(event) {
-        event.preventDefault();
-        if (Number(form.humorDia) < 1 || Number(form.humorDia) > 5) {
-            setError('Humor deve estar entre 1 e 5.');
-            return;
-        }
-
-        setSaving(true);
-        setError('');
-        const payload = {
-            humorDia: Number(form.humorDia),
-            descricao: form.descricao || null,
-            emocoes: form.emocoes.split(',').map((item) => item.trim()).filter(Boolean),
-        };
-
-        try {
-            if (editingId) {
-                await clinicalApi.updateEmotionRecord(editingId, payload);
-            } else {
-                await clinicalApi.createEmotionRecord(payload);
-            }
-            setRecords(await clinicalApi.listEmotionRecords());
-            setForm(initialForm);
-            setEditingId(null);
-            onToast?.({ type: 'success', message: 'Registro emocional salvo.' });
-        } catch (err) {
-            setError(err.message || 'Nao foi possivel salvar o registro.');
-        } finally {
-            setSaving(false);
-        }
-    }
-
-    function startEdit(record) {
-        setEditingId(record.id);
-        setForm({
-            humorDia: record.humorDia,
-            descricao: record.descricao || '',
-            emocoes: (record.emocoes || []).join(', '),
-        });
-    }
+    const {
+        records,
+        form,
+        setForm,
+        editingId,
+        loading,
+        saving,
+        error,
+        handleSubmit,
+        startEdit,
+    } = usePatientEmotion(onToast);
 
     return (
         <div className="psihome">
             <header className="agenda-page__header panel">
                 <div>
-                    <p className="eyebrow">Saúde emocional</p>
+                    <p className="eyebrow">SaÃºde emocional</p>
                     <h1>Registro Emocional</h1>
-                    <p className="agenda-page__subtitle">Registre seu humor e emoções do dia. Edição permitida somente nas primeiras 24 horas.</p>
+                    <p className="agenda-page__subtitle">Registre seu humor e emoÃ§Ãµes do dia. EdiÃ§Ã£o permitida somente nas primeiras 24 horas.</p>
                 </div>
             </header>
 

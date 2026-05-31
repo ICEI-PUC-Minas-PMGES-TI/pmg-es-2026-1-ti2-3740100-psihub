@@ -1,68 +1,15 @@
-import { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { clinicalApi } from '@/services/clinical.service';
-
-const emptyProfile = {
-    nome: '',
-    telefone: '',
-    fotoPerfilUrl: '',
-    dataNascimento: '',
-    observacoesIniciais: '',
-};
+import { usePatientProfile } from '../../hooks/patient/usePatientProfile';
 
 export function PatientProfilePage({ onToast }) {
-    const [form, setForm] = useState(emptyProfile);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const controller = new AbortController();
-        clinicalApi.getPatientProfile(controller.signal)
-            .then((profile) => {
-                setForm({
-                    nome: profile.nome || '',
-                    telefone: profile.telefone || '',
-                    fotoPerfilUrl: profile.fotoPerfilUrl || '',
-                    dataNascimento: profile.dataNascimento || '',
-                    observacoesIniciais: profile.observacoesIniciais || '',
-                });
-                setError('');
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar o perfil.');
-            })
-            .finally(() => setLoading(false));
-        return () => controller.abort();
-    }, []);
-
-    async function handleSubmit(event) {
-        event.preventDefault();
-        if (!form.nome.trim() || !form.dataNascimento) {
-            setError('Nome e data de nascimento sao obrigatorios.');
-            return;
-        }
-        setSaving(true);
-        setError('');
-        try {
-            await clinicalApi.updatePatientProfile({
-                nome: form.nome,
-                telefone: form.telefone || null,
-                fotoPerfilUrl: form.fotoPerfilUrl || null,
-                dataNascimento: form.dataNascimento,
-                observacoesIniciais: form.observacoesIniciais || null,
-            });
-            onToast?.({ type: 'success', message: 'Perfil atualizado.' });
-        } catch (err) {
-            setError(err.message || 'Nao foi possivel salvar o perfil.');
-        } finally {
-            setSaving(false);
-        }
-    }
-
-    function updateField(field, value) {
-        setForm((current) => ({ ...current, [field]: value }));
-    }
+    const {
+        form,
+        loading,
+        saving,
+        error,
+        handleSubmit,
+        updateField,
+    } = usePatientProfile(onToast);
 
     if (loading) {
         return (
@@ -75,7 +22,7 @@ export function PatientProfilePage({ onToast }) {
                     </div>
                 </header>
                 <section className="panel">
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando perfil…</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando perfilâ€¦</p>
                 </section>
             </div>
         );

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { toIsoDate } from '@/shared/utils/date.utils';
-import { DEFAULT_DURATION } from './agenda.constants';
-import { minutesToTimeLabel } from './agenda.utils';
+import { DEFAULT_DURATION } from '../../utils/agenda.constants';
+import { minutesToTimeLabel } from '../../utils/agenda.utils';
 
 /**
  * Controla criacao de consulta pelo psicologo e acoes de bloquear horarios.

@@ -9,6 +9,7 @@ import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.ApiResponseMapper;
 import com.psihub.api.shared.utils.JsonListMapper;
+import com.psihub.api.shared.utils.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -90,7 +91,7 @@ public class RegistroEmocionalService {
 
     private void aplicarPayload(RegistroEmocional registro, RegistroEmocionalRequest request) {
         registro.setHumorDia(request.humorDia());
-        registro.setDescricao(sanitizeOptional(request.descricao()));
+        registro.setDescricao(StringUtils.sanitizeOptional(request.descricao()));
         registro.setEmocoes(jsonListMapper.toJson(normalizeList(request.emocoes())));
     }
 
@@ -99,17 +100,10 @@ public class RegistroEmocionalService {
             return List.of();
         }
         return values.stream()
-                .map(this::sanitizeOptional)
+                .map(StringUtils::sanitizeOptional)
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
     }
 
-    private String sanitizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        return normalized.isBlank() ? null : normalized;
-    }
 }

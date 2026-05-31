@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { startOfWeek } from './agenda.utils';
+import { startOfWeek } from '../../utils/agenda.utils';
 
 /**
  * Centraliza apenas o estado visual local da agenda do psicologo.

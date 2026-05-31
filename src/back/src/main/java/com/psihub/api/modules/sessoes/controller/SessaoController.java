@@ -7,13 +7,11 @@ import com.psihub.api.modules.sessoes.dto.PreparacaoSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.ProntuarioSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.SalvarRascunhoSessaoRequest;
 import com.psihub.api.modules.sessoes.service.SessaoService;
-import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +37,7 @@ public class SessaoController {
             @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long consultaId
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.prepararComoPsicologo(consultaId, user.userId());
     }
 
@@ -49,7 +47,7 @@ public class SessaoController {
             @PathVariable Long consultaId,
             @Valid @RequestBody(required = false) IniciarSessaoRequest request
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.iniciarComoPsicologo(consultaId, user.userId(), request == null ? new IniciarSessaoRequest(null, null) : request);
     }
 
@@ -59,7 +57,7 @@ public class SessaoController {
             @PathVariable Long consultaId,
             @Valid @RequestBody SalvarRascunhoSessaoRequest request
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.salvarRascunhoComoPsicologo(consultaId, user.userId(), request);
     }
 
@@ -69,7 +67,7 @@ public class SessaoController {
             @PathVariable Long consultaId,
             @Valid @RequestBody EncerrarSessaoRequest request
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.encerrarComoPsicologo(consultaId, user.userId(), request);
     }
 
@@ -82,7 +80,7 @@ public class SessaoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             @RequestParam(required = false) String tema
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.linhaTempo(pacienteId, user.userId(), inicio, fim, tema);
     }
 
@@ -91,14 +89,8 @@ public class SessaoController {
             @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long prontuarioId
     ) {
-        validarPsicologo(user);
+        sessaoService.exigirPsicologo(user);
         return sessaoService.detalharProntuarioComoPsicologo(prontuarioId, user.userId());
-    }
-
-    private void validarPsicologo(AuthenticatedUser user) {
-        if (!user.isPsicologo()) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar prontuarios e sessoes");
-        }
     }
 }
 

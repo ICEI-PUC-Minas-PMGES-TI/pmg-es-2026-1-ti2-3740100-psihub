@@ -7,7 +7,7 @@ import {
     STATUS_OPTIONS,
     STATUS_OPTIONS_ACTIVE,
     TYPE_OPTIONS,
-} from '@/modules/psicologos/hooks/agenda/agenda.constants';
+} from '@/modules/psicologos/utils/agenda.constants';
 import {
     canCancelConsultation,
     consultationStatusLabel,
@@ -16,7 +16,7 @@ import {
     formatClock,
     startOfWeek,
     statusBadgeClass,
-} from '@/modules/psicologos/hooks/agenda/agenda.utils';
+} from '@/modules/psicologos/utils/agenda.utils';
 import { useAgenda } from '@/modules/psicologos/hooks/useAgenda';
 import {
     AvailabilityEditorModal,

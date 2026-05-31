@@ -11,6 +11,7 @@ import com.psihub.api.modules.psicologos.repository.EspecialidadePsicologoReposi
 import com.psihub.api.modules.psicologos.repository.PsicologoRepository;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.exception.ApiException;
+import com.psihub.api.shared.utils.StringUtils;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Comparator;
@@ -85,8 +86,8 @@ public class PsicologoService {
     ) {
         Psicologo psicologo = new Psicologo();
         psicologo.setUsuario(usuario);
-        String crpNormalizado = sanitizeOptional(crp);
-        String biografiaNormalizada = sanitizeOptional(biografia);
+        String crpNormalizado = StringUtils.sanitizeOptional(crp);
+        String biografiaNormalizada = StringUtils.sanitizeOptional(biografia);
         psicologo.setCrp(crpNormalizado != null ? crpNormalizado : "CADASTRO-" + usuario.getId());
         psicologo.setValorConsulta(valorConsulta != null ? valorConsulta : BigDecimal.ZERO);
         psicologo.setBiografia(biografiaNormalizada != null ? biografiaNormalizada : "Perfil profissional em configuracao.");
@@ -96,7 +97,7 @@ public class PsicologoService {
         Psicologo psicologoSalvo = psicologoRepository.save(psicologo);
 
         List<String> nomes = especialidades == null ? List.of("Psicologia") : especialidades.stream()
-                .map(this::sanitizeOptional)
+                .map(StringUtils::sanitizeOptional)
                 .filter(Objects::nonNull)
                 .collect(LinkedHashMap<String, String>::new, (map, nome) -> map.putIfAbsent(normalizarChave(nome), nome), Map::putAll)
                 .values()
@@ -117,7 +118,7 @@ public class PsicologoService {
 
     @Transactional(readOnly = true)
     public boolean existeCrp(String crp) {
-        String normalized = sanitizeOptional(crp);
+        String normalized = StringUtils.sanitizeOptional(crp);
         return normalized != null && psicologoRepository.existsByCrpIgnoreCase(normalized);
     }
 
@@ -126,14 +127,14 @@ public class PsicologoService {
         Psicologo psicologo = buscarPorId(psicologoId);
         Usuario usuario = psicologo.getUsuario();
 
-        String nome = sanitizeOptional(request.nome());
+        String nome = StringUtils.sanitizeOptional(request.nome());
         if (nome != null) {
             usuario.setNome(nome);
         }
-        usuario.setTelefone(sanitizeOptional(request.telefone()));
-        usuario.setFotoUrl(sanitizeOptional(request.fotoPerfilUrl()));
+        usuario.setTelefone(StringUtils.sanitizeOptional(request.telefone()));
+        usuario.setFotoUrl(StringUtils.sanitizeOptional(request.fotoPerfilUrl()));
 
-        String crp = sanitizeOptional(request.crp());
+        String crp = StringUtils.sanitizeOptional(request.crp());
         if (crp != null) {
             // Valida unicidade do CRP apenas quando o valor muda.
             if (!crp.equalsIgnoreCase(psicologo.getCrp()) && existeCrp(crp)) {
@@ -144,7 +145,7 @@ public class PsicologoService {
         if (request.valorConsulta() != null) {
             psicologo.setValorConsulta(request.valorConsulta());
         }
-        psicologo.setBiografia(sanitizeOptional(request.biografia()));
+        psicologo.setBiografia(StringUtils.sanitizeOptional(request.biografia()));
 
         atualizarEspecialidades(psicologo, request.especialidades());
         return toPerfilResponse(psicologo);
@@ -181,7 +182,7 @@ public class PsicologoService {
         }
 
         psicologo.setStatusAcesso(StatusAcesso.REVOGADO);
-        psicologo.setMotivoRevogacao(sanitizeOptional(motivo));
+        psicologo.setMotivoRevogacao(StringUtils.sanitizeOptional(motivo));
         return toAdminResponse(psicologo);
     }
 
@@ -259,7 +260,7 @@ public class PsicologoService {
         }
 
         List<String> nomes = especialidades.stream()
-                .map(this::sanitizeOptional)
+                .map(StringUtils::sanitizeOptional)
                 .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
@@ -290,11 +291,4 @@ public class PsicologoService {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
-    private String sanitizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        return normalized.isBlank() ? null : normalized;
-    }
 }

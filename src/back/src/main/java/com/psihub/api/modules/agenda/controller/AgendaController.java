@@ -14,10 +14,10 @@ import com.psihub.api.modules.consultas.dto.ConsultaResponse;
 import com.psihub.api.modules.consultas.service.ConsultaService;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
+import com.psihub.api.shared.utils.DateTimeParser;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -91,8 +91,8 @@ public class AgendaController {
             @RequestParam(required = false) String inicio,
             @RequestParam(required = false) String fim
     ) {
-        LocalDateTime inicioPeriodo = parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
-        LocalDateTime fimPeriodo = parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
+        LocalDateTime inicioPeriodo = DateTimeParser.parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
+        LocalDateTime fimPeriodo = DateTimeParser.parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
         return agendaService.listarAgendaCompleta(user.userId(), inicioPeriodo, fimPeriodo);
     }
 
@@ -102,8 +102,8 @@ public class AgendaController {
             @RequestParam(required = false) String inicio,
             @RequestParam(required = false) String fim
     ) {
-        LocalDateTime inicioPeriodo = parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
-        LocalDateTime fimPeriodo = parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
+        LocalDateTime inicioPeriodo = DateTimeParser.parseDateTimeOrDefault(inicio, LocalDate.now().atStartOfDay(), false);
+        LocalDateTime fimPeriodo = DateTimeParser.parseDateTimeOrDefault(fim, inicioPeriodo.plusDays(30), true);
         return agendaService.listarBloqueios(user.userId(), inicioPeriodo, fimPeriodo);
     }
 
@@ -149,8 +149,8 @@ public class AgendaController {
     ) {
         return agendaService.listarDisponibilidade(
                 psicologoId,
-                parseRequiredDateTime(inicio, "inicio", false),
-                parseRequiredDateTime(fim, "fim", true)
+                DateTimeParser.parseRequiredDateTime(inicio, "inicio", false),
+                DateTimeParser.parseRequiredDateTime(fim, "fim", true)
         );
     }
 
@@ -170,7 +170,7 @@ public class AgendaController {
             @PathVariable Long psicologoId,
             @Valid @RequestBody DefinirDisponibilidadeRequest request
     ) {
-        validarPsicologoAutenticado(user, psicologoId);
+        agendaService.validarPsicologoAutenticado(user, psicologoId);
         return agendaService.definirDisponibilidade(user.userId(), request);
     }
 
@@ -179,40 +179,8 @@ public class AgendaController {
             @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long psicologoId
     ) {
-        validarPsicologoAutenticado(user, psicologoId);
+        agendaService.validarPsicologoAutenticado(user, psicologoId);
         return agendaService.listarRegras(user.userId());
     }
 
-    private void validarPsicologoAutenticado(AuthenticatedUser user, Long psicologoId) {
-        if (!user.isPsicologo() || !user.userId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Voce nao tem permissao para acessar esta agenda");
-        }
-    }
-
-    private LocalDateTime parseDateTimeOrDefault(String value, LocalDateTime defaultValue, boolean fim) {
-        if (value == null || value.isBlank()) {
-            return defaultValue;
-        }
-        return parseDateTime(value, fim);
-    }
-
-    private LocalDateTime parseRequiredDateTime(String value, String nomeParametro, boolean fim) {
-        if (value == null || value.isBlank()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro obrigatorio ausente: " + nomeParametro);
-        }
-        return parseDateTime(value, fim);
-    }
-
-    private LocalDateTime parseDateTime(String value, boolean fim) {
-        try {
-            return LocalDateTime.parse(value.trim());
-        } catch (DateTimeParseException ignored) {
-            try {
-                LocalDate data = LocalDate.parse(value.trim());
-                return fim ? data.plusDays(1).atStartOfDay() : data.atStartOfDay();
-            } catch (DateTimeParseException exception) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro de data/hora invalido");
-            }
-        }
-    }
 }

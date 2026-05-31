@@ -2,10 +2,9 @@ import { apiRequest } from './http.service.js';
 
 const PSICOLOGO_BASE = '/api/psicologos/me/financeiro/pagamentos';
 const PACIENTE_BASE = '/api/pacientes/me/pagamentos';
-const NOTIFICACOES_BASE = '/api/usuarios/me/notificacoes';
 
 export const financialApi = {
-    // ---- Psicólogo ----
+    // ---- Psicologo ----
 
     registerPayment(payload) {
         return apiRequest(PSICOLOGO_BASE, {
@@ -56,27 +55,6 @@ export const financialApi = {
         return apiRequest(`${PSICOLOGO_BASE.replace('/pagamentos', '')}/resumo`, {
             query: { inicio, fim },
             signal,
-        });
-    },
-
-    // ---- Notificações (ambos os perfis) ----
-
-    listNotifications({ lida, signal } = {}) {
-        return apiRequest(NOTIFICACOES_BASE, {
-            query: { lida },
-            signal,
-        });
-    },
-
-    markNotificationRead(notificacaoId) {
-        return apiRequest(`${NOTIFICACOES_BASE}/${notificacaoId}/marcar-lida`, {
-            method: 'PATCH',
-        });
-    },
-
-    markAllNotificationsRead() {
-        return apiRequest(`${NOTIFICACOES_BASE}/marcar-todas-lidas`, {
-            method: 'PATCH',
         });
     },
 };

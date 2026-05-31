@@ -1,62 +1,25 @@
-import { useEffect, useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
-import { clinicalApi } from '@/services/clinical.service';
-import { schedulingApi } from '@/services/scheduling.service';
 import { formatDateTime } from '@/shared/utils/date.utils';
+import { useReports } from '../../hooks/useReports';
 
 export function ReportsPage({ onToast, initialPatientId }) {
-    const [patients, setPatients] = useState([]);
-    const [selectedPatient, setSelectedPatient] = useState(() =>
-        initialPatientId ? String(initialPatientId) : ''
-    );
-    const [timeline, setTimeline] = useState([]);
-    const [loadingPatients, setLoadingPatients] = useState(true);
-    const [loadingTimeline, setLoadingTimeline] = useState(false);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const controller = new AbortController();
-        schedulingApi.listMyPatients({ signal: controller.signal })
-            .then((data) => {
-                setPatients(data || []);
-                setSelectedPatient((prev) => prev || (data?.[0]?.id ? String(data[0].id) : ''));
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar pacientes.');
-            })
-            .finally(() => setLoadingPatients(false));
-        return () => controller.abort();
-    }, []);
-
-    useEffect(() => {
-        if (!selectedPatient) {
-            setTimeline([]);
-            return undefined;
-        }
-        const controller = new AbortController();
-        setLoadingTimeline(true);
-        clinicalApi.getTimeline({ pacienteId: selectedPatient, signal: controller.signal })
-            .then((data) => {
-                setTimeline(data || []);
-                setError('');
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') {
-                    setError(err.message || 'Não foi possível carregar a evolução.');
-                    onToast?.({ type: 'error', message: 'Acesso clínico negado sem vínculo aceito.' });
-                }
-            })
-            .finally(() => setLoadingTimeline(false));
-        return () => controller.abort();
-    }, [selectedPatient, onToast]);
+    const {
+        patients,
+        selectedPatient,
+        setSelectedPatient,
+        timeline,
+        loadingPatients,
+        loadingTimeline,
+        error,
+    } = useReports({ initialPatientId, onToast });
 
     return (
         <div className="psihome">
             <header className="agenda-page__header panel">
                 <div>
-                    <p className="eyebrow">Relatórios</p>
-                    <h1>Relatórios e Evolução</h1>
-                    <p className="agenda-page__subtitle">Consulte a linha do tempo clínica somente para pacientes com vínculo aceito.</p>
+                    <p className="eyebrow">RelatÃ³rios</p>
+                    <h1>RelatÃ³rios e EvoluÃ§Ã£o</h1>
+                    <p className="agenda-page__subtitle">Consulte a linha do tempo clÃ­nica somente para pacientes com vÃ­nculo aceito.</p>
                 </div>
             </header>
 
@@ -83,9 +46,9 @@ export function ReportsPage({ onToast, initialPatientId }) {
                 </label>
 
                 {loadingTimeline ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evolução…</p>
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evoluÃ§Ã£oâ€¦</p>
                 ) : timeline.length === 0 ? (
-                    <p className="empty-state">Nenhum registro de evolução para o filtro atual.</p>
+                    <p className="empty-state">Nenhum registro de evoluÃ§Ã£o para o filtro atual.</p>
                 ) : (
                     <div className="simple-list" style={{ marginTop: '12px' }}>
                         {timeline.map((item) => (
@@ -94,7 +57,7 @@ export function ReportsPage({ onToast, initialPatientId }) {
                                     <strong>{formatDateTime(item.inicioEm)}</strong>
                                     <span>{(item.temasSessao || []).join(', ') || 'Sem temas registrados'}</span>
                                 </div>
-                                <span>Progresso: {item.nivelProgresso != null ? `${item.nivelProgresso}/10` : 'Não informado'}</span>
+                                <span>Progresso: {item.nivelProgresso != null ? `${item.nivelProgresso}/10` : 'NÃ£o informado'}</span>
                             </div>
                         ))}
                     </div>
@@ -103,4 +66,3 @@ export function ReportsPage({ onToast, initialPatientId }) {
         </div>
     );
 }
-

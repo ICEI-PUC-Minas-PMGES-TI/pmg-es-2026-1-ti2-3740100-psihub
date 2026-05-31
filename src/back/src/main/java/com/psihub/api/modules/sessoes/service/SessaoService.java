@@ -17,6 +17,7 @@ import com.psihub.api.modules.sessoes.repository.ProntuarioSessaoRepository;
 import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.exception.ApiException;
+import com.psihub.api.shared.middleware.AuthenticatedUser;
 import com.psihub.api.shared.utils.ApiResponseMapper;
 import com.psihub.api.shared.utils.JsonListMapper;
 import java.time.LocalDate;
@@ -51,6 +52,12 @@ public class SessaoService {
         this.mapper = mapper;
         this.jsonListMapper = jsonListMapper;
         this.vinculoService = vinculoService;
+    }
+
+    public void exigirPsicologo(AuthenticatedUser user) {
+        if (!user.isPsicologo()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar prontuarios e sessoes");
+        }
     }
 
     @Transactional(readOnly = true)

@@ -26,6 +26,7 @@ import com.psihub.api.shared.enums.TipoAtendimento;
 import com.psihub.api.shared.enums.TipoUsuario;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.ApiResponseMapper;
+import com.psihub.api.shared.utils.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class ConsultaService {
         consulta.setAgendadoPorUsuario(agendadoPor);
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
         consulta.setStatus(StatusConsulta.AGENDADA);
-        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
+        consulta.setObservacoes(StringUtils.sanitizeOptional(request.observacoes()));
 
         return mapper.toResponse(consultaRepository.save(consulta));
     }
@@ -127,7 +128,7 @@ public class ConsultaService {
         consulta.setAgendadoPorUsuario(agendadoPor);
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? TipoAtendimento.ONLINE : request.tipoAtendimento());
         consulta.setStatus(StatusConsulta.AGENDADA);
-        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
+        consulta.setObservacoes(StringUtils.sanitizeOptional(request.observacoes()));
 
         return mapper.toResponse(consultaRepository.save(consulta));
     }
@@ -253,7 +254,7 @@ public class ConsultaService {
 
         consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
-        consulta.setMotivoCancelamento(request == null ? null : sanitizeOptional(request.motivoCancelamento()));
+        consulta.setMotivoCancelamento(request == null ? null : StringUtils.sanitizeOptional(request.motivoCancelamento()));
 
         if (tipoUsuario == TipoUsuario.PACIENTE) {
             notificacaoService.notificarCancelamentoParaPsicologo(consulta);
@@ -280,7 +281,7 @@ public class ConsultaService {
                     consultaId,
                     userId,
                     tipoUsuario,
-                    new CancelarConsultaRequest(sanitizeOptional(request.motivo()))
+                    new CancelarConsultaRequest(StringUtils.sanitizeOptional(request.motivo()))
             );
         }
 
@@ -349,7 +350,7 @@ public class ConsultaService {
         consulta.setInicioEm(intervalo.inicioEm());
         consulta.setFimEm(intervalo.fimEm());
         consulta.setTipoAtendimento(request.tipoAtendimento() == null ? consulta.getTipoAtendimento() : request.tipoAtendimento());
-        consulta.setObservacoes(sanitizeOptional(request.observacoes()));
+        consulta.setObservacoes(StringUtils.sanitizeOptional(request.observacoes()));
 
         return mapper.toResponse(consulta);
     }
@@ -479,14 +480,6 @@ public class ConsultaService {
             Collection<StatusConsulta> statusesIgnorados
     ) {
         return consultaRepository.existsBlockingOverlap(psicologoId, inicio, fim, statusesIgnorados);
-    }
-
-    private String sanitizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        return normalized.isBlank() ? null : normalized;
     }
 
     private LocalDateTime aplicarFrequencia(LocalDateTime inicio, FrequenciaRecorrencia frequencia, int indice) {

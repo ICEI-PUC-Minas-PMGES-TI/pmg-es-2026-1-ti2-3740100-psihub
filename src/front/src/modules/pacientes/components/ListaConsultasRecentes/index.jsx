@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import { formatDateTime, toIsoDate } from '@/shared/utils/date.utils';
 import { patientStatusLabels } from '../../utils/patient.utils';
-import { EmptyState, LoadingState } from '../PatientStates';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { LoadingState } from '@/shared/components/LoadingState';
 import { ModalCancelarConsulta } from '../ModalCancelarConsulta';
 
 export function ListaConsultasRecentes({
