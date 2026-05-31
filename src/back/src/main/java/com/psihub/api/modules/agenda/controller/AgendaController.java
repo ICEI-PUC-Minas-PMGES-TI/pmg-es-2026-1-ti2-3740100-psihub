@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
@@ -73,6 +74,15 @@ public class AgendaController {
     @GetMapping("/me/disponibilidades")
     public List<RegraDisponibilidadeResponse> listarMinhasRegras(@AuthenticationPrincipal AuthenticatedUser user) {
         return agendaService.listarRegras(user.userId());
+    }
+
+    @DeleteMapping("/me/disponibilidades/{regraId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removerMinhaRegra(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long regraId
+    ) {
+        agendaService.removerRegra(user.userId(), regraId);
     }
 
     @GetMapping("/me/agenda/slots")

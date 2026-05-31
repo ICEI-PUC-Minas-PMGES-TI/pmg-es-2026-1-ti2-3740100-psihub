@@ -304,6 +304,19 @@ public class AgendaService {
         excecaoDisponibilidadeRepository.save(excecao);
     }
 
+    @Transactional
+    public void removerRegra(Long psicologoId, Long regraId) {
+        RegraDisponibilidade regra = regraDisponibilidadeRepository.findById(java.util.Objects.requireNonNull(regraId))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Regra de disponibilidade nao encontrada"));
+
+        if (!regra.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Regra nao pertence ao psicologo autenticado");
+        }
+
+        regra.setAtivo(false);
+        regraDisponibilidadeRepository.save(regra);
+    }
+
     private RegraDisponibilidade criarRegra(
             Psicologo psicologo,
             DiaSemana dia,
