@@ -322,10 +322,34 @@ try {
 
     # ── Loop principal ────────────────────────────────────────────────────────
 
+    # [FIX 4] Rastreia quantas vezes o backend (Docker) falhou ao iniciar.
+    # O job docker-compose-logs nunca muda de estado para "Failed" porque o
+    # Compose reinicia o container — sem esse contador o loop seria infinito.
+    $backendCrashCount = 0
+    $maxBackendCrashes = 3
+
     while ($true) {
         foreach ($job in $jobs) {
             Receive-Job -Job $job -ErrorAction SilentlyContinue | ForEach-Object {
-                Write-Host "[$($job.Name)] $_"
+                $line = $_
+
+                # [FIX 5] Destaca linhas de erro em vermelho para facilitar leitura.
+                if ($line -match "\bERROR\b|Application run failed") {
+                    Write-Host "[$($job.Name)] $line" -ForegroundColor Red
+
+                    # [FIX 4 cont.] Detecta crash loop do backend Docker.
+                    if ($job.Name -eq "backend" -and $line -match "Application run failed") {
+                        $backendCrashCount++
+                        if ($backendCrashCount -ge $maxBackendCrashes) {
+                            throw "Backend falhou $backendCrashCount vezes. Corrija o erro acima e rode novamente."
+                        }
+                        Write-Host "[PsiHub] Backend falhou ($backendCrashCount/$maxBackendCrashes). Aguardando restart..." -ForegroundColor Yellow
+                    }
+                } elseif ($line -match "\bWARN\b") {
+                    Write-Host "[$($job.Name)] $line" -ForegroundColor Yellow
+                } else {
+                    Write-Host "[$($job.Name)] $line"
+                }
             }
 
             if ($job.State -eq "Failed") {
