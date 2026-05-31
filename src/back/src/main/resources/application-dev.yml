@@ -1,0 +1,32 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Profile "dev" — usado APENAS em ambiente local (ativado pelo dev.ps1).
+# NUNCA ative este profile em producao.
+# ──────────────────────────────────────────────────────────────────────────────
+
+spring:
+  flyway:
+    # Permite que o Flyway execute "clean" (apaga tudo e recria) quando
+    # detecta checksum inválido — ou seja, quando um script de migration
+    # já aplicado foi editado. Resolve o erro:
+    #   "Migration checksum mismatch for migration version X"
+    clean-disabled: false
+    clean-on-validation-error: true
+
+  jpa:
+    # Em dev, "update" é mais tolerante: o Hibernate aplica ALTER TABLE
+    # automaticamente para cobrir diferenças menores entre entidade e banco.
+    # Em prod usa-se "validate" (application.yml) para garantir que nada
+    # inesperado aconteça no schema.
+    hibernate:
+      ddl-auto: update
+
+  # Log SQL detalhado para facilitar debug local.
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

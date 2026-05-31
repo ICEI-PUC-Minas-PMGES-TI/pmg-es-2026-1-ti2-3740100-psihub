@@ -249,10 +249,12 @@ try {
             Wait-MySQLHealthy
         }
 
-        Write-Step "Iniciando backend local em http://localhost:8080"
+        Write-Step "Iniciando backend local em http://localhost:8080 (profile: dev)"
         $jobs += Start-Job -Name "backend" -ScriptBlock {
             param($Path, $MvnWrapper)
             Set-Location $Path
+            # Ativa o profile 'dev': Flyway recria o schema se migrations foram editadas.
+            $env:SPRING_PROFILES_ACTIVE = "dev"
             # Garante permissao de execucao no mvnw em sistemas Unix.
             if (-not ($IsWindows -or $env:OS -eq "Windows_NT")) {
                 chmod +x $MvnWrapper
@@ -275,9 +277,11 @@ try {
 
         $backendMode = "docker"
         Write-Host "[PsiHub] JDK 25 nao encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
-        Write-Step "Iniciando backend Docker em http://localhost:8080"
+        Write-Step "Iniciando backend Docker em http://localhost:8080 (profile: dev)"
         Push-Location $backendPath
         try {
+            # Passa o profile dev para o container via variavel de ambiente.
+            $env:SPRING_PROFILES_ACTIVE = "dev"
             Invoke-CheckedCommand -Command { docker compose up -d --build backend } -ErrorMessage "Falha ao iniciar o backend Docker."
         } finally {
             Pop-Location
