@@ -9,6 +9,11 @@ new - Psicologo
 
 <img width="878" height="840" alt="image" src="https://github.com/user-attachments/assets/9c4b69d7-f180-41c8-a44e-ef936906879a" />
 
+new - Paciente
+
+<img width="698" height="250" alt="image" src="https://github.com/user-attachments/assets/1d3d1942-eadd-43b3-9e81-cf00599e60ec" />
+
+
 old
 
 ![Modelo BPMN do Processo 4](images/gestao-financeira.png)
