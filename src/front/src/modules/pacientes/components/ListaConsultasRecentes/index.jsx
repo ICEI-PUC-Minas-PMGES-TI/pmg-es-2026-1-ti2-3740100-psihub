@@ -36,7 +36,6 @@ export function ListaConsultasRecentes({
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Consultas</p>
-                    <h1>Minhas Consultas</h1>
                     <p className="agenda-page__subtitle">Acompanhe e gerencie seus agendamentos de atendimento.</p>
                 </div>
             </header>
@@ -44,7 +43,7 @@ export function ListaConsultasRecentes({
                 <div className="panel__header">
                     <h2>Minhas Consultas</h2>
                     <button className="ghost-button" type="button" onClick={onToggleHistory}>
-                        {showHistory ? 'Ocultar historico' : 'Ver historico'}
+                        {showHistory ? 'Ocultar histórico' : 'Ver histórico'}
                     </button>
                 </div>
 
@@ -52,7 +51,7 @@ export function ListaConsultasRecentes({
                 {!loading && sortedAppointments.length === 0 && (
                     <EmptyState
                         icon={CalendarCheck}
-                        title={showHistory ? 'Nenhuma consulta encontrada no historico.' : 'Voce ainda nao tem consultas agendadas.'}
+                        title={showHistory ? 'Nenhuma consulta encontrada no historico.' : 'Você ainda não tem consultas agendadas.'}
                     />
                 )}
 

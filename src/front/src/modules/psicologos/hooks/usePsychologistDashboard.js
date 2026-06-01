@@ -90,7 +90,7 @@ export function usePsychologistDashboard() {
             list.push({
                 id: 'ok', icon: 'ok',
                 title: 'Tudo em dia!',
-                sub: 'Sem notificaÃ§Ãµes pendentes.',
+                sub: 'Sem notificações pendentes.',
                 time: null,
             });
 

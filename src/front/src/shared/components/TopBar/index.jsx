@@ -3,10 +3,10 @@ import { NotificacoesDropdown } from '@/shared/components/NotificacoesDropdown';
 
 export function TopBar({ user, role }) {
     const subtitle = role === 'admin'
-        ? 'Controle acesso de psicologos sem abrir dados clinicos.'
-        : role === 'psicologo'
-            ? 'Gerencie sua disponibilidade, consultas e rotina clinica.'
-            : 'Agende consultas e acompanhe seus proximos atendimentos.';
+        ? 'Controle acesso de psicólogos sem abrir dados clínicos.'
+        : role === 'psicólogo'
+            ? 'Gerencie sua disponibilidade, consultas e rotina clínica.'
+            : 'Agende consultas e acompanhe seus próximos atendimentos.';
     const today = new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: 'long',

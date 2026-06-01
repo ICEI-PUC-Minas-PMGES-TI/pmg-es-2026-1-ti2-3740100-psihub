@@ -8,7 +8,6 @@ export function SearchPsychologistView({ psychologists, loading, onOpenAgenda })
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Agendamento</p>
-                    <h1>Agendar Consulta</h1>
                     <p className="agenda-page__subtitle">Encontre um psicólogo disponível e escolha um horário.</p>
                 </div>
             </header>
@@ -39,7 +38,7 @@ export function SearchPsychologistView({ psychologists, loading, onOpenAgenda })
                                 <tr className="data-table__row" key={psychologist.id}>
                                     <td>{psychologist.nome}</td>
                                     <td>{psychologist.especialidades?.[0] || 'Psicologia'}</td>
-                                    <td>Ainda sem avaliacao</td>
+                                    <td>Ainda sem avaliação</td>
                                     <td>
                                         <button className="secondary-button" type="button" onClick={() => onOpenAgenda(psychologist)}>
                                             Ver agenda
