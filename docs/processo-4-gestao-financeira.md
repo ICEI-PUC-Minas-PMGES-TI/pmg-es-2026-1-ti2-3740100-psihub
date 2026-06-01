@@ -5,6 +5,10 @@ Como oportunidade de melhoria, busca-se automatizar o registro de pagamentos, re
 
 Em seguida, apresenta-se o modelo do processo descrito no padrão BPMN.
 
+new - Psicologo
+<img width="878" height="840" alt="image" src="https://github.com/user-attachments/assets/9c4b69d7-f180-41c8-a44e-ef936906879a" />
+
+old
 ![Modelo BPMN do Processo 4](images/gestao-financeira.png)
 
 ---
