@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react';
-import { psychologistApi } from '@/services/psychologist.service';
+import { patientApi } from '@/services/patient.service';
 
 const emptyProfile = {
     nome: '',
     telefone: '',
     fotoPerfilUrl: '',
-    crp: '',
-    valorConsulta: '',
-    biografia: '',
-    especialidades: '',
+    dataNascimento: '',
+    observacoesIniciais: '',
 };
 
-export function usePsychologistProfile(onToast) {
+export function usePatientProfile(onToast) {
     const [form, setForm] = useState(emptyProfile);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -19,65 +17,41 @@ export function usePsychologistProfile(onToast) {
 
     useEffect(() => {
         const controller = new AbortController();
-        setLoading(true);
-
-        psychologistApi
-            .getPsychologistProfile(controller.signal)
+        patientApi.getPatientProfile(controller.signal)
             .then((profile) => {
                 setForm({
                     nome: profile.nome || '',
                     telefone: profile.telefone || '',
                     fotoPerfilUrl: profile.fotoPerfilUrl || '',
-                    crp: profile.crp || '',
-                    valorConsulta: profile.valorConsulta ?? '',
-                    biografia: profile.biografia || '',
-                    especialidades: (profile.especialidades || []).join(', '),
+                    dataNascimento: profile.dataNascimento || '',
+                    observacoesIniciais: profile.observacoesIniciais || '',
                 });
-
                 setError('');
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') {
-                    setError(
-                        err.message ||
-                            'Nao foi possivel carregar o perfil.'
-                    );
-                }
+                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar o perfil.');
             })
             .finally(() => setLoading(false));
-
         return () => controller.abort();
     }, []);
 
     async function handleSubmit(event) {
         event.preventDefault();
-
-        if (!form.nome.trim() || !form.crp.trim()) {
-            setError('Nome e CRP sao obrigatorios.');
+        if (!form.nome.trim() || !form.dataNascimento) {
+            setError('Nome e data de nascimento sao obrigatorios.');
             return;
         }
-
         setSaving(true);
         setError('');
-
         try {
-            await psychologistApi.updatePsychologistProfile({
+            await patientApi.updatePatientProfile({
                 nome: form.nome,
                 telefone: form.telefone || null,
                 fotoPerfilUrl: form.fotoPerfilUrl || null,
-                crp: form.crp,
-                valorConsulta: Number(form.valorConsulta || 0),
-                biografia: form.biografia || null,
-                especialidades: form.especialidades
-                    .split(',')
-                    .map((item) => item.trim())
-                    .filter(Boolean),
+                dataNascimento: form.dataNascimento,
+                observacoesIniciais: form.observacoesIniciais || null,
             });
-
-            onToast?.({
-                type: 'success',
-                message: 'Perfil profissional atualizado.',
-            });
+            onToast?.({ type: 'success', message: 'Perfil atualizado.' });
         } catch (err) {
             setError(err.message || 'Nao foi possivel salvar o perfil.');
         } finally {
@@ -86,10 +60,7 @@ export function usePsychologistProfile(onToast) {
     }
 
     function updateField(field, value) {
-        setForm((current) => ({
-            ...current,
-            [field]: value,
-        }));
+        setForm((current) => ({ ...current, [field]: value }));
     }
 
     return {

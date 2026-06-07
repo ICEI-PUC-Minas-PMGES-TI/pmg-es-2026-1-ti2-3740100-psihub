@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { clinicalApi } from '@/services/clinical.service';
+import { psychologistApi } from '@/services/psychologist.service';
 import { schedulingApi } from '@/services/scheduling.service';
 
 export function usePatientsManagement(onToast) {
@@ -14,7 +14,7 @@ export function usePatientsManagement(onToast) {
         try {
             const [patientList, linkList] = await Promise.all([
                 schedulingApi.listMyPatients({ signal }),
-                clinicalApi.listPsychologistLinks({ status: 'SOLICITADO', signal }),
+                psychologistApi.listPsychologistLinks({ status: 'SOLICITADO', signal }),
             ]);
             setPatients(patientList || []);
             setLinks(linkList || []);
@@ -47,8 +47,8 @@ export function usePatientsManagement(onToast) {
 
     async function respond(vinculoId, action) {
         try {
-            if (action === 'accept') await clinicalApi.acceptLink(vinculoId);
-            if (action === 'reject') await clinicalApi.rejectLink(vinculoId);
+            if (action === 'accept') await psychologistApi.acceptLink(vinculoId);
+            if (action === 'reject') await psychologistApi.rejectLink(vinculoId);
             onToast?.({ type: 'success', message: 'SolicitaÃ§Ã£o atualizada.' });
             await load();
         } catch (err) {

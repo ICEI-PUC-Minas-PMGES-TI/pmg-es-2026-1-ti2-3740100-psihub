@@ -9,8 +9,7 @@
  * @example
  * import { AdminPsychologistsPage } from '@/modules/admin';
  *
- * @see services/clinical.service.js para chamadas HTTP de aprovacao e revogacao de acesso.
- * @see pages/AdminPsychologists para a montagem da rota administrativa.
+ * @see services/admin.service.js para chamadas HTTP de aprovacao e revogacao de acesso.
  */
 export { AdminPsychologistsPage } from './components/AdminPsychologistsPage';
 export { useAdminPsychologists } from './hooks/useAdminPsychologists';

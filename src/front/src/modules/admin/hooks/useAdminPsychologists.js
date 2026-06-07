@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { clinicalApi } from '@/services/clinical.service';
+import { adminApi } from '@/services/admin.service';
 
 export function useAdminPsychologists(onToast) {
     const [status, setStatus] = useState('');
@@ -10,7 +10,7 @@ export function useAdminPsychologists(onToast) {
     useEffect(() => {
         const controller = new AbortController();
         setLoading(true);
-        clinicalApi.listAdminPsychologists({ status, signal: controller.signal })
+        adminApi.listAdminPsychologists({ status, signal: controller.signal })
             .then((data) => {
                 setItems(data || []);
                 setError('');
@@ -24,10 +24,10 @@ export function useAdminPsychologists(onToast) {
 
     async function changeAccess(psicologoId, action) {
         try {
-            if (action === 'approve') await clinicalApi.approvePsychologist(psicologoId);
-            if (action === 'revoke') await clinicalApi.revokePsychologist(psicologoId, 'Revogado via painel administrativo');
+            if (action === 'approve') await adminApi.approvePsychologist(psicologoId);
+            if (action === 'revoke') await adminApi.revokePsychologist(psicologoId, 'Revogado via painel administrativo');
             onToast?.({ type: 'success', message: 'Acesso atualizado.' });
-            setItems(await clinicalApi.listAdminPsychologists({ status }));
+            setItems(await adminApi.listAdminPsychologists({ status }));
         } catch (err) {
             onToast?.({ type: 'error', message: err.message || 'Nao foi possivel atualizar o acesso.' });
         }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { clinicalApi } from '@/services/clinical.service';
+import { psychologistApi } from '@/services/psychologist.service';
 import { schedulingApi } from '@/services/scheduling.service';
 import { getCurrentUserId } from '@/shared/utils/jwt.utils';
 
@@ -121,16 +121,16 @@ export function useReports({ initialPatientId, onToast }) {
 
         try {
             const [timelineResult, recordsResult, evolutionsResult] = await Promise.allSettled([
-                clinicalApi.getTimeline({
+                psychologistApi.getTimeline({
                     pacienteId: selectedPatient,
                     psicologoId,
                     signal
                 }),
-                clinicalApi.listPatientEmotionRecords({
+                psychologistApi.listPatientEmotionRecords({
                     pacienteId: selectedPatient,
                     signal
                 }),
-                clinicalApi.listPatientEvolutionRecords({
+                psychologistApi.listPatientEvolutionRecords({
                     pacienteId: selectedPatient,
                     signal
                 }),
