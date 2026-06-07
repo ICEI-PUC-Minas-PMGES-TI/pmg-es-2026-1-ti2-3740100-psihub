@@ -46,6 +46,11 @@ export const clinicalApi = {
         });
     },
 
+    // Psychologist: list manual evolution records for a specific patient (requires vinculo aceito)
+    listPatientEvolutionRecords({ pacienteId, signal } = {}) {
+        return apiRequest(`/api/psicologos/pacientes/${pacienteId}/evolucoes`, { signal });
+    },
+
     // Psychologist: annotations on a patient's emotional record
     listRecordAnnotations({ pacienteId, registroId, signal }) {
         return apiRequest(`/api/psicologos/pacientes/${pacienteId}/registros-emocionais/${registroId}/anotacoes`, { signal });

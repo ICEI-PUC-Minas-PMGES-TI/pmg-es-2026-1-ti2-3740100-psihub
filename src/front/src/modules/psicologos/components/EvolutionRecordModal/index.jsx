@@ -7,7 +7,7 @@ export function EvolutionRecordModal({ isOpen, onClose, onSubmit, pacienteNome }
         titulo: '',
         temasSessao: '',
         observacaoClinica: '',
-        nivelEngajamento: 'NEUTRO',
+        nivelEngajamento: 'MEDIO',
         nivelProgresso: 5,
         intercorrencias: '',
         tarefas: ''
@@ -37,7 +37,7 @@ export function EvolutionRecordModal({ isOpen, onClose, onSubmit, pacienteNome }
                 titulo: '',
                 temasSessao: '',
                 observacaoClinica: '',
-                nivelEngajamento: 'NEUTRO',
+                nivelEngajamento: 'MEDIO',
                 nivelProgresso: 5,
                 intercorrencias: '',
                 tarefas: ''
@@ -123,11 +123,9 @@ export function EvolutionRecordModal({ isOpen, onClose, onSubmit, pacienteNome }
                             onChange={handleChange}
                             disabled={loading}
                         >
-                            <option value="MUITO_BAIXO">Muito Baixo</option>
                             <option value="BAIXO">Baixo</option>
-                            <option value="NEUTRO">Neutro</option>
+                            <option value="MEDIO">Médio</option>
                             <option value="ALTO">Alto</option>
-                            <option value="MUITO_ALTO">Muito Alto</option>
                         </select>
                     </label>
 

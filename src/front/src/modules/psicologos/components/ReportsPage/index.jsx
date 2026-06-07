@@ -5,18 +5,20 @@ import { useReports } from '../../hooks/useReports';
 import { clinicalApi } from '@/services/clinical.service';
 import { RecordAnnotationModal } from '../RecordAnnotationModal';
 import { EvolutionRecordModal } from '../EvolutionRecordModal';
+import { ClinicalTimeline } from '../ClinicalTimeline';
 
 export function ReportsPage({ onToast, initialPatientId }) {
     const {
         patients,
         selectedPatient,
         setSelectedPatient,
-        timeline,
-        records,
+        mergedTimeline,
+        tendencia,
         loadingPatients,
         loadingTimeline,
         loadingRecords,
         error,
+        refreshReports,
     } = useReports({ initialPatientId, onToast });
 
     // Modal states
@@ -48,8 +50,7 @@ export function ReportsPage({ onToast, initialPatientId }) {
             });
             onToast?.({ type: 'success', message: 'Anotação salva com sucesso!' });
             setAnnotationModalOpen(false);
-            // Reload records to show new annotation
-            window.location.reload();
+            await refreshReports();
         } catch (err) {
             throw new Error(err.message || 'Falha ao criar anotação');
         }
@@ -59,7 +60,7 @@ export function ReportsPage({ onToast, initialPatientId }) {
     const handleSubmitEvolution = async (formData) => {
         try {
             const payload = {
-                pacienteId: selectedPatient,
+                pacienteId: Number(selectedPatient),
                 titulo: formData.titulo || 'Sem título',
                 temasSessao: formData.temasSessao.split(',').map(t => t.trim()).filter(t => t),
                 anotacoesClinicas: formData.observacaoClinica,
@@ -68,11 +69,10 @@ export function ReportsPage({ onToast, initialPatientId }) {
                 intercorrencias: formData.intercorrencias || null,
                 tarefasEncaminhamentos: formData.tarefas || null,
             };
-            await clinicalApi.createEvolutionRecord(payload);
+            const createdEvolution = await clinicalApi.createEvolutionRecord(payload);
             onToast?.({ type: 'success', message: 'Registro de evolução criado com sucesso!' });
             setEvolutionModalOpen(false);
-            // Reload timeline to show new record
-            window.location.reload();
+            await refreshReports(createdEvolution);
         } catch (err) {
             throw new Error(err.message || 'Falha ao criar registro');
         }
@@ -92,106 +92,48 @@ export function ReportsPage({ onToast, initialPatientId }) {
 
             <section className="panel">
                 <div className="panel__header">
-                    <h2>Linha do tempo de Evolução</h2>
+                    <h2>Linha do tempo clínica</h2>
                     <FileText size={20} />
                 </div>
 
-                <label className="field">
-                    Paciente vinculado
-                    <select
-                        value={selectedPatient}
-                        onChange={(event) => setSelectedPatient(event.target.value)}
-                        disabled={loadingPatients}
-                    >
-                        <option value="">Selecione</option>
-                        {patients.map((patient) => (
-                            <option key={patient.id} value={patient.id}>{patient.nome}</option>
-                        ))}
-                    </select>
-                </label>
-
-                {selectedPatient && (
-                    <button
-                        className="primary-button"
-                        style={{ marginBottom: '20px' }}
-                        onClick={() => setEvolutionModalOpen(true)}
-                    >
-                        <Plus size={16} style={{ marginRight: '6px' }} />
-                        Novo Registro de Evolução
-                    </button>
-                )}
-
-                {loadingTimeline ? (
-                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando evolução…</p>
-                ) : timeline.length === 0 ? (
-                    <div className="empty-state-container">
-                        <p className="empty-state">Nenhum registro de evolução para este paciente.</p>
-                        <p style={{ fontSize: '13px', color: '#999', marginTop: '8px' }}>
-                            Crie um novo registro clicando no botão acima ou adicione anotações aos registros emocionais do paciente.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="simple-list" style={{ marginTop: '12px' }}>
-                        {timeline.map((item) => (
-                            <div className="simple-list__item" key={item.prontuarioId || item.id}>
-                                <div>
-                                    <strong>{formatDateTime(item.inicioEm)}</strong>
-                                    {item.temasSessao && item.temasSessao.length > 0 ? (
-                                        <span>{item.temasSessao.join(', ')}</span>
-                                    ) : (
-                                        <span style={{ color: '#999' }}>Sem temas registrados</span>
-                                    )}
-                                    {item.evolucaoClinica && (
-                                        <p style={{ marginTop: '6px', fontSize: '13px', color: '#666' }}>
-                                            {item.evolucaoClinica.substring(0, 100)}...
-                                        </p>
-                                    )}
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <span style={{ display: 'block', fontSize: '12px', color: '#666' }}>
-                                        Progresso: {item.nivelProgresso != null ? `${item.nivelProgresso}/10` : 'NÃ£o informado'}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Emotional records submitted by patient (psychologist view) */}
-                <div style={{ marginTop: 32, paddingTop: '24px', borderTop: '1px solid #e0e0e0' }}>
-                    <h3 style={{ marginBottom: '16px' }}>📊 Registros Emocionais do Paciente</h3>
-                    {loadingRecords && (
-                        <p className="state-row"><Loader2 className="spin" size={16} /> Carregando…</p>
-                    )}
-                    {!loadingRecords && (records == null || records.length === 0) ? (
-                        <p className="empty-state">Nenhum registro emocional disponível para este paciente.</p>
-                    ) : (
-                        <div className="simple-list" style={{ marginTop: '12px' }}>
-                            {records.map((r) => (
-                                <div className="simple-list__item" key={r.id}>
-                                    <div>
-                                        <strong>{formatDateTime(r.registradoEm)}</strong>
-                                        <span>Humor: {r.humorDia}/5 {r.emocoes && r.emocoes.length > 0 ? `— ${r.emocoes.join(', ')}` : ''}</span>
-                                        {r.descricao && (
-                                            <p style={{ marginTop: '6px', fontSize: '13px', color: '#666' }}>
-                                                {r.descricao}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="inline-actions">
-                                        <button
-                                            className="secondary-button"
-                                            type="button"
-                                            onClick={() => handleOpenAnnotationModal(r)}
-                                        >
-                                            ✏️ Anotar
-                                        </button>
-                                    </div>
-                                </div>
+                <div className="mb-5 grid gap-4">
+                    <label className="field">
+                        Paciente vinculado
+                        <select
+                            value={selectedPatient}
+                            onChange={(event) => setSelectedPatient(event.target.value)}
+                            disabled={loadingPatients}
+                        >
+                            <option value="">Selecione</option>
+                            {patients.map((patient) => (
+                                <option key={patient.id} value={patient.id}>{patient.nome}</option>
                             ))}
-                        </div>
+                        </select>
+                    </label>
+
+                    {selectedPatient && (
+                        <button
+                            className="primary-button primary-button--fit"
+                            type="button"
+                            onClick={() => setEvolutionModalOpen(true)}
+                        >
+                            <Plus size={16} aria-hidden="true" />
+                            Novo Registro de Evolução
+                        </button>
                     )}
                 </div>
+
+                {(loadingTimeline || loadingRecords) && (
+                    <p className="state-row"><Loader2 className="spin" size={16} /> Carregando linha do tempo clínica…</p>
+                )}
+
+                <ClinicalTimeline
+                    events={mergedTimeline}
+                    tendencia={tendencia}
+                    loading={loadingTimeline || loadingRecords}
+                    hasSelectedPatient={Boolean(selectedPatient)}
+                    onAnnotateRecord={handleOpenAnnotationModal}
+                />
             </section>
 
             {/* Modals */}

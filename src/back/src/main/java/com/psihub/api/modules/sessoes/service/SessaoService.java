@@ -292,6 +292,28 @@ public class SessaoService {
     }
 
     @Transactional(readOnly = true)
+    public List<EvolutaoClinicaResponse> listarEvolucoesClinicas(Long psicologoId, Long pacienteId) {
+        vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
+
+        return evolutaoClinicaRepository.findByPacienteIdAndAtivoTrueOrderByCriadoEmDesc(pacienteId)
+                .stream()
+                .filter(evolucao -> evolucao.getPsicologo().getId().equals(psicologoId))
+                .map(evolucao -> new EvolutaoClinicaResponse(
+                        evolucao.getId(),
+                        evolucao.getPaciente().getId(),
+                        evolucao.getCriadoEm(),
+                        evolucao.getTitulo(),
+                        jsonListMapper.fromJson(evolucao.getTemasSessao()),
+                        evolucao.getNivelProgresso(),
+                        evolucao.getNivelEngajamento(),
+                        evolucao.getAnotacoesClinicas(),
+                        evolucao.getIntercorrencias(),
+                        evolucao.getTarefasEncaminhamentos()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public EvolutaoClinicaResponse buscarEvolutaoClinica(Long psicologoId, Long evolucaoId) {
         EvolutaoClinica evolucao = evolutaoClinicaRepository.findById(java.util.Objects.requireNonNull(evolucaoId))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada"));
