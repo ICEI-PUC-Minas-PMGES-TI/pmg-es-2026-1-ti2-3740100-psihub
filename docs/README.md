@@ -106,8 +106,6 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 ## 5. Indicadores de desempenho
 
-_O documento a seguir apresenta os indicadores de desempenho dos processos._
-
 [Indicadores de desempenho dos processos](performance-indicators.md)
 
 
