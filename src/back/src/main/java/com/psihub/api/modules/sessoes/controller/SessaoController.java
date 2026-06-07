@@ -103,5 +103,14 @@ public class SessaoController {
         sessaoService.exigirPsicologo(user);
         return sessaoService.criarEvolutaoClinica(user.userId(), request);
     }
+
+    @GetMapping("/psicologos/pacientes/evolucao/{id}")
+    public EvolutaoClinicaResponse buscarEvolutaoClinica(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long id
+    ) {
+        sessaoService.exigirPsicologo(user);
+        return sessaoService.buscarEvolutaoClinica(user.userId(), id);
+    }
 }
 

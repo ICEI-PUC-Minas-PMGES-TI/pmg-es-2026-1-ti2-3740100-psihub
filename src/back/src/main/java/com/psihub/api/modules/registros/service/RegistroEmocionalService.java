@@ -2,9 +2,6 @@ package com.psihub.api.modules.registros.service;
 
 import com.psihub.api.modules.pacientes.entity.Paciente;
 import com.psihub.api.modules.pacientes.service.PacienteService;
-import com.psihub.api.modules.psicologos.service.PsicologoService;
-import com.psihub.api.modules.vinculos.service.VinculoService;
-import com.psihub.api.modules.notificacoes.service.NotificacaoService;
 import com.psihub.api.modules.registros.dto.RegistroEmocionalRequest;
 import com.psihub.api.modules.registros.entity.RegistroEmocional;
 import com.psihub.api.modules.registros.repository.RegistroEmocionalRepository;
@@ -18,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -27,26 +25,17 @@ public class RegistroEmocionalService {
     private final PacienteService pacienteService;
     private final JsonListMapper jsonListMapper;
     private final ApiResponseMapper mapper;
-    private final VinculoService vinculoService;
-    private final PsicologoService psicologoService;
-    private final NotificacaoService notificacaoService;
 
     public RegistroEmocionalService(
             RegistroEmocionalRepository registroEmocionalRepository,
             PacienteService pacienteService,
             JsonListMapper jsonListMapper,
-            ApiResponseMapper mapper,
-            VinculoService vinculoService,
-            PsicologoService psicologoService,
-            NotificacaoService notificacaoService
+            ApiResponseMapper mapper
     ) {
         this.registroEmocionalRepository = registroEmocionalRepository;
         this.pacienteService = pacienteService;
         this.jsonListMapper = jsonListMapper;
         this.mapper = mapper;
-        this.vinculoService = vinculoService;
-        this.psicologoService = psicologoService;
-        this.notificacaoService = notificacaoService;
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +52,7 @@ public class RegistroEmocionalService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RegistroEmocionalResponse criarComoPaciente(Long pacienteId, RegistroEmocionalRequest request) {
         Paciente paciente = pacienteService.buscarPorId(pacienteId);
         validarPayload(request);
@@ -72,27 +61,7 @@ public class RegistroEmocionalService {
         registro.setPaciente(paciente);
         aplicarPayload(registro, request);
 
-        RegistroEmocional salvo = registroEmocionalRepository.save(registro);
-
-        // If patient targeted a psychologist, ensure vinculo and optionally auto-accept, then notify
-        if (request != null && request.psicologoId() != null) {
-            Long psicId = request.psicologoId();
-            // create/ensure link as solicited
-            vinculoService.garantirSolicitado(pacienteId, psicId);
-            if (request.autoAceitarVinculo() != null && request.autoAceitarVinculo()) {
-                vinculoService.garantirAceito(pacienteId, psicId);
-            }
-
-            try {
-                var psicologo = psicologoService.buscarPorId(psicId);
-                String mensagem = paciente.getUsuario().getNome() + " enviou um novo registro emocional em " + salvo.getRegistradoEm();
-                notificacaoService.criar(psicologo.getUsuario(), "Novo registro emocional", mensagem);
-            } catch (Exception ignored) {
-                // ignore notification failures
-            }
-        }
-
-        return mapper.toResponse(salvo);
+        return mapper.toResponse(registroEmocionalRepository.save(registro));
     }
 
     @Transactional
@@ -115,7 +84,7 @@ public class RegistroEmocionalService {
     @Transactional(readOnly = true)
     public RegistroEmocional buscarPorId(Long registroId) {
         return registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
-                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
     }
 
     private void validarPayload(RegistroEmocionalRequest request) {
@@ -131,7 +100,6 @@ public class RegistroEmocionalService {
         registro.setHumorDia(request.humorDia());
         registro.setDescricao(StringUtils.sanitizeOptional(request.descricao()));
         registro.setEmocoes(jsonListMapper.toJson(normalizeList(request.emocoes())));
-        registro.setPsicologoId(request == null ? null : request.psicologoId());
     }
 
     private List<String> normalizeList(List<String> values) {

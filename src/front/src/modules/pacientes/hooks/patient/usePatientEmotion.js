@@ -5,7 +5,6 @@ const initialForm = {
     humorDia: 3,
     emocoes: '',
     descricao: '',
-    psicologoId: null,
 };
 
 export function usePatientEmotion(onToast) {
@@ -15,7 +14,6 @@ export function usePatientEmotion(onToast) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
-    const [psicologos, setPsicologos] = useState([]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -28,14 +26,6 @@ export function usePatientEmotion(onToast) {
                 if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar registros.');
             })
             .finally(() => setLoading(false));
-        return () => controller.abort();
-    }, []);
-
-    useEffect(() => {
-        const controller = new AbortController();
-        clinicalApi.listAvailablePsychologists(controller.signal)
-            .then((data) => setPsicologos(data || []))
-            .catch(() => setPsicologos([]));
         return () => controller.abort();
     }, []);
 
@@ -52,7 +42,6 @@ export function usePatientEmotion(onToast) {
             humorDia: Number(form.humorDia),
             descricao: form.descricao || null,
             emocoes: form.emocoes.split(',').map((item) => item.trim()).filter(Boolean),
-            psicologoId: form.psicologoId || null,
         };
 
         try {
@@ -78,7 +67,6 @@ export function usePatientEmotion(onToast) {
             humorDia: record.humorDia,
             descricao: record.descricao || '',
             emocoes: (record.emocoes || []).join(', '),
-            psicologoId: record.psicologoId || null,
         });
     }
 
@@ -90,7 +78,6 @@ export function usePatientEmotion(onToast) {
         loading,
         saving,
         error,
-        psicologos,
         handleSubmit,
         startEdit,
     };

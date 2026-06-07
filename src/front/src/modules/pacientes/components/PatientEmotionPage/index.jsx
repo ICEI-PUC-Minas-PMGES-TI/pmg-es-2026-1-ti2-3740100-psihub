@@ -19,7 +19,6 @@ export function PatientEmotionPage({ onToast }) {
         loading,
         saving,
         error,
-        psicologos,
         handleSubmit,
         startEdit,
     } = usePatientEmotion(onToast);
@@ -60,15 +59,6 @@ export function PatientEmotionPage({ onToast }) {
                         Emoções
                         <input value={form.emocoes} onChange={(event) => setForm((current) => ({ ...current, emocoes: event.target.value }))} placeholder="Separe por vírgula" />
                     </label>
-                    <label className="form-group">
-                        Enviar para psicólogo (opcional)
-                        <select value={form.psicologoId || ''} onChange={(e) => setForm((c) => ({ ...c, psicologoId: e.target.value ? Number(e.target.value) : null }))}>
-                            <option value="">-- Nenhum --</option>
-                            {psicologos.map((p) => (
-                                <option key={p.id} value={p.id}>{p.nome} {p.crp ? `(${p.crp})` : ''}</option>
-                            ))}
-                        </select>
-                    </label>
                     <label className="form-group form-group--full">
                         Descrição
                         <textarea rows="4" maxLength={500} value={form.descricao} onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))} />
@@ -93,9 +83,6 @@ export function PatientEmotionPage({ onToast }) {
                             <article className="simple-list__item" key={record.id}>
                                 <div>
                                     <strong>{formatDateTime(record.registradoEm)} | Humor {record.humorDia}/5</strong>
-                                    {record.psicologoId && (
-                                        <div className="muted">Enviado para: {psicologos.find(p => p.id === record.psicologoId)?.nome || 'Psicologo'}</div>
-                                    )}
                                     <span>{(record.emocoes || []).join(', ') || 'Sem emoções informadas'}</span>
                                     {record.descricao && <span>{record.descricao}</span>}
                                 </div>

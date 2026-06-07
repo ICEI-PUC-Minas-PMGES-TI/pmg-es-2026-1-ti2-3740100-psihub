@@ -9,8 +9,7 @@ public record RegistroEmocionalResponse(
         Integer humorDia,
         String descricao,
         List<String> emocoes,
-        LocalDateTime registradoEm,
-        Long psicologoId
+        LocalDateTime registradoEm
 ) {
 }
 

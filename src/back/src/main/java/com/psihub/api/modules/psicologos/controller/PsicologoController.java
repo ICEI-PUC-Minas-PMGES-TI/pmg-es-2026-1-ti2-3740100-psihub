@@ -8,7 +8,7 @@ import com.psihub.api.modules.registros.service.RegistroEmocionalService;
 import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.modules.registros.service.RegistroAnotacaoService;
 import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
-import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
+import com.psihub.api.shared.utils.JsonListMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,17 +33,20 @@ public class PsicologoController {
     private final RegistroEmocionalService registroEmocionalService;
     private final VinculoService vinculoService;
     private final RegistroAnotacaoService registroAnotacaoService;
+    private final JsonListMapper jsonListMapper;
 
     public PsicologoController(
             PsicologoService psicologoService,
             RegistroEmocionalService registroEmocionalService,
             VinculoService vinculoService,
-            RegistroAnotacaoService registroAnotacaoService
+            RegistroAnotacaoService registroAnotacaoService,
+            JsonListMapper jsonListMapper
     ) {
         this.psicologoService = psicologoService;
         this.registroEmocionalService = registroEmocionalService;
         this.vinculoService = vinculoService;
         this.registroAnotacaoService = registroAnotacaoService;
+        this.jsonListMapper = jsonListMapper;
     }
 
     @GetMapping("/disponiveis")
@@ -89,9 +91,8 @@ public class PsicologoController {
                         r.getId(),
                         r.getHumorDia(),
                         r.getDescricao(),
-                        jsonListToList(r.getEmocoes()),
-                        r.getRegistradoEm(),
-                        r.getPsicologoId()
+                        jsonListMapper.fromJson(r.getEmocoes()),
+                        r.getRegistradoEm()
                 ))
                 .toList();
     }
@@ -117,9 +118,8 @@ public class PsicologoController {
                 registro.getId(),
                 registro.getHumorDia(),
                 registro.getDescricao(),
-                jsonListToList(registro.getEmocoes()),
-                registro.getRegistradoEm(),
-                registro.getPsicologoId()
+                jsonListMapper.fromJson(registro.getEmocoes()),
+                registro.getRegistradoEm()
         );
     }
 
@@ -161,18 +161,5 @@ public class PsicologoController {
         registroAnotacaoService.deletar(user.userId(), pacienteId, registroId, anotacaoId);
     }
 
-    // helper to convert stored JSON string of emotions to List<String>
-    private List<String> jsonListToList(String json) {
-        if (json == null || json.isBlank()) {
-            return java.util.List.of();
-        }
-        try {
-            // reuse existing JsonListMapper is not available here, parse simple JSON array
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
-        } catch (Exception e) {
-            return java.util.List.of();
-        }
-    }
 }
 

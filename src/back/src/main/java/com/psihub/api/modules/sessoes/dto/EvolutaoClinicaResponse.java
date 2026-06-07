@@ -12,7 +12,9 @@ public record EvolutaoClinicaResponse(
         List<String> temasSessao,
         Integer nivelProgresso,
         NivelEngajamento nivelEngajamento,
-        String anotacoesClinicas
+        String anotacoesClinicas,
+        String intercorrencias,
+        String tarefasEncaminhamentos
 ) {
 }
 

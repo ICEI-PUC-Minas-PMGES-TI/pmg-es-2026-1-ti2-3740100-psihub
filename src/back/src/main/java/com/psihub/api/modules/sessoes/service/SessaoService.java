@@ -282,10 +282,34 @@ public class SessaoService {
             salva.getPaciente().getId(),
             salva.getCriadoEm(),
             salva.getTitulo(),
-            jsonListMapper.toList(salva.getTemasSessao()),
+            jsonListMapper.fromJson(salva.getTemasSessao()),
             salva.getNivelProgresso(),
             salva.getNivelEngajamento(),
-            salva.getAnotacoesClinicas()
+            salva.getAnotacoesClinicas(),
+            salva.getIntercorrencias(),
+            salva.getTarefasEncaminhamentos()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public EvolutaoClinicaResponse buscarEvolutaoClinica(Long psicologoId, Long evolucaoId) {
+        EvolutaoClinica evolucao = evolutaoClinicaRepository.findById(java.util.Objects.requireNonNull(evolucaoId))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada"));
+        if (!evolucao.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada");
+        }
+        vinculoService.exigirVinculoAceito(evolucao.getPaciente().getId(), psicologoId);
+        return new EvolutaoClinicaResponse(
+                evolucao.getId(),
+                evolucao.getPaciente().getId(),
+                evolucao.getCriadoEm(),
+                evolucao.getTitulo(),
+                jsonListMapper.fromJson(evolucao.getTemasSessao()),
+                evolucao.getNivelProgresso(),
+                evolucao.getNivelEngajamento(),
+                evolucao.getAnotacoesClinicas(),
+                evolucao.getIntercorrencias(),
+                evolucao.getTarefasEncaminhamentos()
         );
     }
 

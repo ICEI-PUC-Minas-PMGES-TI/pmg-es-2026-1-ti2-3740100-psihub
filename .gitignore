@@ -1,0 +1,15 @@
+# IDE metadata
+.idea/
+*.iml
+
+# Maven build output
+src/back/target/
+
+# Node modules
+src/front/node_modules/
+src/front/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local

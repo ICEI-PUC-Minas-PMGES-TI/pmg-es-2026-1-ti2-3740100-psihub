@@ -78,6 +78,8 @@ public class RegistroAnotacaoService {
 
     @Transactional
     public void deletar(Long psicologoId, Long pacienteId, Long registroId, Long anotacaoId) {
+        vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
+
         RegistroAnotacao anotacao = registroAnotacaoRepository.findById(Objects.requireNonNull(anotacaoId))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Anotacao nao encontrada"));
 

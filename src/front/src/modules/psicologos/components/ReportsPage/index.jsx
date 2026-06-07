@@ -171,7 +171,7 @@ export function ReportsPage({ onToast, initialPatientId }) {
                                 <div className="simple-list__item" key={r.id}>
                                     <div>
                                         <strong>{formatDateTime(r.registradoEm)}</strong>
-                                        <span>Humor: {r.humorDia}/10 {r.emocoes && r.emocoes.length > 0 ? `— ${r.emocoes.join(', ')}` : ''}</span>
+                                        <span>Humor: {r.humorDia}/5 {r.emocoes && r.emocoes.length > 0 ? `— ${r.emocoes.join(', ')}` : ''}</span>
                                         {r.descricao && (
                                             <p style={{ marginTop: '6px', fontSize: '13px', color: '#666' }}>
                                                 {r.descricao}
