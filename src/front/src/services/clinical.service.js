@@ -31,10 +31,44 @@ export const clinicalApi = {
         });
     },
 
-    getTimeline({ pacienteId, inicio, fim, tema, signal }) {
+    getTimeline({ pacienteId, psicologoId, inicio, fim, tema, signal }) {
         return apiRequest(`/api/pacientes/${pacienteId}/linha-do-tempo`, {
-            query: { inicio, fim, tema },
+            query: { psicologoId, inicio, fim, tema },
             signal,
+        });
+    },
+
+    // Psychologist: list emotional records for a specific patient (requires vinculo aceito)
+    listPatientEmotionRecords({ pacienteId, inicio, fim, signal } = {}) {
+        return apiRequest(`/api/psicologos/pacientes/${pacienteId}/registros-emocionais`, {
+            query: inicio || fim ? { inicio, fim } : undefined,
+            signal,
+        });
+    },
+
+    // Psychologist: annotations on a patient's emotional record
+    listRecordAnnotations({ pacienteId, registroId, signal }) {
+        return apiRequest(`/api/psicologos/pacientes/${pacienteId}/registros-emocionais/${registroId}/anotacoes`, { signal });
+    },
+
+    createRecordAnnotation({ pacienteId, registroId, texto }) {
+        return apiRequest(`/api/psicologos/pacientes/${pacienteId}/registros-emocionais/${registroId}/anotacoes`, {
+            method: 'POST',
+            body: { texto },
+        });
+    },
+
+    deleteRecordAnnotation({ pacienteId, registroId, anotacaoId }) {
+        return apiRequest(`/api/psicologos/pacientes/${pacienteId}/registros-emocionais/${registroId}/anotacoes/${anotacaoId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    // Create manual evolution record (prontuario without consulting)
+    createEvolutionRecord(payload) {
+        return apiRequest('/api/psicologos/pacientes/evolucao', {
+            method: 'POST',
+            body: payload,
         });
     },
 
@@ -51,6 +85,10 @@ export const clinicalApi = {
 
     listEmotionRecords(signal) {
         return apiRequest('/api/pacientes/me/registros-emocionais', { signal });
+    },
+
+    listAvailablePsychologists(signal) {
+        return apiRequest('/api/psicologos/disponiveis', { signal });
     },
 
     createEmotionRecord(payload) {

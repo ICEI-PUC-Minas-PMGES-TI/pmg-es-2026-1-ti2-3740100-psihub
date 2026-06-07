@@ -8,6 +8,10 @@ import java.util.List;
 public record RegistroEmocionalRequest(
         @Min(1) @Max(5) Integer humorDia,
         @Size(max = 500) String descricao,
-        List<@Size(max = 80) String> emocoes
+        List<@Size(max = 80) String> emocoes,
+        // optional: target psychologist to send this registro
+        Long psicologoId,
+        // optional: when true, auto-accept the vinculo so psychologist can see immediately
+        Boolean autoAceitarVinculo
 ) {
 }

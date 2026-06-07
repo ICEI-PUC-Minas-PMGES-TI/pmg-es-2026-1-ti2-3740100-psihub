@@ -64,7 +64,8 @@ public class ApiResponseMapper {
                 registro.getHumorDia(),
                 registro.getDescricao(),
                 jsonListMapper.fromJson(registro.getEmocoes()),
-                registro.getRegistradoEm()
+                registro.getRegistradoEm(),
+                registro.getPsicologoId()
         );
     }
 

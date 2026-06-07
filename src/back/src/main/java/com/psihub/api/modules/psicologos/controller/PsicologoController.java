@@ -4,6 +4,18 @@ import com.psihub.api.modules.psicologos.dto.PerfilPsicologoRequest;
 import com.psihub.api.modules.psicologos.dto.PerfilPsicologoResponse;
 import com.psihub.api.modules.psicologos.dto.PsicologoDisponivelResponse;
 import com.psihub.api.modules.psicologos.service.PsicologoService;
+import com.psihub.api.modules.registros.service.RegistroEmocionalService;
+import com.psihub.api.modules.vinculos.service.VinculoService;
+import com.psihub.api.modules.registros.service.RegistroAnotacaoService;
+import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
+import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -19,9 +31,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class PsicologoController {
 
     private final PsicologoService psicologoService;
+    private final RegistroEmocionalService registroEmocionalService;
+    private final VinculoService vinculoService;
+    private final RegistroAnotacaoService registroAnotacaoService;
 
-    public PsicologoController(PsicologoService psicologoService) {
+    public PsicologoController(
+            PsicologoService psicologoService,
+            RegistroEmocionalService registroEmocionalService,
+            VinculoService vinculoService,
+            RegistroAnotacaoService registroAnotacaoService
+    ) {
         this.psicologoService = psicologoService;
+        this.registroEmocionalService = registroEmocionalService;
+        this.vinculoService = vinculoService;
+        this.registroAnotacaoService = registroAnotacaoService;
     }
 
     @GetMapping("/disponiveis")
@@ -40,6 +63,116 @@ public class PsicologoController {
             @Valid @RequestBody PerfilPsicologoRequest request
     ) {
         return psicologoService.atualizarPerfil(user.userId(), request);
+    }
+
+    @GetMapping("/pacientes/{pacienteId}/registros-emocionais")
+    public List<RegistroEmocionalResponse> listarRegistrosComoPsicologo(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
+    ) {
+        // exige que seja psicologo
+        if (!user.isPsicologo()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar registros de pacientes");
+        }
+
+        // exige vinculo clinico aceito entre psicologo e paciente
+        vinculoService.exigirVinculoAceito(pacienteId, user.userId());
+
+        LocalDateTime inicioDt = inicio == null ? LocalDate.now().minusDays(30).atStartOfDay() : inicio.atStartOfDay();
+        LocalDateTime fimDt = fim == null ? LocalDate.now().plusDays(1).atStartOfDay() : fim.plusDays(1).atStartOfDay();
+
+        return registroEmocionalService.buscarPorPacienteEPeriodo(pacienteId, inicioDt, fimDt)
+                .stream()
+                .map(r -> new RegistroEmocionalResponse(
+                        r.getId(),
+                        r.getHumorDia(),
+                        r.getDescricao(),
+                        jsonListToList(r.getEmocoes()),
+                        r.getRegistradoEm(),
+                        r.getPsicologoId()
+                ))
+                .toList();
+    }
+
+    @GetMapping("/pacientes/{pacienteId}/registros-emocionais/{registroId}")
+    public RegistroEmocionalResponse obterRegistroComoPsicologo(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId,
+            @PathVariable Long registroId
+    ) {
+        if (!user.isPsicologo()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar registros de pacientes");
+        }
+
+        vinculoService.exigirVinculoAceito(pacienteId, user.userId());
+
+        var registro = registroEmocionalService.buscarPorId(registroId);
+        if (!registro.getPaciente().getId().equals(pacienteId)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Registro emocional nao encontrado");
+        }
+
+        return new RegistroEmocionalResponse(
+                registro.getId(),
+                registro.getHumorDia(),
+                registro.getDescricao(),
+                jsonListToList(registro.getEmocoes()),
+                registro.getRegistradoEm(),
+                registro.getPsicologoId()
+        );
+    }
+
+    @GetMapping("/pacientes/{pacienteId}/registros-emocionais/{registroId}/anotacoes")
+    public List<com.psihub.api.modules.registros.dto.RegistroAnotacaoResponse> listarAnotacoes(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId,
+            @PathVariable Long registroId
+    ) {
+        if (!user.isPsicologo()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Apenas psicologos podem acessar anotacoes");
+        }
+        return registroAnotacaoService.listarPorRegistro(user.userId(), pacienteId, registroId);
+    }
+
+    @PostMapping("/pacientes/{pacienteId}/registros-emocionais/{registroId}/anotacoes")
+    public com.psihub.api.modules.registros.dto.RegistroAnotacaoResponse criarAnotacao(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId,
+            @PathVariable Long registroId,
+            @Valid @RequestBody com.psihub.api.modules.registros.dto.RegistroAnotacaoRequest request
+    ) {
+        if (!user.isPsicologo()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Apenas psicologos podem criar anotacoes");
+        }
+        return registroAnotacaoService.criar(user.userId(), pacienteId, registroId, request);
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/pacientes/{pacienteId}/registros-emocionais/{registroId}/anotacoes/{anotacaoId}")
+    public void deletarAnotacao(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId,
+            @PathVariable Long registroId,
+            @PathVariable Long anotacaoId
+    ) {
+        if (!user.isPsicologo()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Apenas psicologos podem remover anotacoes");
+        }
+        registroAnotacaoService.deletar(user.userId(), pacienteId, registroId, anotacaoId);
+    }
+
+    // helper to convert stored JSON string of emotions to List<String>
+    private List<String> jsonListToList(String json) {
+        if (json == null || json.isBlank()) {
+            return java.util.List.of();
+        }
+        try {
+            // reuse existing JsonListMapper is not available here, parse simple JSON array
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+        } catch (Exception e) {
+            return java.util.List.of();
+        }
     }
 }
 

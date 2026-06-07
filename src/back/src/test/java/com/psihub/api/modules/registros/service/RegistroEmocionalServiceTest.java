@@ -21,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.psihub.api.modules.vinculos.service.VinculoService;
+import com.psihub.api.modules.psicologos.service.PsicologoService;
+import com.psihub.api.modules.notificacoes.service.NotificacaoService;
 
 @ExtendWith(MockitoExtension.class)
 class RegistroEmocionalServiceTest {
@@ -37,6 +40,15 @@ class RegistroEmocionalServiceTest {
     @Mock
     private ApiResponseMapper mapper;
 
+    @Mock
+    private VinculoService vinculoService;
+
+    @Mock
+    private PsicologoService psicologoService;
+
+    @Mock
+    private NotificacaoService notificacaoService;
+
     @Test
     void deveBloquearEdicaoApos24Horas() {
         Paciente paciente = new Paciente();
@@ -52,14 +64,17 @@ class RegistroEmocionalServiceTest {
                 registroRepository,
                 pacienteService,
                 jsonListMapper,
-                mapper
+                mapper,
+                vinculoService,
+                psicologoService,
+                notificacaoService
         );
 
         ApiException exception = assertThrows(ApiException.class, () ->
                 service.atualizarComoPaciente(
                         10L,
                         99L,
-                        new RegistroEmocionalRequest(4, "Dia estavel", List.of("calma"))
+                        new RegistroEmocionalRequest(4, "Dia estavel", List.of("calma"), null, null)
                 ));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());

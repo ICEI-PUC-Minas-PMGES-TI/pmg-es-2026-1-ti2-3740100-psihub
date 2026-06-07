@@ -20,6 +20,7 @@ import com.psihub.api.modules.pacientes.service.PacienteService;
 import com.psihub.api.modules.psicologos.entity.Psicologo;
 import com.psihub.api.modules.psicologos.service.PsicologoService;
 import com.psihub.api.modules.vinculos.service.VinculoService;
+import com.psihub.api.modules.registros.service.RegistroEmocionalService;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.enums.TipoAtendimento;
@@ -60,6 +61,7 @@ public class ConsultaService {
     private final ApiResponseMapper mapper;
     private final NotificacaoService notificacaoService;
     private final VinculoService vinculoService;
+    private final RegistroEmocionalService registroEmocionalService;
 
     public ConsultaService(
             ConsultaRepository consultaRepository,
@@ -69,7 +71,8 @@ public class ConsultaService {
             AuthService authService,
             ApiResponseMapper mapper,
             NotificacaoService notificacaoService,
-            VinculoService vinculoService
+            VinculoService vinculoService,
+            RegistroEmocionalService registroEmocionalService
     ) {
         this.consultaRepository = consultaRepository;
         this.pacienteService = pacienteService;
@@ -79,6 +82,7 @@ public class ConsultaService {
         this.mapper = mapper;
         this.notificacaoService = notificacaoService;
         this.vinculoService = vinculoService;
+        this.registroEmocionalService = registroEmocionalService;
     }
 
     @Transactional
@@ -93,6 +97,20 @@ public class ConsultaService {
         validarHorarioNoPassado(intervalo.inicioEm());
         validarSemConflitoComLock(psicologo.getId(), intervalo.inicioEm(), intervalo.fimEm());
         vinculoService.garantirSolicitado(paciente.getId(), psicologo.getId());
+
+        // if request asks to auto accept the vinculo, mark as ACEITO so psicologo can see data immediately
+        if (request.autoAceitarVinculo() != null && request.autoAceitarVinculo()) {
+            vinculoService.garantirAceito(paciente.getId(), psicologo.getId());
+        }
+
+        // if patient included an emotional record while scheduling, create it
+        if (request.registroEmocional() != null) {
+            try {
+                registroEmocionalService.criarComoPaciente(paciente.getId(), request.registroEmocional());
+            } catch (Exception e) {
+                // swallow for now but log or rethrow if desired; do not block scheduling on registro failure
+            }
+        }
 
         Consulta consulta = new Consulta();
         consulta.setPaciente(paciente);

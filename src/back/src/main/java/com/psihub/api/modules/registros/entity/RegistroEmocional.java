@@ -30,6 +30,9 @@ public class RegistroEmocional extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String emocoes;
 
+    @Column(name = "psicologo_id")
+    private Long psicologoId;
+
     @Column(name = "registrado_em", nullable = false)
     private LocalDateTime registradoEm;
 
@@ -76,6 +79,14 @@ public class RegistroEmocional extends BaseEntity {
 
     public void setEmocoes(String emocoes) {
         this.emocoes = emocoes;
+    }
+
+    public Long getPsicologoId() {
+        return psicologoId;
+    }
+
+    public void setPsicologoId(Long psicologoId) {
+        this.psicologoId = psicologoId;
     }
 
     public LocalDateTime getRegistradoEm() {

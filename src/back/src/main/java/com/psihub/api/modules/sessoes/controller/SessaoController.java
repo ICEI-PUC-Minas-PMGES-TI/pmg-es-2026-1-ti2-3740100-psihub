@@ -1,6 +1,8 @@
 package com.psihub.api.modules.sessoes.controller;
 
+import com.psihub.api.modules.sessoes.dto.CriarEvolutaoClinicaRequest;
 import com.psihub.api.modules.sessoes.dto.EncerrarSessaoRequest;
+import com.psihub.api.modules.sessoes.dto.EvolutaoClinicaResponse;
 import com.psihub.api.modules.sessoes.dto.IniciarSessaoRequest;
 import com.psihub.api.modules.sessoes.dto.LinhaTempoSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.PreparacaoSessaoResponse;
@@ -91,6 +93,15 @@ public class SessaoController {
     ) {
         sessaoService.exigirPsicologo(user);
         return sessaoService.detalharProntuarioComoPsicologo(prontuarioId, user.userId());
+    }
+
+    @PostMapping("/psicologos/pacientes/evolucao")
+    public EvolutaoClinicaResponse criarEvolutaoClinica(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody CriarEvolutaoClinicaRequest request
+    ) {
+        sessaoService.exigirPsicologo(user);
+        return sessaoService.criarEvolutaoClinica(user.userId(), request);
     }
 }
 
