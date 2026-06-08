@@ -1,6 +1,6 @@
 /**
  * @module psicologos
- * @description Modulo responsavel pela experiencia do psicologo autenticado: agenda, disponibilidade, pacientes, perfil e relatorios.
+ * @description Modulo responsavel pela experiencia do psicologo autenticado: agenda, disponibilidade, pacientes, financeiro, perfil e relatorios.
  *
  * Componentes publicos: PsychologistAgendaPage, PsychologistDashboard, PatientsManagementPage, PsychologistProfilePage, ReportsPage.
  * Hooks publicos: useAgenda, usePsychologistDashboard, usePsychologistFinancial, usePatientsManagement, usePsychologistProfile, useReports, useNotifications.
@@ -10,10 +10,10 @@
  * import { PsychologistAgendaPage, useAgenda } from '@/modules/psicologos';
  *
  * @see services/scheduling.service.js para agenda, disponibilidade, pacientes e consultas.
- * @see services/clinical.service.js para perfil, vinculos e linha do tempo clinica.
+ * @see services/psychologist.service.js para perfil, vinculos e linha do tempo clinica.
  * @see shared/utils/date.utils.js para formatacao e calculos de datas.
  */
-import './psicologos.css';
+import './module.css';
 export { PsychologistDashboard } from './components/PsychologistDashboard';
 export { PsychologistAgendaPage } from './components/PsychologistAgendaPage';
 export { PatientsManagementPage } from './components/PatientsManagementPage';

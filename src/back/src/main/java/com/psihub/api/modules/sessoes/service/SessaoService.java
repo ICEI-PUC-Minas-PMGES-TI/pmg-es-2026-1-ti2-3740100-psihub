@@ -4,7 +4,9 @@ import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.consultas.service.ConsultaService;
 import com.psihub.api.modules.registros.entity.RegistroEmocional;
 import com.psihub.api.modules.registros.service.RegistroEmocionalService;
+import com.psihub.api.modules.sessoes.dto.CriarEvolutaoClinicaRequest;
 import com.psihub.api.modules.sessoes.dto.EncerrarSessaoRequest;
+import com.psihub.api.modules.sessoes.dto.EvolutaoClinicaResponse;
 import com.psihub.api.modules.sessoes.dto.IniciarSessaoRequest;
 import com.psihub.api.modules.sessoes.dto.LinhaTempoSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.PreparacaoSessaoResponse;
@@ -12,8 +14,14 @@ import com.psihub.api.modules.sessoes.dto.ProntuarioSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.RegistroEmocionalResponse;
 import com.psihub.api.modules.sessoes.dto.ResumoEmocionalResponse;
 import com.psihub.api.modules.sessoes.dto.SalvarRascunhoSessaoRequest;
+import com.psihub.api.modules.sessoes.entity.EvolutaoClinica;
 import com.psihub.api.modules.sessoes.entity.ProntuarioSessao;
+import com.psihub.api.modules.sessoes.repository.EvolutaoClinicaRepository;
 import com.psihub.api.modules.sessoes.repository.ProntuarioSessaoRepository;
+import com.psihub.api.modules.pacientes.entity.Paciente;
+import com.psihub.api.modules.pacientes.service.PacienteService;
+import com.psihub.api.modules.psicologos.entity.Psicologo;
+import com.psihub.api.modules.psicologos.service.PsicologoService;
 import com.psihub.api.modules.vinculos.service.VinculoService;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.exception.ApiException;
@@ -33,7 +41,10 @@ public class SessaoService {
 
     private final ConsultaService consultaService;
     private final ProntuarioSessaoRepository prontuarioSessaoRepository;
+    private final EvolutaoClinicaRepository evolutaoClinicaRepository;
     private final RegistroEmocionalService registroEmocionalService;
+    private final PacienteService pacienteService;
+    private final PsicologoService psicologoService;
     private final ApiResponseMapper mapper;
     private final JsonListMapper jsonListMapper;
     private final VinculoService vinculoService;
@@ -41,14 +52,20 @@ public class SessaoService {
     public SessaoService(
             ConsultaService consultaService,
             ProntuarioSessaoRepository prontuarioSessaoRepository,
+            EvolutaoClinicaRepository evolutaoClinicaRepository,
             RegistroEmocionalService registroEmocionalService,
+            PacienteService pacienteService,
+            PsicologoService psicologoService,
             ApiResponseMapper mapper,
             JsonListMapper jsonListMapper,
             VinculoService vinculoService
     ) {
         this.consultaService = consultaService;
         this.prontuarioSessaoRepository = prontuarioSessaoRepository;
+        this.evolutaoClinicaRepository = evolutaoClinicaRepository;
         this.registroEmocionalService = registroEmocionalService;
+        this.pacienteService = pacienteService;
+        this.psicologoService = psicologoService;
         this.mapper = mapper;
         this.jsonListMapper = jsonListMapper;
         this.vinculoService = vinculoService;
@@ -238,6 +255,84 @@ public class SessaoService {
         validarVinculoClinico(prontuario.getConsulta(), psicologoId);
 
         return mapper.toResponse(prontuario);
+    }
+
+    @Transactional
+    public EvolutaoClinicaResponse criarEvolutaoClinica(Long psicologoId, CriarEvolutaoClinicaRequest request) {
+        vinculoService.exigirVinculoAceito(request.pacienteId(), psicologoId);
+
+        Paciente paciente = pacienteService.buscarPorId(request.pacienteId());
+        Psicologo psicologo = psicologoService.buscarPorId(psicologoId);
+
+        EvolutaoClinica evolucao = new EvolutaoClinica();
+        evolucao.setPaciente(paciente);
+        evolucao.setPsicologo(psicologo);
+        evolucao.setTitulo(request.titulo());
+        evolucao.setTemasSessao(jsonListMapper.toJson(request.temasSessao()));
+        evolucao.setAnotacoesClinicas(request.anotacoesClinicas());
+        evolucao.setNivelEngajamento(request.nivelEngajamento());
+        evolucao.setNivelProgresso(request.nivelProgresso());
+        evolucao.setIntercorrencias(request.intercorrencias());
+        evolucao.setTarefasEncaminhamentos(request.tarefasEncaminhamentos());
+
+        EvolutaoClinica salva = evolutaoClinicaRepository.save(evolucao);
+
+        return new EvolutaoClinicaResponse(
+            salva.getId(),
+            salva.getPaciente().getId(),
+            salva.getCriadoEm(),
+            salva.getTitulo(),
+            jsonListMapper.fromJson(salva.getTemasSessao()),
+            salva.getNivelProgresso(),
+            salva.getNivelEngajamento(),
+            salva.getAnotacoesClinicas(),
+            salva.getIntercorrencias(),
+            salva.getTarefasEncaminhamentos()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<EvolutaoClinicaResponse> listarEvolucoesClinicas(Long psicologoId, Long pacienteId) {
+        vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
+
+        return evolutaoClinicaRepository.findByPacienteIdAndAtivoTrueOrderByCriadoEmDesc(pacienteId)
+                .stream()
+                .filter(evolucao -> evolucao.getPsicologo().getId().equals(psicologoId))
+                .map(evolucao -> new EvolutaoClinicaResponse(
+                        evolucao.getId(),
+                        evolucao.getPaciente().getId(),
+                        evolucao.getCriadoEm(),
+                        evolucao.getTitulo(),
+                        jsonListMapper.fromJson(evolucao.getTemasSessao()),
+                        evolucao.getNivelProgresso(),
+                        evolucao.getNivelEngajamento(),
+                        evolucao.getAnotacoesClinicas(),
+                        evolucao.getIntercorrencias(),
+                        evolucao.getTarefasEncaminhamentos()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public EvolutaoClinicaResponse buscarEvolutaoClinica(Long psicologoId, Long evolucaoId) {
+        EvolutaoClinica evolucao = evolutaoClinicaRepository.findById(java.util.Objects.requireNonNull(evolucaoId))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada"));
+        if (!evolucao.getPsicologo().getId().equals(psicologoId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada");
+        }
+        vinculoService.exigirVinculoAceito(evolucao.getPaciente().getId(), psicologoId);
+        return new EvolutaoClinicaResponse(
+                evolucao.getId(),
+                evolucao.getPaciente().getId(),
+                evolucao.getCriadoEm(),
+                evolucao.getTitulo(),
+                jsonListMapper.fromJson(evolucao.getTemasSessao()),
+                evolucao.getNivelProgresso(),
+                evolucao.getNivelEngajamento(),
+                evolucao.getAnotacoesClinicas(),
+                evolucao.getIntercorrencias(),
+                evolucao.getTarefasEncaminhamentos()
+        );
     }
 
     private ResumoEmocionalResponse montarResumoEmocional(Consulta consulta) {

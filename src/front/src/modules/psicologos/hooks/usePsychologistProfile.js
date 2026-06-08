@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { clinicalApi } from '@/services/clinical.service';
+import { psychologistApi } from '@/services/psychologist.service';
 
 const emptyProfile = {
     nome: '',
@@ -21,7 +21,7 @@ export function usePsychologistProfile(onToast) {
         const controller = new AbortController();
         setLoading(true);
 
-        clinicalApi
+        psychologistApi
             .getPsychologistProfile(controller.signal)
             .then((profile) => {
                 setForm({
@@ -61,7 +61,7 @@ export function usePsychologistProfile(onToast) {
         setError('');
 
         try {
-            await clinicalApi.updatePsychologistProfile({
+            await psychologistApi.updatePsychologistProfile({
                 nome: form.nome,
                 telefone: form.telefone || null,
                 fotoPerfilUrl: form.fotoPerfilUrl || null,

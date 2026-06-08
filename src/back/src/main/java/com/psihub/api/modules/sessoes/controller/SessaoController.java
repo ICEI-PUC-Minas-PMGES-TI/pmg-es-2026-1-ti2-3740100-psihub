@@ -1,6 +1,8 @@
 package com.psihub.api.modules.sessoes.controller;
 
+import com.psihub.api.modules.sessoes.dto.CriarEvolutaoClinicaRequest;
 import com.psihub.api.modules.sessoes.dto.EncerrarSessaoRequest;
+import com.psihub.api.modules.sessoes.dto.EvolutaoClinicaResponse;
 import com.psihub.api.modules.sessoes.dto.IniciarSessaoRequest;
 import com.psihub.api.modules.sessoes.dto.LinhaTempoSessaoResponse;
 import com.psihub.api.modules.sessoes.dto.PreparacaoSessaoResponse;
@@ -92,5 +94,31 @@ public class SessaoController {
         sessaoService.exigirPsicologo(user);
         return sessaoService.detalharProntuarioComoPsicologo(prontuarioId, user.userId());
     }
-}
 
+    @PostMapping("/psicologos/pacientes/evolucao")
+    public EvolutaoClinicaResponse criarEvolutaoClinica(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody CriarEvolutaoClinicaRequest request
+    ) {
+        sessaoService.exigirPsicologo(user);
+        return sessaoService.criarEvolutaoClinica(user.userId(), request);
+    }
+
+    @GetMapping("/psicologos/pacientes/{pacienteId}/evolucoes")
+    public List<EvolutaoClinicaResponse> listarEvolucoesClinicas(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long pacienteId
+    ) {
+        sessaoService.exigirPsicologo(user);
+        return sessaoService.listarEvolucoesClinicas(user.userId(), pacienteId);
+    }
+
+    @GetMapping("/psicologos/pacientes/evolucao/{id}")
+    public EvolutaoClinicaResponse buscarEvolutaoClinica(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long id
+    ) {
+        sessaoService.exigirPsicologo(user);
+        return sessaoService.buscarEvolutaoClinica(user.userId(), id);
+    }
+}

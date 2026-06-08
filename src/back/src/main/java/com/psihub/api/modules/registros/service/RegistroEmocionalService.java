@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -51,7 +52,7 @@ public class RegistroEmocionalService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RegistroEmocionalResponse criarComoPaciente(Long pacienteId, RegistroEmocionalRequest request) {
         Paciente paciente = pacienteService.buscarPorId(pacienteId);
         validarPayload(request);
@@ -78,6 +79,12 @@ public class RegistroEmocionalService {
         validarPayload(request);
         aplicarPayload(registro, request);
         return mapper.toResponse(registro);
+    }
+
+    @Transactional(readOnly = true)
+    public RegistroEmocional buscarPorId(Long registroId) {
+        return registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
     }
 
     private void validarPayload(RegistroEmocionalRequest request) {

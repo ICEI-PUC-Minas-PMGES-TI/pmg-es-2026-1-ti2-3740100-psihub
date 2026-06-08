@@ -1,8 +1,8 @@
 /**
  * @module auth
- * @description Modulo responsavel por entrada publica, login, cadastro, sessao autenticada e utilitarios de JWT/localStorage.
+ * @description Modulo responsavel por login, cadastro de paciente, sessao autenticada e utilitarios de JWT/localStorage.
  *
- * Componentes publicos: AuthPage, LandingPage, PsychologistRegisterPage.
+ * Componentes publicos: AuthPage.
  * Hooks publicos: useAuthForm.
  * Utils publicos: storeAuthSession, clearAuthSession, getStoredAuthSession, decodeJwtPayload, getMenuItems.
  *
@@ -13,8 +13,6 @@
  * @see modules/auth/utils/auth.utils.js para persistencia e leitura da sessao autenticada.
  */
 export { AuthPage } from './components/AuthPage';
-export { LandingPage } from './components/LandingPage';
-export { PsychologistRegisterPage } from './components/PsychologistRegisterPage';
 export { useAuthForm } from './hooks/useAuthForm';
 export {
   clearAuthSession,

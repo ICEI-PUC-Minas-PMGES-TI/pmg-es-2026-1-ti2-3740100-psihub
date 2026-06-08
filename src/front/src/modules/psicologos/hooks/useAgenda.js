@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { useAgendaCalendar } from './agenda/useAgendaCalendar';
-import { useAgendaExport } from './agenda/useAgendaExport';
-import { useAgendaFiltros } from './agenda/useAgendaFiltros';
-import { useAgendaUiState } from './agenda/useAgendaUiState';
-import { useAgendarConsultaMutation } from './agenda/useAgendarConsultaMutation';
-import { useConsultaActionsMutation } from './agenda/useConsultaActionsMutation';
-import { useCancelarConsultaMutation } from './agenda/useCancelarConsultaMutation';
-import { useConsultasQuery } from './agenda/useConsultasQuery';
-import { useDisponibilidadeMutation } from './agenda/useDisponibilidadeMutation';
-import { useDisponibilidadeQuery } from './agenda/useDisponibilidadeQuery';
-import { useHorariosAvulsosQuery } from './agenda/useHorariosAvulsosQuery';
+import { useAgendaCalendar } from './useAgendaCalendar';
+import { useAgendaExport } from './useAgendaExport';
+import { useAgendaFiltros } from './useAgendaFiltros';
+import { useAgendaUiState } from './useAgendaUiState';
+import { useAgendaAgendarConsultaMutation } from './useAgendaAgendarConsultaMutation';
+import { useAgendaConsultaActionsMutation } from './useAgendaConsultaActionsMutation';
+import { useAgendaCancelarConsultaMutation } from './useAgendaCancelarConsultaMutation';
+import { useAgendaConsultasQuery } from './useAgendaConsultasQuery';
+import { useAgendaDisponibilidadeMutation } from './useAgendaDisponibilidadeMutation';
+import { useAgendaDisponibilidadeQuery } from './useAgendaDisponibilidadeQuery';
+import { useAgendaHorariosAvulsosQuery } from './useAgendaHorariosAvulsosQuery';
 
 /**
  * @deprecated Facade de compatibilidade da agenda do psicologo.
- * Prefira usar hooks especializados em `hooks/agenda/` para novas evolucoes.
+ * Prefira usar hooks especializados `useAgenda*` para novas evolucoes.
  *
  * @param {{ onToast?: Function }} params
  * @returns {Object} estado, dados derivados e callbacks necessarios pela tela atual de agenda.
@@ -22,15 +22,15 @@ export function useAgenda({ onToast }) {
     const [refreshKey, setRefreshKey] = useState(0);
     const refreshAll = () => setRefreshKey((current) => current + 1);
     const ui = useAgendaUiState();
-    const disponibilidade = useDisponibilidadeQuery({ onToast, refreshKey });
-    const horarios = useHorariosAvulsosQuery({ onToast, refreshKey });
-    const consultas = useConsultasQuery({ onToast, refreshKey });
+    const disponibilidade = useAgendaDisponibilidadeQuery({ onToast, refreshKey });
+    const horarios = useAgendaHorariosAvulsosQuery({ onToast, refreshKey });
+    const consultas = useAgendaConsultasQuery({ onToast, refreshKey });
     const filtros = useAgendaFiltros(consultas.consultations);
     const calendar = useAgendaCalendar({ ...disponibilidade, ...horarios, ...consultas, weekStart: ui.weekStart });
-    const disponibilidadeMutation = useDisponibilidadeMutation({ ...ui, ...disponibilidade, onToast, refreshAll });
-    const agendar = useAgendarConsultaMutation({ ...ui, ...calendar, onToast, refreshAll });
-    const cancelar = useCancelarConsultaMutation({ ...ui, onToast, refreshAll });
-    const consultaActions = useConsultaActionsMutation({ ...ui, onToast, refreshAll });
+    const disponibilidadeMutation = useAgendaDisponibilidadeMutation({ ...ui, ...disponibilidade, onToast, refreshAll });
+    const agendar = useAgendaAgendarConsultaMutation({ ...ui, ...calendar, onToast, refreshAll });
+    const cancelar = useAgendaCancelarConsultaMutation({ ...ui, onToast, refreshAll });
+    const consultaActions = useAgendaConsultaActionsMutation({ ...ui, onToast, refreshAll });
     const exportacao = useAgendaExport({ filteredConsultations: filtros.filteredConsultations, onToast });
 
     return {

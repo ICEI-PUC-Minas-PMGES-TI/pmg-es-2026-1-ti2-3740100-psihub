@@ -78,7 +78,7 @@ public class NotificacaoService {
         notificacaoRepository.saveAll(pendentes);
     }
 
-    private void criar(Usuario usuario, String titulo, String mensagem) {
+    public void criar(Usuario usuario, String titulo, String mensagem) {
         Notificacao notificacao = new Notificacao();
         notificacao.setUsuario(usuario);
         notificacao.setTitulo(titulo);

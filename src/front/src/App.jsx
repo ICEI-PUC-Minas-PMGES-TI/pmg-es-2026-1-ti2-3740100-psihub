@@ -12,20 +12,20 @@ import {
 } from '@/modules/auth';
 import { trackUiEvent } from '@/shared/utils/metrics.utils';
 
-const AdminPsychologistsPage = lazy(() => import('@/pages/AdminPsychologists').then(m => ({ default: m.AdminPsychologistsPage })));
-const AuthPage = lazy(() => import('@/pages/Auth').then(m => ({ default: m.AuthPage })));
-const LandingPage = lazy(() => import('@/pages/Landing').then(m => ({ default: m.LandingPage })));
-const PatientDashboard = lazy(() => import('@/pages/PatientDashboard').then(m => ({ default: m.PatientDashboard })));
-const PatientEmotionPage = lazy(() => import('@/pages/PatientEmotion').then(m => ({ default: m.PatientEmotionPage })));
-const PatientProfilePage = lazy(() => import('@/pages/PatientProfile').then(m => ({ default: m.PatientProfilePage })));
-const PatientsManagementPage = lazy(() => import('@/pages/PatientsManagement').then(m => ({ default: m.PatientsManagementPage })));
-const PsychologistAgendaPage = lazy(() => import('@/pages/PsychologistAgenda').then(m => ({ default: m.PsychologistAgendaPage })));
-const PsychologistDashboard = lazy(() => import('@/pages/PsychologistDashboard').then(m => ({ default: m.PsychologistDashboard })));
-const PsychologistProfilePage = lazy(() => import('@/pages/PsychologistProfile').then(m => ({ default: m.PsychologistProfilePage })));
-const PsychologistRegisterPage = lazy(() => import('@/pages/PsychologistRegister').then(m => ({ default: m.PsychologistRegisterPage })));
-const ReportsPage = lazy(() => import('@/pages/Reports').then(m => ({ default: m.ReportsPage })));
-const PsychologistFinancialPage = lazy(() => import('@/pages/PsychologistFinancial').then(m => ({ default: m.PsychologistFinancialPage })));
-const PatientPaymentsPage = lazy(() => import('@/pages/PatientPayments').then(m => ({ default: m.PatientPaymentsPage })));
+const AdminPsychologistsPage = lazy(() => import('@/modules/admin').then(m => ({ default: m.AdminPsychologistsPage })));
+const AuthPage = lazy(() => import('@/modules/auth').then(m => ({ default: m.AuthPage })));
+const LandingPage = lazy(() => import('@/modules/public').then(m => ({ default: m.LandingPage })));
+const PatientDashboard = lazy(() => import('@/modules/pacientes').then(m => ({ default: m.PatientDashboard })));
+const PatientEmotionPage = lazy(() => import('@/modules/pacientes').then(m => ({ default: m.PatientEmotionPage })));
+const PatientProfilePage = lazy(() => import('@/modules/pacientes').then(m => ({ default: m.PatientProfilePage })));
+const PatientPaymentsPage = lazy(() => import('@/modules/pacientes').then(m => ({ default: m.PatientPaymentsPage })));
+const PatientsManagementPage = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.PatientsManagementPage })));
+const PsychologistAgendaPage = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.PsychologistAgendaPage })));
+const PsychologistDashboard = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.PsychologistDashboard })));
+const PsychologistFinancialPage = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.PsychologistFinancialPage })));
+const PsychologistProfilePage = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.PsychologistProfilePage })));
+const ReportsPage = lazy(() => import('@/modules/psicologos').then(m => ({ default: m.ReportsPage })));
+const PsychologistRegisterPage = lazy(() => import('@/modules/public').then(m => ({ default: m.PsychologistRegisterPage })));
 
 const PATIENT_APPOINTMENTS_SEARCH = '?view=consultas';
 

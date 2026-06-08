@@ -93,7 +93,7 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 [PROCESSO 2 - Gestão do paciente](processo-2-gestão-do-paciente.md "Detalhamento do Processo 2.")
 
-[PROCESSO 3 - Processo da secção](processo-3-processo-da-secção.md "Detalhamento do Processo 3.")
+[PROCESSO 3 - Processo da sessão](processo-3-processo-da-sessão.md "Detalhamento do Processo 3.")
 
 [PROCESSO 4 - Gestão financeira](processo-4-gestao-financeira.md "Detalhamento do Processo 4.")
 
@@ -105,8 +105,6 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 
 ## 5. Indicadores de desempenho
-
-_O documento a seguir apresenta os indicadores de desempenho dos processos._
 
 [Indicadores de desempenho dos processos](performance-indicators.md)
 
