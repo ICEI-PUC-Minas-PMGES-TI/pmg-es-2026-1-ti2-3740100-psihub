@@ -10,7 +10,7 @@ import { consultationStatusLabel } from '../utils/agenda.utils';
 export function useAgendaExport({ filteredConsultations, onToast }) {
     function exportFilteredConsultations() {
         if (filteredConsultations.length === 0) {
-            onToast?.({ type: 'error', message: 'Nao ha consultas para exportar.' });
+            onToast?.({ type: 'error', message: 'Não há consultas para exportar.' });
             return;
         }
 

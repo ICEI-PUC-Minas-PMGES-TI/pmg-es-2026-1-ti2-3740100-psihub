@@ -5,7 +5,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
 public record ConfirmarPagamentoRequest(
-        @NotNull(message = "statusPagamento e obrigatorio")
+        @NotNull(message = "statusPagamento é obrigatório")
         StatusPagamento statusPagamento
 ) {
     @AssertTrue(message = "statusPagamento deve ser PAGO ou PENDENTE")

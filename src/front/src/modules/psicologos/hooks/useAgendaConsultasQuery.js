@@ -27,7 +27,7 @@ export function useAgendaConsultasQuery({ onToast, refreshKey }) {
             .then((data) => setConsultations(data || []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar suas consultas.' });
+                    onToast?.({ type: 'error', message: error?.message || 'Não foi possível carregar suas consultas.' });
                 }
             })
             .finally(() => setLoadingConsultations(false));

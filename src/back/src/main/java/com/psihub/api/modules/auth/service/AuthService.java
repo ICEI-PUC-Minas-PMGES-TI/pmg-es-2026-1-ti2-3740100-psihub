@@ -123,25 +123,25 @@ public class AuthService {
 
     public Usuario buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(Objects.requireNonNull(id))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario responsavel pelo agendamento nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuário responsável pelo agendamento não encontrado"));
     }
 
     private void validarCadastro(RegisterRequest request, TipoUsuario tipoUsuario) {
         if (!Objects.equals(request.senha(), request.confirmarSenha())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Confirmacao de senha nao confere");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Confirmação de senha não confere");
         }
 
         if (tipoUsuario == TipoUsuario.PACIENTE && request.dataNascimento() == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Data de nascimento e obrigatoria para paciente");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Data de nascimento é obrigatória para paciente");
         }
 
         if (tipoUsuario == TipoUsuario.PSICOLOGO) {
             String crp = StringUtils.sanitizeOptional(request.crp());
             if (crp == null) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "CRP e obrigatorio para psicologo");
+                throw new ApiException(HttpStatus.BAD_REQUEST, "CRP é obrigatório para psicólogo");
             }
             if (psicologoService.existeCrp(crp)) {
-                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicologo cadastrado com este CRP");
+                throw new ApiException(HttpStatus.CONFLICT, "Já existe um psicólogo cadastrado com este CRP");
             }
         }
     }
@@ -153,21 +153,21 @@ public class AuthService {
 
         StatusAcesso status = psicologoService.buscarStatusAcessoPorId(usuario.getId());
         if (status == StatusAcesso.PENDENTE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro aguarda aprovacao pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro aguarda aprovação pelo administrador");
         }
         if (status == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo revogado pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicólogo revogado pelo administrador");
         }
     }
 
     private ApiException invalidCredentials() {
-        return new ApiException(HttpStatus.UNAUTHORIZED, "E-mail ou senha invalidos");
+        return new ApiException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos");
     }
 
     private String normalizeText(String value) {
         String normalized = value == null ? "" : value.trim().replaceAll("\\s+", " ");
         if (normalized.isBlank()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Informe um nome valido");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Informe um nome válido");
         }
         return normalized;
     }
@@ -175,7 +175,7 @@ public class AuthService {
     private String normalizeEmail(String value) {
         String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
         if (normalized.isBlank()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Informe um e-mail valido");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Informe um e-mail válido");
         }
         return normalized;
     }
@@ -183,7 +183,7 @@ public class AuthService {
     private TipoUsuario parseTipo(String value) {
         String normalized = value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
         if (!normalized.equals("PACIENTE") && !normalized.equals("PSICOLOGO")) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Tipo de usuario invalido");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Tipo de usuário inválido");
         }
         return TipoUsuario.valueOf(normalized);
     }

@@ -22,7 +22,7 @@ export function useAgendaConsultaActionsMutation({ consultationModal, setConsult
             setConsultationModal(null);
             refreshAll();
         } catch (error) {
-            onToast?.({ type: 'error', message: error?.message || 'Nao foi possivel atualizar o status.' });
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível atualizar o status.' });
         } finally {
             setStatusSubmitting(false);
         }
@@ -46,7 +46,7 @@ export function useAgendaConsultaActionsMutation({ consultationModal, setConsult
             setConsultationModal(null);
             refreshAll();
         } catch (error) {
-            onToast?.({ type: 'error', message: error?.message || 'Nao foi possivel editar a consulta.' });
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível editar a consulta.' });
         } finally {
             setEditSubmitting(false);
         }
@@ -61,7 +61,7 @@ export function useAgendaConsultaActionsMutation({ consultationModal, setConsult
             setConsultationModal(null);
             refreshAll();
         } catch (error) {
-            onToast?.({ type: 'error', message: error?.message || 'Nao foi possivel remover a consulta.' });
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível remover a consulta.' });
         } finally {
             setDeleteSubmitting(false);
         }

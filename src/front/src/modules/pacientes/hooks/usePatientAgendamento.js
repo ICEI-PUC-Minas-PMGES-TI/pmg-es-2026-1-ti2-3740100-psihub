@@ -48,7 +48,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
             .then((data) => setMonthSlots(data || []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar a agenda.' });
+                    onToast?.({ type: 'error', message: 'Não foi possível carregar a agenda.' });
                 }
             })
             .finally(() => setLoadingAgendamento(false));
@@ -68,7 +68,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
             .then((data) => setDaySlots((data || []).filter((slot) => new Date(getSlotInicio(slot)).getTime() > Date.now())))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar os horarios.' });
+                    onToast?.({ type: 'error', message: 'Não foi possível carregar os horários.' });
                 }
             });
 
@@ -118,7 +118,7 @@ export function usePatientAgendamento({ activeView, onNavigate, onToast, onSched
             setStep('success');
             onScheduled?.();
         } catch {
-            onToast?.({ type: 'error', message: 'Esse horario nao esta mais disponivel. Escolha outro horario.' });
+            onToast?.({ type: 'error', message: 'Esse horário não está mais disponível. Escolha outro horário.' });
         } finally {
             setSubmittingAgendamento(false);
         }

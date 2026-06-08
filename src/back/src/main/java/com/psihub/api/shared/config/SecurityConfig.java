@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) ->
                                 securityErrorWriter.writeUnauthorized(response, "Faca login para continuar"))
                         .accessDeniedHandler((request, response, accessDeniedException) ->
-                                securityErrorWriter.writeForbidden(response, "Voce nao tem permissao para acessar esta area"))
+                                securityErrorWriter.writeForbidden(response, "Você não tem permissão para acessar esta área"))
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(

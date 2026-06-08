@@ -67,13 +67,13 @@ public class RegistroEmocionalService {
     @Transactional
     public RegistroEmocionalResponse atualizarComoPaciente(Long pacienteId, Long registroId, RegistroEmocionalRequest request) {
         RegistroEmocional registro = registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado"));
 
         if (!registro.getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado");
         }
         if (LocalDateTime.now().isAfter(registro.getEditavelAte())) {
-            throw new ApiException(HttpStatus.CONFLICT, "Registro emocional nao pode ser editado apos 24h");
+            throw new ApiException(HttpStatus.CONFLICT, "Registro emocional não pode ser editado apos 24h");
         }
 
         validarPayload(request);
@@ -84,12 +84,12 @@ public class RegistroEmocionalService {
     @Transactional(readOnly = true)
     public RegistroEmocional buscarPorId(Long registroId) {
         return registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado"));
     }
 
     private void validarPayload(RegistroEmocionalRequest request) {
         if (request == null || request.humorDia() == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Humor do dia e obrigatorio");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Humor do dia é obrigatório");
         }
         if (request.humorDia() < 1 || request.humorDia() > 5) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Humor do dia deve estar entre 1 e 5");

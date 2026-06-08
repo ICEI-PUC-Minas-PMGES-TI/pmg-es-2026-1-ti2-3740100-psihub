@@ -27,7 +27,7 @@ public class PacienteService {
     @Transactional(readOnly = true)
     public Paciente buscarPorId(Long id) {
         return pacienteRepository.findById(Objects.requireNonNull(id))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente não encontrado"));
     }
 
     @Transactional

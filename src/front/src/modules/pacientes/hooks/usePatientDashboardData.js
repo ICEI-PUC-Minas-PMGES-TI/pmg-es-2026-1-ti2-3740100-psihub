@@ -23,7 +23,7 @@ export function usePatientDashboardData({ activeView, showHistory, refreshKey, o
             .then((data) => setPsychologists(data || []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar os profissionais.' });
+                    onToast?.({ type: 'error', message: 'Não foi possível carregar os profissionais.' });
                 }
             })
             .finally(() => setLoadingPsychologists(false));
@@ -47,7 +47,7 @@ export function usePatientDashboardData({ activeView, showHistory, refreshKey, o
             .then((data) => setAppointments(data || []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar suas consultas.' });
+                    onToast?.({ type: 'error', message: 'Não foi possível carregar suas consultas.' });
                 }
             })
             .finally(() => setLoadingAppointments(false));

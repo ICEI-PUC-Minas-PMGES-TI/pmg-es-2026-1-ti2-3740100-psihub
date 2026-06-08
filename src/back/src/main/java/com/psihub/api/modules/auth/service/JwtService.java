@@ -71,18 +71,18 @@ public class JwtService {
     public AuthenticatedUser validate(String token) {
         String[] chunks = token == null ? new String[0] : token.split("\\.");
         if (chunks.length != 3) {
-            throw new JwtValidationException("Token invalido");
+            throw new JwtValidationException("Token inválido");
         }
 
         String unsignedToken = chunks[0] + "." + chunks[1];
         String expectedSignature = sign(unsignedToken);
         if (!MessageDigest.isEqual(expectedSignature.getBytes(StandardCharsets.UTF_8), chunks[2].getBytes(StandardCharsets.UTF_8))) {
-            throw new JwtValidationException("Token invalido");
+            throw new JwtValidationException("Token inválido");
         }
 
         Map<String, Object> header = decodeJson(chunks[0]);
         if (!"HS256".equals(header.get("alg"))) {
-            throw new JwtValidationException("Token invalido");
+            throw new JwtValidationException("Token inválido");
         }
 
         Map<String, Object> payload = decodeJson(chunks[1]);
@@ -102,7 +102,7 @@ public class JwtService {
         try {
             return base64UrlEncoder().encodeToString(objectMapper.writeValueAsBytes(value));
         } catch (Exception exception) {
-            throw new IllegalStateException("Nao foi possivel gerar token", exception);
+            throw new IllegalStateException("Não foi possível gerar token", exception);
         }
     }
 
@@ -111,7 +111,7 @@ public class JwtService {
             byte[] decoded = Base64.getUrlDecoder().decode(value);
             return objectMapper.readValue(decoded, MAP_TYPE);
         } catch (Exception exception) {
-            throw new JwtValidationException("Token invalido");
+            throw new JwtValidationException("Token inválido");
         }
     }
 
@@ -121,7 +121,7 @@ public class JwtService {
             mac.init(new SecretKeySpec(secret, "HmacSHA256"));
             return base64UrlEncoder().encodeToString(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception exception) {
-            throw new IllegalStateException("Nao foi possivel assinar token", exception);
+            throw new IllegalStateException("Não foi possível assinar token", exception);
         }
     }
 
@@ -136,14 +136,14 @@ public class JwtService {
         if (value instanceof String text) {
             return Long.parseLong(text);
         }
-        throw new JwtValidationException("Token invalido");
+        throw new JwtValidationException("Token inválido");
     }
 
     private String readString(Object value) {
         if (value instanceof String text && !text.isBlank()) {
             return text;
         }
-        throw new JwtValidationException("Token invalido");
+        throw new JwtValidationException("Token inválido");
     }
 
     private String toPayloadTipo(TipoUsuario tipoUsuario) {
@@ -154,7 +154,7 @@ public class JwtService {
         try {
             return TipoUsuario.valueOf(tipo.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
-            throw new JwtValidationException("Token invalido");
+            throw new JwtValidationException("Token inválido");
         }
     }
 }

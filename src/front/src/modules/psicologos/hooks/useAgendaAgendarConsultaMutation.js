@@ -52,8 +52,8 @@ export function useAgendaAgendarConsultaMutation({
             onToast?.({ type: 'success', message: 'Consulta agendada com sucesso.' });
             setScheduleConsultationModal(null);
             refreshAll();
-        } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel agendar essa consulta.' });
+        } catch (error) {
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível agendar essa consulta.' });
         } finally {
             setScheduleConsultationSaving(false);
         }
@@ -102,11 +102,11 @@ export function useAgendaAgendarConsultaMutation({
                 horaFim: `${end}:00`.slice(0, 8),
                 motivo: 'Bloqueio manual',
             });
-            onToast?.({ type: 'success', message: 'Horario marcado como indisponivel.' });
+            onToast?.({ type: 'success', message: 'Horário marcado como indisponível.' });
             setCellActionMenu(null);
             refreshAll();
         } catch (error) {
-            onToast?.({ type: 'error', message: error?.message || 'Nao foi possivel bloquear o horario.' });
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível bloquear o horário.' });
             setCellActionMenu(null);
         }
     }
@@ -115,11 +115,11 @@ export function useAgendaAgendarConsultaMutation({
         if (!unblockSlotModal) return;
         try {
             await schedulingApi.removeMySlot(unblockSlotModal.id);
-            onToast?.({ type: 'success', message: 'Bloqueio removido. Horario disponivel novamente.' });
+            onToast?.({ type: 'success', message: 'Bloqueio removido. Horário disponível novamente.' });
             setUnblockSlotModal(null);
             refreshAll();
-        } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel remover o bloqueio.' });
+        } catch (error) {
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível remover o bloqueio.' });
         }
     }
 

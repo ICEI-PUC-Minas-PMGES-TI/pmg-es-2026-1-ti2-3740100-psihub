@@ -78,7 +78,7 @@ public class ConsultaController {
             @PathVariable Long consultaId
     ) {
         if (!user.isPsicologo()) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem confirmar consultas");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem confirmar consultas");
         }
 
         return consultaService.confirmarComoPsicologo(consultaId, user.userId());
@@ -109,7 +109,7 @@ public class ConsultaController {
             @Valid @RequestBody AtualizarConsultaRequest request
     ) {
         if (!user.isPsicologo()) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem editar consultas");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem editar consultas");
         }
         return consultaService.atualizarComoPsicologo(consultaId, user.userId(), request);
     }
@@ -120,7 +120,7 @@ public class ConsultaController {
             @PathVariable Long consultaId
     ) {
         if (!user.isPsicologo()) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem excluir consultas");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem excluir consultas");
         }
         return consultaService.excluirComoPsicologo(consultaId, user.userId());
     }
@@ -132,7 +132,7 @@ public class ConsultaController {
             @Valid @RequestBody AgendarRecorrenciaRequest request
     ) {
         if (!user.isPsicologo()) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem criar recorrencias");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem criar recorrências");
         }
         return consultaService.agendarRecorrenciaComoPsicologo(user.userId(), request);
     }

@@ -60,10 +60,10 @@ public class NotificacaoService {
     @Transactional
     public NotificacaoResponse marcarLida(Long usuarioId, Long notificacaoId) {
         Notificacao notificacao = notificacaoRepository.findById(Objects.requireNonNull(notificacaoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Notificacao nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Notificação não encontrada"));
 
         if (!notificacao.getUsuario().getId().equals(usuarioId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Notificacao nao pertence ao usuario autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Notificação não pertence ao usuário autenticado");
         }
 
         notificacao.setLida(true);

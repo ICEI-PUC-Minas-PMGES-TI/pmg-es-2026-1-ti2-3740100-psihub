@@ -111,7 +111,7 @@ public class PsicologoController {
 
         var registro = registroEmocionalService.buscarPorId(registroId);
         if (!registro.getPaciente().getId().equals(pacienteId)) {
-            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Registro emocional nao encontrado");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Registro emocional não encontrado");
         }
 
         return new RegistroEmocionalResponse(

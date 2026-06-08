@@ -204,7 +204,7 @@ public class ConsultaService {
     public ConsultaResponse confirmarComoPsicologo(Long consultaId, Long psicologoId) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
 
         if (consulta.getStatus() != StatusConsulta.AGENDADA) {
@@ -220,7 +220,7 @@ public class ConsultaService {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
 
         if (consulta.getStatus() == StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluidas nao podem ser canceladas");
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluídas não podem ser canceladas");
         }
 
         if (consulta.getStatus() == StatusConsulta.CANCELADA) {
@@ -245,7 +245,7 @@ public class ConsultaService {
         validarAcessoConsulta(consulta, userId, tipoUsuario);
 
         if (consulta.getStatus() == StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluidas nao podem ser canceladas");
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluídas não podem ser canceladas");
         }
 
         if (consulta.getStatus() == StatusConsulta.CANCELADA) {
@@ -286,19 +286,19 @@ public class ConsultaService {
         }
 
         if (novoStatus == StatusConsulta.AGENDADA) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido reverter consulta para AGENDADA");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Não é permitido reverter consulta para AGENDADA");
         }
 
         if (consulta.getStatus() == StatusConsulta.CANCELADA || consulta.getStatus() == StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consulta finalizada nao permite mudanca de status");
+            throw new ApiException(HttpStatus.CONFLICT, "Consulta finalizada não permite mudança de status");
         }
 
         if (novoStatus == StatusConsulta.CONFIRMADA && tipoUsuario != TipoUsuario.PSICOLOGO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem confirmar consultas");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem confirmar consultas");
         }
 
         if (novoStatus == StatusConsulta.FALTOU && tipoUsuario != TipoUsuario.PSICOLOGO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicologos podem marcar falta");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas psicólogos podem marcar falta");
         }
 
         if (novoStatus == StatusConsulta.EM_ANDAMENTO) {
@@ -324,11 +324,11 @@ public class ConsultaService {
     ) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
 
         if (consulta.getStatus() == StatusConsulta.CANCELADA || consulta.getStatus() == StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consultas finalizadas nao podem ser editadas");
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas finalizadas não podem ser editadas");
         }
 
         LocalDateTime novoInicio = Objects.requireNonNull(request.inicioEm());
@@ -344,7 +344,7 @@ public class ConsultaService {
                 NON_CONFLICTING_STATUSES
         );
         if (!conflitos.isEmpty()) {
-            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para remarcacao");
+            throw new ApiException(HttpStatus.CONFLICT, "Horário indisponível para remarcação");
         }
 
         consulta.setInicioEm(intervalo.inicioEm());
@@ -359,12 +359,12 @@ public class ConsultaService {
     public ConsultaResponse excluirComoPsicologo(Long consultaId, Long psicologoId) {
         Consulta consulta = buscarConsultaDetalhada(consultaId);
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
         consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         if (consulta.getMotivoCancelamento() == null) {
-            consulta.setMotivoCancelamento("Consulta removida pelo psicologo");
+            consulta.setMotivoCancelamento("Consulta removida pelo psicólogo");
         }
         return mapper.toResponse(consulta);
     }
@@ -395,21 +395,21 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public Consulta buscarConsultaDetalhada(Long consultaId) {
         return consultaRepository.findDetailedById(consultaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada"));
     }
 
     private void validarPsicologoAtivo(Psicologo psicologo) {
         if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicólogo aguarda aprovação pelo administrador");
         }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicólogo foi revogado pelo administrador");
         }
     }
 
     private void validarHorarioNoPassado(LocalDateTime inicioEm) {
         if (inicioEm.isBefore(LocalDateTime.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido agendar consulta em horario passado");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Não é permitido agendar consulta em horário passado");
         }
     }
 
@@ -423,11 +423,11 @@ public class ConsultaService {
         HorarioDisponivelDTO horario = disponibilidade.stream()
                 .filter(item -> item.inicio().equals(inicioEm))
                 .findFirst()
-                .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento"));
+                .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, "Horário indisponível para agendamento"));
 
         LocalDateTime fimEmCalculado = horario.fim();
         if (fimEmInformado != null && !fimEmInformado.equals(fimEmCalculado)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Horario de fim invalido para o inicio informado");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Horário de fim inválido para o início informado");
         }
 
         return new IntervaloConsulta(inicioEm, fimEmCalculado);
@@ -442,7 +442,7 @@ public class ConsultaService {
         );
 
         if (!conflitos.isEmpty()) {
-            throw new ApiException(HttpStatus.CONFLICT, "Horario indisponivel para agendamento");
+            throw new ApiException(HttpStatus.CONFLICT, "Horário indisponível para agendamento");
         }
     }
 
@@ -458,7 +458,7 @@ public class ConsultaService {
         boolean pertenceAoPsicologo = tipoUsuario == TipoUsuario.PSICOLOGO && consulta.getPsicologo().getId().equals(userId);
 
         if (!pertenceAoPaciente && !pertenceAoPsicologo) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
     }
 

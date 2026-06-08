@@ -1,5 +1,15 @@
 package com.psihub.api.modules.financeiro.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.psihub.api.modules.consultas.entity.Consulta;
 import com.psihub.api.modules.consultas.repository.ConsultaRepository;
 import com.psihub.api.modules.financeiro.dto.ConfirmarPagamentoRequest;
@@ -14,14 +24,6 @@ import com.psihub.api.modules.financeiro.repository.PagamentoRepository;
 import com.psihub.api.modules.financeiro.repository.ReciboRepository;
 import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.exception.ApiException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PagamentoService {
@@ -43,18 +45,18 @@ public class PagamentoService {
     @Transactional
     public PagamentoResponse registrarPagamento(Long psicologoId, RegistrarPagamentoRequest request) {
         Consulta consulta = consultaRepository.findById(Objects.requireNonNull(request.consultaId()))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada"));
 
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Consulta nao pertence ao psicologo autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Consulta não pertence ao psicólogo autenticado");
         }
 
         if (consulta.getStatus() != StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Pagamento so pode ser registrado para consultas concluidas");
+            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Pagamento só pode ser registrado para consultas concluídas");
         }
 
         pagamentoRepository.findByConsultaId(consulta.getId()).ifPresent(p -> {
-            throw new ApiException(HttpStatus.CONFLICT, "Ja existe um pagamento registrado para esta consulta");
+            throw new ApiException(HttpStatus.CONFLICT, "Já existe um pagamento registrado para esta consulta");
         });
 
         Pagamento pagamento = new Pagamento();
@@ -87,7 +89,7 @@ public class PagamentoService {
     @Transactional
     public void gerarRecibo(Long pagamentoId) {
         Pagamento pagamento = pagamentoRepository.findById(Objects.requireNonNull(pagamentoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
 
         int ano = LocalDateTime.now().getYear();
         String uuid8 = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
@@ -106,10 +108,10 @@ public class PagamentoService {
     @Transactional(readOnly = true)
     public PagamentoResponse buscarPorConsulta(Long psicologoId, Long consultaId) {
         Pagamento pagamento = pagamentoRepository.findByConsultaId(consultaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento nao encontrado para esta consulta"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento não encontrado para esta consulta"));
 
         if (!pagamento.getConsulta().getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento nao pertence ao psicologo autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento não pertence ao psicólogo autenticado");
         }
 
         return toResponse(pagamento);
@@ -147,7 +149,7 @@ public class PagamentoService {
         Pagamento pagamento = buscarPagamentoDoPsicologo(psicologoId, pagamentoId);
 
         Recibo recibo = reciboRepository.findByPagamentoId(pagamento.getId())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Recibo nao encontrado para este pagamento"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Recibo não encontrado para este pagamento"));
 
         return toReciboResponse(recibo);
     }
@@ -168,14 +170,14 @@ public class PagamentoService {
     @Transactional(readOnly = true)
     public ReciboResponse buscarReciboComoPaciente(Long pacienteId, Long pagamentoId) {
         Pagamento pagamento = pagamentoRepository.findById(Objects.requireNonNull(pagamentoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
 
         if (!pagamento.getConsulta().getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento nao pertence ao paciente autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento não pertence ao paciente autenticado");
         }
 
         Recibo recibo = reciboRepository.findByPagamentoId(pagamento.getId())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Recibo nao encontrado para este pagamento"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Recibo não encontrado para este pagamento"));
 
         return toReciboResponse(recibo);
     }
@@ -205,10 +207,10 @@ public class PagamentoService {
     }
 
     private Pagamento buscarPagamentoDoPsicologo(Long psicologoId, Long pagamentoId) {        Pagamento pagamento = pagamentoRepository.findById(Objects.requireNonNull(pagamentoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
 
         if (!pagamento.getConsulta().getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento nao pertence ao psicologo autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Pagamento não pertence ao psicólogo autenticado");
         }
 
         return pagamento;

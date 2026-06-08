@@ -20,7 +20,7 @@ public final class DateTimeParser {
 
     public static LocalDateTime parseRequiredDateTime(String value, String nomeParametro, boolean fim) {
         if (value == null || value.isBlank()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro obrigatorio ausente: " + nomeParametro);
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Parâmetro obrigatório ausente: " + nomeParametro);
         }
         return parseDateTime(value, fim);
     }
@@ -33,7 +33,7 @@ public final class DateTimeParser {
                 LocalDate data = LocalDate.parse(value.trim());
                 return fim ? data.plusDays(1).atStartOfDay() : data.atStartOfDay();
             } catch (DateTimeParseException exception) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "Parametro de data/hora invalido");
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Parâmetro de data/hora inválido");
             }
         }
     }

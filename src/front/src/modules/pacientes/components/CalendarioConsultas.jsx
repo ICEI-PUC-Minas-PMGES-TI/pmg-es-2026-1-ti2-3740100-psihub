@@ -55,7 +55,7 @@ export function CalendarioConsultas({
                         const past = isBeforeToday(date);
                         const available = availableDateKeys.has(dateKey);
                         const selected = selectedDateKey === dateKey;
-                        const availabilityLabel = available ? 'com horarios disponiveis' : 'sem horarios disponiveis'; // Descreve disponibilidade alem da cor visual do calendario.
+                        const availabilityLabel = available ? 'com horários disponiveis' : 'sem horários disponiveis'; // Descreve disponibilidade alem da cor visual do calendario.
 
                         return (
                             <button
@@ -86,8 +86,8 @@ export function CalendarioConsultas({
                     </div>
                 </div>
 
-                {!selectedDateKey && <EmptyState icon={Clock} title="Escolha uma data futura no calendario." />}
-                {selectedDateKey && daySlots.length === 0 && <EmptyState icon={Clock} title="Nao ha horarios disponiveis nessa data." />}
+                {!selectedDateKey && <EmptyState icon={Clock} title="Escolha uma data futura no calendário." />}
+                {selectedDateKey && daySlots.length === 0 && <EmptyState icon={Clock} title="Não há horários disponíveis nessa data." />}
 
                 {daySlots.length > 0 && (
                     <div className="slot-grid">

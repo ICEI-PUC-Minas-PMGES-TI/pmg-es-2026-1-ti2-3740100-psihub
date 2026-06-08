@@ -16,7 +16,7 @@ export function useAdminPsychologists(onToast) {
                 setError('');
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar psicologos.');
+                if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar psicólogos.');
             })
             .finally(() => setLoading(false));
         return () => controller.abort();
@@ -29,7 +29,7 @@ export function useAdminPsychologists(onToast) {
             onToast?.({ type: 'success', message: 'Acesso atualizado.' });
             setItems(await adminApi.listAdminPsychologists({ status }));
         } catch (err) {
-            onToast?.({ type: 'error', message: err.message || 'Nao foi possivel atualizar o acesso.' });
+            onToast?.({ type: 'error', message: err.message || 'Não foi possível atualizar o acesso.' });
         }
     }
 

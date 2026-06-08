@@ -178,7 +178,7 @@ export function validateAvailabilityBreak(state) {
     const breakEnd = timeStringToMinutes(state.pausaFim);
 
     if (breakEnd <= breakStart) return 'Fim do intervalo deve ser posterior ao inicio.';
-    if (breakStart < serviceStart || breakEnd > serviceEnd) return 'Intervalo deve estar dentro do horario de atendimento.';
+    if (breakStart < serviceStart || breakEnd > serviceEnd) return 'Intervalo deve estar dentro do horário de atendimento.';
 
     return null;
 }

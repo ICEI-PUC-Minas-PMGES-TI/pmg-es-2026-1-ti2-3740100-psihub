@@ -119,7 +119,7 @@ public class SessaoService {
 
         LocalDateTime inicio = request.iniciadoEm() == null ? LocalDateTime.now() : request.iniciadoEm();
         if (inicio.isAfter(LocalDateTime.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de inicio nao pode ser futura");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de inicio não pode ser futura");
         }
 
         consulta.setIniciadoEm(inicio);
@@ -187,11 +187,11 @@ public class SessaoService {
 
         LocalDateTime encerramento = request.finalizadoEm() == null ? LocalDateTime.now() : request.finalizadoEm();
         if (encerramento.isAfter(LocalDateTime.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de encerramento nao pode ser futura");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de encerramento não pode ser futura");
         }
 
         if (!encerramento.isAfter(consulta.getIniciadoEm())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de encerramento deve ser posterior ao inicio");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Hora de encerramento deve ser posterior ao início");
         }
 
         ProntuarioSessao prontuario = buscarOuCriarProntuario(consulta);
@@ -242,7 +242,7 @@ public class SessaoService {
     @Transactional(readOnly = true)
     public ProntuarioSessaoResponse detalharProntuario(Long prontuarioId) {
         ProntuarioSessao prontuario = prontuarioSessaoRepository.findDetailedById(prontuarioId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuario nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuário não encontrado"));
 
         return mapper.toResponse(prontuario);
     }
@@ -250,7 +250,7 @@ public class SessaoService {
     @Transactional(readOnly = true)
     public ProntuarioSessaoResponse detalharProntuarioComoPsicologo(Long prontuarioId, Long psicologoId) {
         ProntuarioSessao prontuario = prontuarioSessaoRepository.findDetailedById(prontuarioId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuario nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Prontuário não encontrado"));
         validarPsicologoDaConsulta(prontuario.getConsulta(), psicologoId);
         validarVinculoClinico(prontuario.getConsulta(), psicologoId);
 
@@ -316,9 +316,9 @@ public class SessaoService {
     @Transactional(readOnly = true)
     public EvolutaoClinicaResponse buscarEvolutaoClinica(Long psicologoId, Long evolucaoId) {
         EvolutaoClinica evolucao = evolutaoClinicaRepository.findById(java.util.Objects.requireNonNull(evolucaoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Evolução clínica não encontrada"));
         if (!evolucao.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Evolucao clinica nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Evolução clínica não encontrada");
         }
         vinculoService.exigirVinculoAceito(evolucao.getPaciente().getId(), psicologoId);
         return new EvolutaoClinicaResponse(
@@ -400,13 +400,13 @@ public class SessaoService {
         validarConsultaEditavel(consulta);
 
         if (consulta.getInicioEm().toLocalDate().isAfter(LocalDate.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao e permitido iniciar sessao de consulta futura");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Não é permitido iniciar sessão de consulta futura");
         }
 
         if (consulta.getStatus() != StatusConsulta.AGENDADA
                 && consulta.getStatus() != StatusConsulta.CONFIRMADA
                 && consulta.getStatus() != StatusConsulta.EM_ANDAMENTO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consulta nao esta em status valido para iniciar sessao");
+            throw new ApiException(HttpStatus.CONFLICT, "Consulta não esta em status válido para iniciar sessão");
         }
     }
 
@@ -414,13 +414,13 @@ public class SessaoService {
         if (consulta.getStatus() == StatusConsulta.CANCELADA
                 || consulta.getStatus() == StatusConsulta.CONCLUIDA
                 || consulta.getStatus() == StatusConsulta.FALTOU) {
-            throw new ApiException(HttpStatus.CONFLICT, "Consulta nao permite alteracao de sessao neste status");
+            throw new ApiException(HttpStatus.CONFLICT, "Consulta não permite alteração de sessão neste status");
         }
     }
 
     private void validarPsicologoDaConsulta(Consulta consulta, Long psicologoId) {
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
     }
 

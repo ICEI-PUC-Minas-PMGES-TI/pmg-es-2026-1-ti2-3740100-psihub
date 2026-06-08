@@ -26,7 +26,7 @@ export function useAgendaHorariosAvulsosQuery({ onToast, refreshKey }) {
             .then((data) => setManualSlots(Array.isArray(data) ? data : []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar os horarios avulsos.' });
+                    onToast?.({ type: 'error', message: error?.message || 'Não foi possível carregar os horários avulsos.' });
                 }
             })
             .finally(() => setLoadingSlots(false));

@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (!authorization.startsWith("Bearer ")) {
-            securityErrorWriter.writeUnauthorized(response, "Informe um token de acesso valido");
+            securityErrorWriter.writeUnauthorized(response, "Informe um token de acesso válido");
             return;
         }
 

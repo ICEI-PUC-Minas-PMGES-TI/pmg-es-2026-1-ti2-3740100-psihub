@@ -45,7 +45,7 @@ public class VinculoService {
             return toResponse(vinculo);
         }
         if (vinculo.getStatus() == StatusVinculo.ENCERRADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Vinculo encerrado nao pode ser reaberto automaticamente");
+            throw new ApiException(HttpStatus.CONFLICT, "Vínculo encerrado não pode ser reaberto automaticamente");
         }
 
         vinculo.setStatus(StatusVinculo.SOLICITADO);
@@ -62,7 +62,7 @@ public class VinculoService {
                 .orElseGet(() -> novoVinculo(paciente, psicologo));
 
         if (vinculo.getStatus() == StatusVinculo.ENCERRADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Vinculo encerrado nao permite novo agendamento");
+            throw new ApiException(HttpStatus.CONFLICT, "Vínculo encerrado não permite novo agendamento");
         }
         if (vinculo.getStatus() == StatusVinculo.RECUSADO) {
             vinculo.setStatus(StatusVinculo.SOLICITADO);
@@ -80,7 +80,7 @@ public class VinculoService {
                 .orElseGet(() -> novoVinculo(paciente, psicologo));
 
         if (vinculo.getStatus() == StatusVinculo.ENCERRADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Vinculo encerrado nao permite novo agendamento");
+            throw new ApiException(HttpStatus.CONFLICT, "Vínculo encerrado não permite novo agendamento");
         }
         vinculo.setStatus(StatusVinculo.ACEITO);
         vinculo.setRespondidoEm(LocalDateTime.now());
@@ -100,7 +100,7 @@ public class VinculoService {
     public VinculoResponse aceitarComoPsicologo(Long psicologoId, Long vinculoId) {
         VinculoPsicologoPaciente vinculo = buscarDoPsicologo(psicologoId, vinculoId);
         if (vinculo.getStatus() != StatusVinculo.SOLICITADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Apenas vinculos solicitados podem ser aceitos");
+            throw new ApiException(HttpStatus.CONFLICT, "Apenas vínculos solicitados podem ser aceitos");
         }
 
         vinculo.setStatus(StatusVinculo.ACEITO);
@@ -112,7 +112,7 @@ public class VinculoService {
     public VinculoResponse recusarComoPsicologo(Long psicologoId, Long vinculoId) {
         VinculoPsicologoPaciente vinculo = buscarDoPsicologo(psicologoId, vinculoId);
         if (vinculo.getStatus() != StatusVinculo.SOLICITADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Apenas vinculos solicitados podem ser recusados");
+            throw new ApiException(HttpStatus.CONFLICT, "Apenas vínculos solicitados podem ser recusados");
         }
 
         vinculo.setStatus(StatusVinculo.RECUSADO);
@@ -127,7 +127,7 @@ public class VinculoService {
                 Objects.requireNonNull(psicologoId),
                 StatusVinculo.ACEITO
         )) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso clinico negado: paciente sem vinculo aceito com o psicologo");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso clínico negado: paciente sem vínculo aceito com o psicólogo");
         }
     }
 
@@ -141,9 +141,9 @@ public class VinculoService {
 
     private VinculoPsicologoPaciente buscarDoPsicologo(Long psicologoId, Long vinculoId) {
         VinculoPsicologoPaciente vinculo = vinculoRepository.findById(Objects.requireNonNull(vinculoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Vinculo nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Vínculo não encontrado"));
         if (!vinculo.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Vinculo nao encontrado");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Vínculo não encontrado");
         }
         return vinculo;
     }

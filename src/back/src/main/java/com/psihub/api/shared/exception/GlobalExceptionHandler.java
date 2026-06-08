@@ -82,8 +82,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleMessageNotReadable(HttpMessageNotReadableException exception) {
         String cause = exception.getMostSpecificCause().getMessage();
         String message = cause != null && cause.length() < 200
-                ? "Corpo da requisicao invalido: " + cause
-                : "Corpo da requisicao invalido";
+                ? "Corpo da requisicao inválido: " + cause
+                : "Corpo da requisicao inválido";
         return build(
                 HttpStatus.BAD_REQUEST,
                 message,
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Object>> handleMissingParameter(MissingServletRequestParameterException exception) {
-        String message = "Parametro obrigatorio ausente";
+        String message = "Parâmetro obrigatório ausente";
         return build(
                 HttpStatus.BAD_REQUEST,
                 message,
@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Object>> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
-        String message = "Parametro com tipo invalido";
+        String message = "Parâmetro com tipo inválido";
         return build(
                 HttpStatus.BAD_REQUEST,
                 message,
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ApiResponse<Object>> handleNotFound(Exception exception) {
-        String message = "Recurso nao encontrado";
+        String message = "Recurso não encontrado";
         return build(
                 HttpStatus.NOT_FOUND,
                 message,
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException exception
     ) {
-        String message = "Metodo HTTP nao permitido para este recurso";
+        String message = "Metodo HTTP não permitido para este recurso";
         return build(
                 HttpStatus.METHOD_NOT_ALLOWED,
                 message,
@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleUnexpected(Exception exception) {
-        log.error("Erro inesperado nao tratado", exception);
+        log.error("Erro inesperado não tratado", exception);
         String message = "Erro interno no servidor";
         return build(
                 HttpStatus.INTERNAL_SERVER_ERROR,

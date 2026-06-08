@@ -6,13 +6,13 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 public record RegistrarPagamentoRequest(
-        @NotNull(message = "consultaId e obrigatorio")
+        @NotNull(message = "consultaId é obrigatório")
         Long consultaId,
 
-        @NotNull(message = "valor e obrigatorio")
+        @NotNull(message = "valor é obrigatório")
         @Positive(message = "valor deve ser positivo")
         BigDecimal valor,
 
-        @NotNull(message = "formaPagamento e obrigatoria")
+        @NotNull(message = "formaPagamento é obrigatória")
         FormaPagamento formaPagamento
 ) {}

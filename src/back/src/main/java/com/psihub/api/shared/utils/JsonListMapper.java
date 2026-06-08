@@ -26,7 +26,7 @@ public class JsonListMapper {
         try {
             return objectMapper.writeValueAsString(values);
         } catch (JsonProcessingException exception) {
-            throw new IllegalArgumentException("Nao foi possivel serializar a lista informada");
+            throw new IllegalArgumentException("Não foi possível serializar a lista informada");
         }
     }
 
@@ -38,7 +38,7 @@ public class JsonListMapper {
         try {
             return objectMapper.readValue(value, STRING_LIST);
         } catch (JsonProcessingException exception) {
-            return List.of(value);
+            throw new IllegalArgumentException("Não foi possível desserializar a lista informada");
         }
     }
 }

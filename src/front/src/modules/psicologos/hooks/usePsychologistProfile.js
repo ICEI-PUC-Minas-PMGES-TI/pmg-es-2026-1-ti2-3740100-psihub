@@ -40,7 +40,7 @@ export function usePsychologistProfile(onToast) {
                 if (err.name !== 'AbortError') {
                     setError(
                         err.message ||
-                            'Nao foi possivel carregar o perfil.'
+                            'Não foi possível carregar o perfil.'
                     );
                 }
             })
@@ -79,7 +79,7 @@ export function usePsychologistProfile(onToast) {
                 message: 'Perfil profissional atualizado.',
             });
         } catch (err) {
-            setError(err.message || 'Nao foi possivel salvar o perfil.');
+            setError(err.message || 'Não foi possível salvar o perfil.');
         } finally {
             setSaving(false);
         }

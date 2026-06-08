@@ -9,7 +9,7 @@ O Processo da Sessão contempla todas as etapas que envolvem a condução de uma
 - Permitir a vinculação de anotações à linha do tempo do paciente, criando um histórico clínico navegável;
 - Reduzir o risco de perda de informações sensíveis ao eliminar o uso de papel e ferramentas genéricas.
 
-![Exemplo de um Modelo BPMN do PROCESSO 3](images/monitorar-sessao.svg "Modelo BPMN do Processo 3.")
+![Exemplo de um Modelo BPMN do PROCESSO 3](images/monitorar-sessao.jpeg "Modelo BPMN do Processo 3.")
 
 ---
 

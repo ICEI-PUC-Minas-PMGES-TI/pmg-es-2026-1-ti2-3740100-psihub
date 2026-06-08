@@ -22,9 +22,9 @@ export function usePatientCancelamento({ onToast, onCanceled }) {
             setCanceling(null);
             setCancelReason('');
             onCanceled?.();
-            onToast?.({ type: 'success', message: 'Consulta cancelada e horario liberado.' });
+            onToast?.({ type: 'success', message: 'Consulta cancelada e horário liberado.' });
         } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel cancelar essa consulta.' });
+            onToast?.({ type: 'error', message: 'Não foi possível cancelar essa consulta.' });
         } finally {
             setSubmittingCancelamento(false);
         }

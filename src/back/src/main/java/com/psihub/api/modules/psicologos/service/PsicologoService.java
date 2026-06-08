@@ -1,5 +1,17 @@
 package com.psihub.api.modules.psicologos.service;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.psihub.api.modules.auth.entity.Usuario;
 import com.psihub.api.modules.psicologos.dto.AdminPsicologoResponse;
 import com.psihub.api.modules.psicologos.dto.PerfilPsicologoRequest;
@@ -12,16 +24,6 @@ import com.psihub.api.modules.psicologos.repository.PsicologoRepository;
 import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.StringUtils;
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PsicologoService {
@@ -51,7 +53,7 @@ public class PsicologoService {
     @Transactional(readOnly = true)
     public Psicologo buscarPorId(Long id) {
         return psicologoRepository.findById(Objects.requireNonNull(id))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicologo nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Psicólogo não encontrado"));
     }
 
     @Transactional(readOnly = true)
@@ -138,7 +140,7 @@ public class PsicologoService {
         if (crp != null) {
             // Valida unicidade do CRP apenas quando o valor muda.
             if (!crp.equalsIgnoreCase(psicologo.getCrp()) && existeCrp(crp)) {
-                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicologo cadastrado com este CRP");
+                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicólogo cadastrado com este CRP");
             }
             psicologo.setCrp(crp);
         }
@@ -166,7 +168,7 @@ public class PsicologoService {
             return toAdminResponse(psicologo);
         }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.CONFLICT, "Psicologo revogado nao pode ser aprovado automaticamente");
+            throw new ApiException(HttpStatus.CONFLICT, "Psicólogo revogado não pode ser aprovado automaticamente");
         }
 
         psicologo.setStatusAcesso(StatusAcesso.ATIVO);
@@ -247,10 +249,10 @@ public class PsicologoService {
 
     private void validarStatusAtivo(Psicologo psicologo) {
         if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicólogo aguarda aprovação pelo administrador");
         }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicólogo foi revogado pelo administrador");
         }
     }
 

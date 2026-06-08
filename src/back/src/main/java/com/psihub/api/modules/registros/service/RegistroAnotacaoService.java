@@ -42,10 +42,10 @@ public class RegistroAnotacaoService {
         vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
 
         RegistroEmocional registro = registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado"));
 
         if (!registro.getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado");
         }
 
         return registroAnotacaoRepository.findByRegistroIdAndAtivoTrueOrderByCriadoEmAsc(registroId)
@@ -59,10 +59,10 @@ public class RegistroAnotacaoService {
         vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
 
         RegistroEmocional registro = registroEmocionalRepository.findById(Objects.requireNonNull(registroId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado"));
 
         if (!registro.getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional nao encontrado");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Registro emocional não encontrado");
         }
 
         var psicologo = psicologoService.buscarPorId(psicologoId);
@@ -81,18 +81,18 @@ public class RegistroAnotacaoService {
         vinculoService.exigirVinculoAceito(pacienteId, psicologoId);
 
         RegistroAnotacao anotacao = registroAnotacaoRepository.findById(Objects.requireNonNull(anotacaoId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Anotacao nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Anotação não encontrada"));
 
         if (!anotacao.getRegistro().getId().equals(registroId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Anotacao nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Anotação não encontrada");
         }
 
         if (!anotacao.getRegistro().getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Anotacao nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Anotação não encontrada");
         }
 
         if (!anotacao.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Somente autor pode remover anotacao");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Somente autor pode remover anotação");
         }
 
         anotacao.setAtivo(false);

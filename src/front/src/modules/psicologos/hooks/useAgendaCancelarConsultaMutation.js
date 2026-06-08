@@ -26,12 +26,12 @@ export function useAgendaCancelarConsultaMutation({
                 consultaId: consultationModal.id,
                 motivoCancelamento: cancelReason.trim() || null,
             });
-            onToast?.({ type: 'success', message: 'Consulta cancelada e horario liberado.' });
+            onToast?.({ type: 'success', message: 'Consulta cancelada e horário liberado.' });
             setConsultationModal(null);
             setCancelReason('');
             refreshAll();
-        } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel cancelar essa consulta.' });
+        } catch (error) {
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível cancelar essa consulta.' });
         } finally {
             setCancelSubmitting(false);
         }

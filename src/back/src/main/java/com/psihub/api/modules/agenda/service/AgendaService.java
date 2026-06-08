@@ -80,7 +80,7 @@ public class AgendaService {
 
     public void validarPsicologoAutenticado(AuthenticatedUser user, Long psicologoId) {
         if (!user.isPsicologo() || !user.userId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Voce nao tem permissao para acessar esta agenda");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Voce não tem permissão para acessar esta agenda");
         }
     }
 
@@ -258,7 +258,7 @@ public class AgendaService {
         final int ocorrencias;
         if (request.frequencia() == null) {
             if (request.ocorrencias() != null && request.ocorrencias() > 1) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "Defina a frequencia para criar multiplos bloqueios recorrentes");
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Defina a frequência para criar múltiplos bloqueios recorrentes");
             }
             ocorrencias = 1;
         } else {
@@ -306,7 +306,7 @@ public class AgendaService {
     public void removerBloqueio(Long psicologoId, Long bloqueioId) {
         ExcecaoDisponibilidade excecao = excecaoDisponibilidadeRepository
                 .findByIdAndPsicologoIdAndAtivoTrue(bloqueioId, psicologoId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bloqueio nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bloqueio não encontrado"));
         excecao.setAtivo(false);
         excecaoDisponibilidadeRepository.save(excecao);
     }
@@ -314,10 +314,10 @@ public class AgendaService {
     @Transactional
     public void removerRegra(Long psicologoId, Long regraId) {
         RegraDisponibilidade regra = regraDisponibilidadeRepository.findById(java.util.Objects.requireNonNull(regraId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Regra de disponibilidade nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Regra de disponibilidade não encontrada"));
 
         if (!regra.getPsicologo().getId().equals(psicologoId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Regra nao pertence ao psicologo autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Regra não pertence ao psicólogo autenticado");
         }
 
         regra.setAtivo(false);
@@ -352,7 +352,7 @@ public class AgendaService {
             List.of(StatusConsulta.CANCELADA, StatusConsulta.CONCLUIDA, StatusConsulta.FALTOU)
         );
         if (conflito) {
-            throw new ApiException(HttpStatus.CONFLICT, "Nao e possivel bloquear horario com consulta existente");
+            throw new ApiException(HttpStatus.CONFLICT, "Não é possível bloquear horário com consulta existente");
         }
     }
 
@@ -438,17 +438,17 @@ public class AgendaService {
     private Psicologo buscarPsicologoAtivo(Long psicologoId) {
         Psicologo psicologo = buscarPsicologo(psicologoId);
         if (psicologo.getStatusAcesso() == StatusAcesso.PENDENTE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicologo aguarda aprovacao pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Cadastro do psicólogo aguarda aprovação pelo administrador");
         }
         if (psicologo.getStatusAcesso() == StatusAcesso.REVOGADO) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicologo foi revogado pelo administrador");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Acesso do psicólogo foi revogado pelo administrador");
         }
         return psicologo;
     }
 
     private void validarPeriodo(LocalTime inicio, LocalTime fim) {
         if (!fim.isAfter(inicio)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Horario de fim deve ser posterior ao horario de inicio");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Horário de fim deve ser posterior ao horário de início");
         }
     }
 
@@ -466,7 +466,7 @@ public class AgendaService {
         }
 
         if (pausaInicio.isBefore(horaInicio) || pausaFim.isAfter(horaFim)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Intervalo deve estar dentro do horario de atendimento");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Intervalo deve estar dentro do horário de atendimento");
         }
     }
 
@@ -477,7 +477,7 @@ public class AgendaService {
                 .findFirst()
                 .ifPresent(regra -> {
                     if (sobrepoePausa(inicio, fim, regra)) {
-                        throw new ApiException(HttpStatus.CONFLICT, "Horario reservado para intervalo");
+                        throw new ApiException(HttpStatus.CONFLICT, "Horário reservado para intervalo");
                     }
                 });
     }

@@ -29,7 +29,7 @@ export function usePatientProfile(onToast) {
                 setError('');
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar o perfil.');
+                if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar o perfil.');
             })
             .finally(() => setLoading(false));
         return () => controller.abort();
@@ -53,7 +53,7 @@ export function usePatientProfile(onToast) {
             });
             onToast?.({ type: 'success', message: 'Perfil atualizado.' });
         } catch (err) {
-            setError(err.message || 'Nao foi possivel salvar o perfil.');
+            setError(err.message || 'Não foi possível salvar o perfil.');
         } finally {
             setSaving(false);
         }

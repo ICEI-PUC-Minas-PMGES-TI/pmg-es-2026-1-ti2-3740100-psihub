@@ -37,7 +37,7 @@ public class MySqlClient {
                     connection.isValid(VALIDATION_TIMEOUT_SECONDS)
             );
         } catch (SQLException exception) {
-            throw new IllegalStateException("Nao foi possivel conectar ao MySQL", exception);
+            throw new IllegalStateException("Não foi possível conectar ao MySQL", exception);
         }
     }
 }

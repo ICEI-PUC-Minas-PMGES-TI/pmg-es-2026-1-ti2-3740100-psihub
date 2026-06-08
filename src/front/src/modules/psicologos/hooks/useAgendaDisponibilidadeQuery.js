@@ -19,8 +19,8 @@ export function useAgendaDisponibilidadeQuery({ onToast, refreshKey }) {
             .then((data) => setAvailabilityRules(data || []))
             .catch((error) => {
                 if (error.name !== 'AbortError') {
-                    console.error('[PsiHub] Erro ao carregar disponibilidade semanal do psicologo', error);
-                    onToast?.({ type: 'error', message: 'Nao foi possivel carregar sua disponibilidade semanal.' });
+                    console.error('[PsiHub] Erro ao carregar disponibilidade semanal do psicólogo', error);
+                    onToast?.({ type: 'error', message: error?.message || 'Não foi possível carregar sua disponibilidade semanal.' });
                 }
             })
             .finally(() => setLoadingAvailability(false));

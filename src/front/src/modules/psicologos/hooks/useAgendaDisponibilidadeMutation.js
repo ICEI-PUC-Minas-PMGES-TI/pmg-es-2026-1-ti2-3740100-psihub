@@ -60,8 +60,8 @@ export function useAgendaDisponibilidadeMutation({
             onToast?.({ type: 'success', message: 'Disponibilidade atualizada.' });
             setAvailabilityModal(null);
             refreshAll();
-        } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel salvar essa disponibilidade.' });
+        } catch (error) {
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível salvar essa disponibilidade.' });
         } finally {
             setAvailabilitySaving(false);
         }
@@ -100,8 +100,8 @@ export function useAgendaDisponibilidadeMutation({
             onToast?.({ type: 'success', message: `Disponibilidade de ${DAY_FULL_LABELS[singleDayAvailabilityModal.dayKey]} atualizada.` });
             setSingleDayAvailabilityModal(null);
             refreshAll();
-        } catch {
-            onToast?.({ type: 'error', message: 'Nao foi possivel salvar essa disponibilidade.' });
+        } catch (error) {
+            onToast?.({ type: 'error', message: error?.message || 'Não foi possível salvar essa disponibilidade.' });
         } finally {
             setSingleDayAvailabilitySaving(false);
         }

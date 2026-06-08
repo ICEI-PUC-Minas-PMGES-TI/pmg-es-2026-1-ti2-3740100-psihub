@@ -23,7 +23,7 @@ export function usePatientEmotion(onToast) {
                 setError('');
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') setError(err.message || 'Nao foi possivel carregar registros.');
+                if (err.name !== 'AbortError') setError(err.message || 'Não foi possível carregar registros.');
             })
             .finally(() => setLoading(false));
         return () => controller.abort();
@@ -55,7 +55,7 @@ export function usePatientEmotion(onToast) {
             setEditingId(null);
             onToast?.({ type: 'success', message: 'Registro emocional salvo.' });
         } catch (err) {
-            setError(err.message || 'Nao foi possivel salvar o registro.');
+            setError(err.message || 'Não foi possível salvar o registro.');
         } finally {
             setSaving(false);
         }
