@@ -21,10 +21,10 @@ O Processo da Sessão contempla todas as etapas que envolvem a condução de uma
 | --- | --- | --- | --- |
 | Paciente selecionado | Seleção única | Deve ser um paciente com consulta agendada para o dia | — |
 | Data da sessão | Data | Formato dd-mm-aaaa; não pode ser data futura | Data atual |
-| Hora de início | Hora | Formato hh:mm:ss | Horário agendado |
-| Resumo emocional do paciente (inter-sessões) | Área de texto | Gerado automaticamente a partir dos registros do paciente; somente leitura | — |
-| Observações pré-sessão | Área de texto | Máximo de 2000 caracteres | — |
-| Arquivos de referência | Arquivo | Formatos PDF, DOCX, JPG; máximo 10 MB por arquivo | — |
+| Hora de início | Hora | Formato HH:MM:SS | Horário agendado |
+| Resumo emocional do paciente (inter-sessões) | Área de texto | Gerado automaticamente a partir dos registros emocionais do paciente entre sessões; somente leitura | — |
+| Observações pré-sessão | Área de texto | Máximo de 2000 caracteres; preenchimento opcional | — |
+| Arquivos de referência | Arquivo | Formatos PDF, DOCX e JPG; máximo de 10 MB por arquivo | — |
 
 | **Comandos** | **Destino** | **Tipo** |
 | --- | --- | --- |
