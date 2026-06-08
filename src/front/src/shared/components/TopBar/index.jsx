@@ -16,7 +16,7 @@ export function TopBar({ user, role }) {
     return (
         <header className="topbar">
             <div>
-                <h1>Ola, {user.nome}!</h1>
+                <h1>Olá, {user.nome}!</h1>
                 <p>{subtitle}</p>
             </div>
 

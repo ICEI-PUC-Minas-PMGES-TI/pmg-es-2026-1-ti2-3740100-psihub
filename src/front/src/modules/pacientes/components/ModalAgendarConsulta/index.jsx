@@ -18,15 +18,15 @@ export function ModalAgendarConsulta({
         <section className="panel narrow-panel">
             <div className="panel__header">
                 <div>
-                    <p className="eyebrow">Confirmacao</p>
+                    <p className="eyebrow">Confirmação</p>
                     <h2>Resumo da consulta</h2>
                 </div>
             </div>
 
             <dl className="summary-list">
                 <div><dt>Paciente</dt><dd>{patientName}</dd></div>
-                <div><dt>Psicologo</dt><dd>{psychologist.nome}</dd></div>
-                <div><dt>Data e horario</dt><dd>{formatDateTime(getSlotInicio(slot))}</dd></div>
+                <div><dt>Psicólogo</dt><dd>{psychologist.nome}</dd></div>
+                <div><dt>Data e horário</dt><dd>{formatDateTime(getSlotInicio(slot))}</dd></div>
             </dl>
 
             <label className="field">
@@ -38,7 +38,7 @@ export function ModalAgendarConsulta({
             </label>
 
             <label className="field">
-                Observacoes
+                Observações
                 <textarea rows={4} maxLength={300} value={observacoes} onChange={(event) => onObservacoesChange(event.target.value)} />
             </label>
 

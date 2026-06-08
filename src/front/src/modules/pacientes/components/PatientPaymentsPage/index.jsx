@@ -196,7 +196,7 @@ export function PatientPaymentsPage({ onToast }) {
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Financeiro</p>
-                    {/* <h1>Meus Pagamentos</h1> */}
+                    <h1>Meus Pagamentos</h1>
                     <p className="agenda-page__subtitle">
                     Consulte seus pagamentos pendentes
                     e o histórico financeiro.

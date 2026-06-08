@@ -28,7 +28,7 @@ export function PatientEmotionPage({ onToast }) {
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Saúde emocional</p>
-                    {/* <h1>Registro Emocional</h1> */}
+                    <h1>Registro Emocional</h1>
                     <p className="agenda-page__subtitle">Registre seu humor e emoções do dia. Edição permitida somente nas primeiras 24 horas.</p>
                 </div>
             </header>

@@ -14,7 +14,7 @@ const icons = {
 };
 
 export function Sidebar({ collapsed, role, user, menuItems, activeView, onNavigate, onLogout }) {
-    const roleLabel = role === 'admin' ? 'Administracao' : role === 'psicologo' ? 'Gestao do Psicologo' : 'Area do Paciente';
+    const roleLabel = role === 'admin' ? 'Administracao' : role === 'psicologo' ? 'Gestão do Psicólogo' : 'Área do Paciente';
     const initials = getInitials(user?.nome);
     const profileLine = user?.crp ? `${user.cargo} - ${user.crp}` : user?.cargo;
 

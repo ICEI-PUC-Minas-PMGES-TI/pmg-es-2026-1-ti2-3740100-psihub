@@ -36,6 +36,7 @@ export function ListaConsultasRecentes({
             <header className="agenda-page__header panel">
                 <div>
                     <p className="eyebrow">Consultas</p>
+                    <h1>Minhas Consultas</h1>
                     <p className="agenda-page__subtitle">Acompanhe e gerencie seus agendamentos de atendimento.</p>
                 </div>
             </header>
