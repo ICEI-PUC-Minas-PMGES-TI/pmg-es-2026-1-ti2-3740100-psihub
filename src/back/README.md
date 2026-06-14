@@ -474,5 +474,18 @@ Resposta de falha:
 
 ## Migrations
 
-- `V1__create_initial_schema.sql`: schema inicial.
-- `V2__allow_reusing_cancelled_slots.sql`: remove a unicidade de `consultas.slot_consulta_id` e cria indice por slot/status, permitindo historico de cancelamentos e reagendamentos.
+- `V1__create_initial_schema.sql`: schema inicial consolidado.
+
+O schema usa triggers MySQL para regras de integridade entre consultas,
+pagamentos, avaliacoes e evolucoes clinicas. No Docker Compose local, o MySQL
+sobe com `--log-bin-trust-function-creators=1` para permitir que o Flyway crie
+esses triggers usando o usuario da aplicacao.
+
+Se uma migration falhar no meio da primeira inicializacao, o Flyway registra a
+versao como falhada e o banco pode ficar parcialmente criado. Em desenvolvimento,
+o caminho mais simples e recriar o volume do MySQL antes de subir novamente:
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
