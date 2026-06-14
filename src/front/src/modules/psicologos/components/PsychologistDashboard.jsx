@@ -77,6 +77,7 @@ function PsychologistHome({ onNavigate }) {
         loadingConsultations,
         todayConsultations,
         completedToday,
+        pendingToday,
         activePatients,
         totalPatients,
         sessionsThisMonth,
@@ -145,7 +146,9 @@ function PsychologistHome({ onNavigate }) {
                                 {loadingConsultations ? '—' : todayConsultations.length}
                             </strong>
                             <span className="psihome__stat-sub">
-                                {loadingConsultations ? '' : `${completedToday} concluída(s)`}
+                                {loadingConsultations
+                                    ? ''
+                                    : `${completedToday} concluída(s) • ${pendingToday} pendente(s)`}
                             </span>
                         </div>
                     </div>
