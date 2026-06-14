@@ -44,7 +44,15 @@ export function usePatientDashboardData({ activeView, showHistory, refreshKey, o
             historico: showHistory,
             signal: controller.signal,
         })
-            .then((data) => setAppointments(data || []))
+            .then(async (data) => {
+                const result = await appendEvaluationStatus(data || [], controller.signal);
+                if (controller.signal.aborted || result.aborted) return;
+
+                setAppointments(result.appointments);
+                if (result.failed) {
+                    onToast?.({ type: 'error', message: 'Não foi possível verificar avaliações já enviadas.' });
+                }
+            })
             .catch((error) => {
                 if (error.name !== 'AbortError') {
                     onToast?.({ type: 'error', message: 'Não foi possível carregar suas consultas.' });
@@ -59,5 +67,57 @@ export function usePatientDashboardData({ activeView, showHistory, refreshKey, o
         psychologists,
         appointments,
         loadingDashboardData: loadingPsychologists || loadingAppointments,
+    };
+}
+
+async function appendEvaluationStatus(appointments, signal) {
+    const concluded = appointments.filter((appointment) => appointment.status === 'CONCLUIDA');
+
+    if (concluded.length === 0) {
+        return { appointments, failed: false, aborted: false };
+    }
+
+    const results = await Promise.all(concluded.map(async (appointment) => {
+        try {
+            const avaliacao = await schedulingApi.getAvaliacaoConsulta({
+                consultaId: appointment.id,
+                signal,
+            });
+            return { id: appointment.id, avaliada: true, avaliacao };
+        } catch (error) {
+            if (error?.name === 'AbortError') {
+                return { id: appointment.id, aborted: true };
+            }
+
+            if (error?.status === 404) {
+                return { id: appointment.id, avaliada: false };
+            }
+
+            return { id: appointment.id, avaliada: false, failed: true };
+        }
+    }));
+
+    if (signal.aborted || results.some((result) => result.aborted)) {
+        return { appointments, failed: false, aborted: true };
+    }
+
+    const evaluationsById = new Map(results.map((result) => [result.id, result]));
+
+    return {
+        appointments: appointments.map((appointment) => {
+            const evaluation = evaluationsById.get(appointment.id);
+
+            if (!evaluation) {
+                return appointment;
+            }
+
+            return {
+                ...appointment,
+                avaliada: evaluation.avaliada,
+                avaliacao: evaluation.avaliacao || null,
+            };
+        }),
+        failed: results.some((result) => result.failed),
+        aborted: false,
     };
 }

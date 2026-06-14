@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CalendarioConsultas } from './CalendarioConsultas';
 import { ListaConsultasRecentes } from './ListaConsultasRecentes';
 import { ModalAgendarConsulta } from './ModalAgendarConsulta';
+import { AvaliacaoConsultaModal } from './AvaliacaoConsultaModal';
 import { ModalConfirmacaoAgendamento } from './ModalConfirmacaoAgendamento';
 import { SearchPsychologistView } from './SearchPsychologistView';
 import { usePatientAgendamento } from '../hooks/usePatientAgendamento';
@@ -11,6 +12,7 @@ import { usePatientDashboardData } from '../hooks/usePatientDashboardData';
 export function PatientDashboard({ activeView, patientName, onNavigate, onToast }) {
     const [refreshKey, setRefreshKey] = useState(0);
     const [showHistory, setShowHistory] = useState(false);
+    const [avaliacaoConsulta, setAvaliacaoConsulta] = useState(null);
     const refresh = () => setRefreshKey((current) => current + 1);
     const data = usePatientDashboardData({ activeView, showHistory, refreshKey, onToast });
     const agendamento = usePatientAgendamento({ activeView, onNavigate, onToast, onScheduled: refresh });
@@ -19,19 +21,30 @@ export function PatientDashboard({ activeView, patientName, onNavigate, onToast 
 
     if (activeView === 'appointments') {
         return (
-            <ListaConsultasRecentes
-                appointments={data.appointments}
-                loading={loading}
-                canceling={cancelamento.canceling}
-                cancelReason={cancelamento.cancelReason}
-                submitting={cancelamento.submittingCancelamento}
-                showHistory={showHistory}
-                onToggleHistory={() => setShowHistory((h) => !h)}
-                onStartCancel={cancelamento.setCanceling}
-                onCancelReasonChange={cancelamento.setCancelReason}
-                onAbortCancel={cancelamento.abortCancel}
-                onConfirmCancel={cancelamento.confirmCancel}
-            />
+            <>
+                <ListaConsultasRecentes
+                    appointments={data.appointments}
+                    loading={loading}
+                    canceling={cancelamento.canceling}
+                    cancelReason={cancelamento.cancelReason}
+                    submitting={cancelamento.submittingCancelamento}
+                    showHistory={showHistory}
+                    onToggleHistory={() => setShowHistory((h) => !h)}
+                    onStartCancel={cancelamento.setCanceling}
+                    onCancelReasonChange={cancelamento.setCancelReason}
+                    onAbortCancel={cancelamento.abortCancel}
+                    onConfirmCancel={cancelamento.confirmCancel}
+                    onStartAvaliacao={setAvaliacaoConsulta}
+                />
+                {avaliacaoConsulta && (
+                    <AvaliacaoConsultaModal
+                        consulta={avaliacaoConsulta}
+                        onClose={() => setAvaliacaoConsulta(null)}
+                        onSuccess={refresh}
+                        onToast={onToast}
+                    />
+                )}
+            </>
         );
     }
 

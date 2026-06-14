@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck, CheckCircle2, MessageSquareText } from 'lucide-react';
 import { formatDateTime, toIsoDate } from '@/shared/utils/date.utils';
 import { patientStatusLabels } from '../utils/patient.utils';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -18,6 +18,7 @@ export function ListaConsultasRecentes({
     onCancelReasonChange,
     onAbortCancel,
     onConfirmCancel,
+    onStartAvaliacao,
 }) {
     const sortedAppointments = useMemo(() => {
         const list = [...appointments];
@@ -60,6 +61,8 @@ export function ListaConsultasRecentes({
                     <div className="appointment-list">
                         {sortedAppointments.map((appointment) => {
                             const canCancel = !['CANCELADA', 'CONCLUIDA', 'FALTOU'].includes(appointment.status);
+                            const canEvaluate = appointment.status === 'CONCLUIDA' && !appointment.avaliada;
+                            const alreadyEvaluated = appointment.status === 'CONCLUIDA' && appointment.avaliada;
                             const isCanceling = canceling?.id === appointment.id;
                             const dateKey = appointment.inicioEm.slice(0, 10);
                             const showTodaySep = !showHistory && !todaySepInserted && dateKey === todayKey;
@@ -91,11 +94,29 @@ export function ListaConsultasRecentes({
                                                 onConfirmCancel={onConfirmCancel}
                                             />
                                         ) : (
-                                            canCancel && (
-                                                <button className="ghost-button" type="button" onClick={() => onStartCancel(appointment)}>
-                                                    Cancelar consulta
-                                                </button>
-                                            )
+                                            <div className="appointment-card__actions">
+                                                {canEvaluate && (
+                                                    <button
+                                                        className="primary-button primary-button--fit"
+                                                        type="button"
+                                                        onClick={() => onStartAvaliacao(appointment)}
+                                                    >
+                                                        <MessageSquareText size={16} />
+                                                        Avaliar Consulta
+                                                    </button>
+                                                )}
+                                                {alreadyEvaluated && (
+                                                    <button className="secondary-button appointment-card__evaluated" type="button" disabled>
+                                                        <CheckCircle2 size={16} />
+                                                        Avaliação enviada
+                                                    </button>
+                                                )}
+                                                {canCancel && (
+                                                    <button className="ghost-button" type="button" onClick={() => onStartCancel(appointment)}>
+                                                        Cancelar Consulta
+                                                    </button>
+                                                )}
+                                            </div>
                                         )}
                                     </article>
                                 </div>

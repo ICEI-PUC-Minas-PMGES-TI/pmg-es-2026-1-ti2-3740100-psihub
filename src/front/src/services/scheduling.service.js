@@ -134,6 +134,12 @@ export const schedulingApi = {
         });
     },
 
+    getAvaliacaoConsulta({ consultaId, signal }) {
+        return apiRequest(`/api/consultas/${consultaId}/avaliacao`, {
+            signal,
+        });
+    },
+
     getPsychologistAvaliacoes(psicologoId) {
         return apiRequest(`/api/psicologos/${psicologoId}/avaliacoes/media`);
     },

@@ -774,6 +774,10 @@ textarea:focus {
   color: var(--color-danger);
 }
 
+.field-hint--right {
+  justify-self: end;
+}
+
 .auth-forgot-button {
   width: fit-content;
   justify-self: center;
@@ -1231,6 +1235,18 @@ textarea:focus {
   min-width: 0;
 }
 
+.appointment-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.appointment-card__evaluated {
+  width: fit-content;
+}
+
 .appointment-card h3 {
   margin: 8px 0 4px;
   color: var(--color-text-primary);
@@ -1333,11 +1349,83 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+.modal-panel h2,
 .modal-panel h3 {
   margin: 0;
   color: var(--color-text-primary);
   font-size: 20px;
   font-weight: 800;
+}
+
+.csat-modal {
+  width: min(560px, 100%);
+}
+
+.csat-modal__description {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
+.csat-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.csat-option {
+  display: grid;
+  min-height: 84px;
+  place-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border: 1px solid var(--color-border-input);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  text-align: center;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.csat-option:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.csat-option--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.csat-option strong {
+  color: currentColor;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.csat-option span {
+  color: currentColor;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.76;
+}
+
+.csat-success {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+
+.csat-success svg {
+  color: var(--color-success);
+}
+
+.csat-success p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-weight: 700;
 }
 
 .details-list {
@@ -1598,6 +1686,10 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .appointment-card__actions {
+    justify-content: flex-start;
+  }
+
   .cancel-box {
     width: 100%;
   }
@@ -1631,6 +1723,10 @@ textarea:focus {
   .modal-panel {
     width: 100%;
     padding: 16px;
+  }
+
+  .csat-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .week-grid,
