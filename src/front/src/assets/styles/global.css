@@ -1914,6 +1914,92 @@ textarea:focus {
 
 /* ── grid inferior: 1 panel com 3 colunas separadas por divisor ── */
 /* na imagem os 3 blocos ficam dentro de UM card branco, sem borda entre eles */
+.performance-panel {
+    display: grid;
+    gap: 16px;
+}
+
+.performance-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.performance-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    padding: 16px 20px;
+    border-radius: 14px;
+}
+
+.performance-card--score { background: #EBF4FD; }
+.performance-card--return { background: #EDF6E4; }
+
+.performance-card__icon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.performance-card--score .performance-card__icon {
+    background: #D2E8F8;
+    color: #185FA5;
+}
+
+.performance-card--return .performance-card__icon {
+    background: #D5EEC3;
+    color: #3B6D11;
+}
+
+.performance-card span,
+.performance-card small {
+    display: block;
+    color: var(--color-text-secondary);
+}
+
+.performance-card span {
+    font-size: 12px;
+}
+
+.performance-card strong {
+    display: block;
+    margin-top: 1px;
+    color: var(--color-text-primary);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.performance-card small {
+    margin-top: 1px;
+    font-size: 11px;
+}
+
+.performance-monthly {
+    display: grid;
+    gap: 12px;
+}
+
+.performance-monthly__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.performance-monthly__header h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 15px;
+    font-weight: 600;
+}
+
 .psihome__bottom-panel {
     background: var(--color-background-primary);
     border: 0.5px solid var(--color-border-tertiary);
@@ -2031,6 +2117,7 @@ textarea:focus {
 
 @media (max-width: 1024px) {
     .psihome__cards       { grid-template-columns: repeat(2, 1fr); }
+    .performance-cards    { grid-template-columns: 1fr; }
     .psihome__bottom-panel{ grid-template-columns: 1fr; }
     .psihome__box + .psihome__box { border-left: none; border-top: 0.5px solid var(--color-border-tertiary); }
 }

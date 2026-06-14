@@ -4,7 +4,7 @@ import {
     Clock3, Loader2, Save, Trash2, X,
     CalendarClock, Users, FolderOpen, BarChart2,
     ChevronRight as ChevronRightIcon, Link2, UserPlus, FileText, ShieldCheck,
-    Pencil,
+    Pencil, Repeat2, Star,
 } from 'lucide-react';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, formatDate, formatDateTime, formatTime, toIsoDate } from '@/shared/utils/date.utils';
@@ -82,7 +82,14 @@ function PsychologistHome({ onNavigate }) {
         sessionsThisMonth,
         sessionGrowth,
         notifications,
+        performanceIndicators,
+        loadingIndicators,
+        indicatorsError,
     } = usePsychologistDashboard();
+
+    const notaMedia = performanceIndicators?.notaMediaConsultas;
+    const retornoPacientes = performanceIndicators?.retornoPacientes;
+    const consultasMensais = performanceIndicators?.consultasPorMesPorPaciente || [];
 
     /* ícones de notificação */
     function NotifIcon({ type }) {
@@ -192,6 +199,83 @@ function PsychologistHome({ onNavigate }) {
                 </section>
 
                 {/* GRID INFERIOR — um único painel branco com 3 colunas separadas por divisor */}
+                <section className="panel dashboard-box performance-panel">
+                    <div className="panel__header">
+                        <div>
+                            <p className="eyebrow">Indicadores do mês</p>
+                            <h2>Desempenho</h2>
+                        </div>
+                    </div>
+
+                    {indicatorsError && <div className="inline-alert inline-alert--error">{indicatorsError}</div>}
+
+                    <div className="performance-cards">
+                        <div className="performance-card performance-card--score">
+                            <div className="performance-card__icon">
+                                <Star size={20} />
+                            </div>
+                            <div>
+                                <span>Nota média das consultas</span>
+                                <strong>{loadingIndicators ? '—' : formatScore(notaMedia?.notaMedia)}</strong>
+                                <small>{loadingIndicators ? '' : `${notaMedia?.totalAvaliacoes ?? 0} avaliação(ões)`}</small>
+                            </div>
+                        </div>
+
+                        <div className="performance-card performance-card--return">
+                            <div className="performance-card__icon">
+                                <Repeat2 size={20} />
+                            </div>
+                            <div>
+                                <span>Pacientes com retorno</span>
+                                <strong>{loadingIndicators ? '—' : formatPercent(retornoPacientes?.percentual)}</strong>
+                                <small>
+                                    {loadingIndicators
+                                        ? ''
+                                        : `${retornoPacientes?.pacientesComRetorno ?? 0}/${retornoPacientes?.totalPacientesComConsultaConcluida ?? 0} pacientes`}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="performance-monthly">
+                        <div className="performance-monthly__header">
+                            <div>
+                                <p className="eyebrow">Consultas por mês</p>
+                                <h3>Quantidade por paciente</h3>
+                            </div>
+                        </div>
+
+                        {loadingIndicators && <Skeleton />}
+
+                        {!loadingIndicators && consultasMensais.length === 0 && (
+                            <p className="psihome__empty">Nenhuma consulta concluída no período.</p>
+                        )}
+
+                        {!loadingIndicators && consultasMensais.length > 0 && (
+                            <div className="data-table" role="table">
+                                <div className="data-table__row data-table__row--head" role="row">
+                                    <span>Paciente</span>
+                                    <span>Mês</span>
+                                    <span>Ano</span>
+                                    <span>Total</span>
+                                </div>
+                                {consultasMensais.map((item) => (
+                                    <div
+                                        className="data-table__row"
+                                        role="row"
+                                        key={`${item.pacienteId}-${item.ano}-${item.mes}`}
+                                    >
+                                        <span>{item.pacienteNome}</span>
+                                        <span>{monthName(item.mes)}</span>
+                                        <span>{item.ano}</span>
+                                        <strong>{item.totalConsultas}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 <section className="panel dashboard-box psihome__bottom-panel">
 
                     {/* CONSULTAS DO DIA */}
@@ -293,6 +377,23 @@ function avatarStyle(index) {
 }
 
 /* ─── restante do arquivo (inalterado) ─────────────────────────── */
+
+function formatScore(value) {
+    if (value == null || Number.isNaN(Number(value))) return '0,0';
+    return Number(value).toFixed(1).replace('.', ',');
+}
+
+function formatPercent(value) {
+    if (value == null || Number.isNaN(Number(value))) return '0,0%';
+    return `${Number(value).toFixed(1).replace('.', ',')}%`;
+}
+
+function monthName(month) {
+    const date = new Date(2026, Number(month) - 1, 1);
+    return new Intl.DateTimeFormat('pt-BR', { month: 'long' })
+        .format(date)
+        .replace(/^./, (letter) => letter.toUpperCase());
+}
 
 export function PsychologistDashboard({ activeView, onToast, onNavigate }) {
     if (activeView === 'dashboard') return <PsychologistHome onNavigate={onNavigate} />;

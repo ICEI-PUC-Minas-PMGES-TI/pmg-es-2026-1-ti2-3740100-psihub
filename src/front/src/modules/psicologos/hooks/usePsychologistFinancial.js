@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { financialApi } from '@/services/financial.service';
+import { indicatorsApi } from '@/services/indicators.service';
 import { schedulingApi } from '@/services/scheduling.service';
 
 export function usePsychologistFinancial(onToast) {
     const [pagamentos, setPagamentos] = useState([]);
     const [consultasSemPagamento, setConsultasSemPagamento] = useState([]);
     const [resumo, setResumo] = useState(null);
+    const [indicadorPagamentos, setIndicadorPagamentos] = useState(null);
     const [filtroStatus, setFiltroStatus] = useState('');
     const [filtroInicio, setFiltroInicio] = useState('');
     const [filtroFim, setFiltroFim] = useState('');
@@ -31,13 +33,15 @@ export function usePsychologistFinancial(onToast) {
             carregarPagamentos(controller.signal),
             schedulingApi.listConsultations({ status: 'CONCLUIDA', signal: controller.signal }),
             financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined, signal: controller.signal }),
+            indicatorsApi.getPaymentCompletion({ inicio: filtroInicio || undefined, fim: filtroFim || undefined, signal: controller.signal }),
         ])
-            .then(([listaPagamentos, listaConsultas, resumoData]) => {
+            .then(([listaPagamentos, listaConsultas, resumoData, indicadorData]) => {
                 const lista = listaPagamentos || [];
                 setPagamentos(lista);
                 const idsPagos = new Set(lista.map((p) => p.consultaId));
                 setConsultasSemPagamento((listaConsultas || []).filter((c) => !idsPagos.has(c.id)));
                 setResumo(resumoData || null);
+                setIndicadorPagamentos(indicadorData || null);
                 setErro('');
             })
             .catch((err) => {
@@ -58,6 +62,7 @@ export function usePsychologistFinancial(onToast) {
                 financialApi.listPsychologistPayments({ status: filtroStatus || undefined, inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
                 schedulingApi.listConsultations({ status: 'CONCLUIDA' }),
                 financialApi.getFinancialSummary({ inicio: filtroInicio || undefined, fim: filtroFim || undefined }),
+                recarregarIndicadorPagamentos(),
             ]);
             const lista = listaPagamentos || [];
             setPagamentos(lista);
@@ -76,6 +81,7 @@ export function usePsychologistFinancial(onToast) {
             setPagamentos((prev) =>
                 prev.map((p) => (p.id === pagamentoId ? { ...p, statusPagamento: 'PAGO' } : p))
             );
+            await recarregarIndicadorPagamentos();
         } catch (err) {
             onToast?.({ type: 'error', message: err.message || 'Erro ao confirmar pagamento.' });
         }
@@ -89,9 +95,19 @@ export function usePsychologistFinancial(onToast) {
             setPagamentos((prev) =>
                 prev.map((p) => (p.id === pagamentoId ? { ...p, statusPagamento: 'ESTORNADO' } : p))
             );
+            await recarregarIndicadorPagamentos();
         } catch (err) {
             onToast?.({ type: 'error', message: err.message || 'Erro ao estornar pagamento.' });
         }
+    }
+
+    async function recarregarIndicadorPagamentos() {
+        const indicadorData = await indicatorsApi.getPaymentCompletion({
+            inicio: filtroInicio || undefined,
+            fim: filtroFim || undefined,
+        });
+        setIndicadorPagamentos(indicadorData || null);
+        return indicadorData;
     }
 
     async function handleVerRecibo(pagamentoId) {
@@ -111,6 +127,7 @@ export function usePsychologistFinancial(onToast) {
         pagamentos,
         consultasSemPagamento,
         resumo,
+        indicadorPagamentos,
         filtroStatus,
         setFiltroStatus,
         filtroInicio,

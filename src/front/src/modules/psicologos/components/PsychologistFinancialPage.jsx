@@ -1,4 +1,4 @@
-import { DollarSign, Loader2 } from 'lucide-react';
+import { DollarSign, Loader2, Percent } from 'lucide-react';
 import { currencyFormatter, formatDateTime } from '@/shared/utils/date.utils';
 import { usePsychologistFinancial } from '../hooks/usePsychologistFinancial';
 import { ModalRegistrarPagamento } from './ModalRegistrarPagamento';
@@ -28,6 +28,7 @@ export function PsychologistFinancialPage({ onToast }) {
         pagamentos,
         consultasSemPagamento,
         resumo,
+        indicadorPagamentos,
         filtroStatus,
         setFiltroStatus,
         filtroInicio,
@@ -65,7 +66,7 @@ export function PsychologistFinancialPage({ onToast }) {
             {erro && <div className="inline-alert inline-alert--error">{erro}</div>}
 
             {resumo && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 8 }}>
                     <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
                         <p className="eyebrow">Total Recebido</p>
                         <strong style={{ fontSize: 20, color: '#16a34a' }}>{currencyFormatter.format(resumo.totalPago ?? 0)}</strong>
@@ -77,6 +78,18 @@ export function PsychologistFinancialPage({ onToast }) {
                     <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
                         <p className="eyebrow">Estornados</p>
                         <strong style={{ fontSize: 20, color: '#dc2626' }}>{currencyFormatter.format(resumo.totalEstornado ?? 0)}</strong>
+                    </div>
+                    <div className="panel" style={{ textAlign: 'center', padding: '16px 12px' }}>
+                        <p className="eyebrow">Pagamentos efetuados</p>
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 20, color: '#2563eb' }}>
+                            <Percent size={18} />
+                            {formatPercent(indicadorPagamentos?.percentual)}
+                        </strong>
+                        <small style={{ display: 'block', marginTop: 4, color: 'var(--color-text-secondary)' }}>
+                            {indicadorPagamentos
+                                ? `${indicadorPagamentos.pagamentosEfetuados}/${indicadorPagamentos.totalPagamentos} pagos`
+                                : 'Sem dados no período'}
+                        </small>
                     </div>
                 </div>
             )}
@@ -204,4 +217,12 @@ export function PsychologistFinancialPage({ onToast }) {
             )}
         </div>
     );
+}
+
+function formatPercent(value) {
+    if (value == null || Number.isNaN(Number(value))) {
+        return '--';
+    }
+
+    return `${Number(value).toFixed(1).replace('.', ',')}%`;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { indicatorsApi } from '@/services/indicators.service';
 import { schedulingApi } from '@/services/scheduling.service';
 import { addDays, toIsoDate } from '@/shared/utils/date.utils';
 
@@ -9,6 +10,9 @@ const ACTIVE_STATUSES = new Set(['AGENDADA', 'CONFIRMADA', 'EM_ANDAMENTO']);
 export function usePsychologistDashboard() {
     const [consultations, setConsultations] = useState([]);
     const [loadingConsultations, setLoadingC] = useState(true);
+    const [performanceIndicators, setPerformanceIndicators] = useState(null);
+    const [loadingIndicators, setLoadingIndicators] = useState(true);
+    const [indicatorsError, setIndicatorsError] = useState('');
 
     useEffect(() => {
         const controller = new AbortController();
@@ -23,6 +27,30 @@ export function usePsychologistDashboard() {
             .then((data) => setConsultations(data || []))
             .catch((err) => { if (err.name !== 'AbortError') console.error(err); })
             .finally(() => setLoadingC(false));
+
+        return () => controller.abort();
+    }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const period = currentMonthPeriod();
+
+        setLoadingIndicators(true);
+        indicatorsApi.getSummary({
+            inicio: period.inicio,
+            fim: period.fim,
+            signal: controller.signal,
+        })
+            .then((data) => {
+                setPerformanceIndicators(data || null);
+                setIndicatorsError('');
+            })
+            .catch((err) => {
+                if (err?.name !== 'AbortError') {
+                    setIndicatorsError(err.message || 'Não foi possível carregar os indicadores.');
+                }
+            })
+            .finally(() => setLoadingIndicators(false));
 
         return () => controller.abort();
     }, []);
@@ -106,5 +134,16 @@ export function usePsychologistDashboard() {
         sessionsThisMonth,
         sessionGrowth,
         notifications,
+        performanceIndicators,
+        loadingIndicators,
+        indicatorsError,
+    };
+}
+
+function currentMonthPeriod() {
+    const today = new Date();
+    return {
+        inicio: toIsoDate(new Date(today.getFullYear(), today.getMonth(), 1)),
+        fim: toIsoDate(today),
     };
 }
