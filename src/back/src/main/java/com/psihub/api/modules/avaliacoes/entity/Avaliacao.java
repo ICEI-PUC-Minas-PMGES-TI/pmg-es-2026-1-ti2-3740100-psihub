@@ -10,7 +10,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
@@ -36,6 +38,16 @@ public class Avaliacao extends BaseEntity {
     @Column(length = 300)
     private String comentario;
 
+    @Column(name = "avaliado_em", nullable = false)
+    private LocalDateTime avaliadoEm;
+
+    @PrePersist
+    void prePersist() {
+        if (avaliadoEm == null) {
+            avaliadoEm = LocalDateTime.now();
+        }
+    }
+
     public Consulta getConsulta() { return consulta; }
     public void setConsulta(Consulta consulta) { this.consulta = consulta; }
 
@@ -50,4 +62,7 @@ public class Avaliacao extends BaseEntity {
 
     public String getComentario() { return comentario; }
     public void setComentario(String comentario) { this.comentario = comentario; }
+
+    public LocalDateTime getAvaliadoEm() { return avaliadoEm; }
+    public void setAvaliadoEm(LocalDateTime avaliadoEm) { this.avaliadoEm = avaliadoEm; }
 }

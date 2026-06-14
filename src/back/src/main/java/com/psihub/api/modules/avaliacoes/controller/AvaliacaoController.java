@@ -1,9 +1,11 @@
 package com.psihub.api.modules.avaliacoes.controller;
 
+import com.psihub.api.modules.avaliacoes.dto.AvaliacoesPsicologoResponse;
 import com.psihub.api.modules.avaliacoes.dto.AvaliacaoResponse;
 import com.psihub.api.modules.avaliacoes.dto.MediaAvaliacaoResponse;
 import com.psihub.api.modules.avaliacoes.dto.RegistrarAvaliacaoRequest;
 import com.psihub.api.modules.avaliacoes.service.AvaliacaoService;
+import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.middleware.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -33,7 +35,20 @@ public class AvaliacaoController {
             @PathVariable Long consultaId,
             @Valid @RequestBody RegistrarAvaliacaoRequest request
     ) {
+        if (!user.isPaciente()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Apenas pacientes podem avaliar consultas");
+        }
+
         return avaliacaoService.registrar(user.userId(), consultaId, request);
+    }
+
+    /** Participantes da consulta consultam a avaliacao registrada */
+    @GetMapping("/api/consultas/{consultaId}/avaliacao")
+    public AvaliacaoResponse buscarPorConsulta(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long consultaId
+    ) {
+        return avaliacaoService.buscarPorConsultaComoUsuario(consultaId, user.userId(), user.tipo());
     }
 
     /** Psicólogo lista suas avaliações */
@@ -42,6 +57,14 @@ public class AvaliacaoController {
             @AuthenticationPrincipal AuthenticatedUser user
     ) {
         return avaliacaoService.listarPorPsicologo(user.userId());
+    }
+
+    /** Psicologo lista suas avaliacoes com media geral */
+    @GetMapping("/api/psicologos/me/avaliacoes/resumo")
+    public AvaliacoesPsicologoResponse resumoMinhasAvaliacoes(
+            @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        return avaliacaoService.resumoPorPsicologo(user.userId());
     }
 
     /** Qualquer usuário consulta a média de um psicólogo */

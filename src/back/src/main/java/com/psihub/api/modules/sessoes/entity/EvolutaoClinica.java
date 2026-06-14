@@ -32,7 +32,7 @@ public class EvolutaoClinica extends BaseEntity {
     @Column(name = "temas_sessao", columnDefinition = "TEXT")
     private String temasSessao;
 
-    @Column(name = "anotacoes_clinicas", columnDefinition = "TEXT")
+    @Column(name = "anotacoes_clinicas", nullable = false, columnDefinition = "TEXT")
     private String anotacoesClinicas;
 
     @Enumerated(EnumType.STRING)
@@ -120,4 +120,3 @@ public class EvolutaoClinica extends BaseEntity {
         this.tarefasEncaminhamentos = tarefasEncaminhamentos;
     }
 }
-

@@ -8,5 +8,6 @@ public record AvaliacaoResponse(
         String pacienteNome,
         int nota,
         String comentario,
-        LocalDateTime criadoEm
+        LocalDateTime criadoEm,
+        LocalDateTime avaliadoEm
 ) {}

@@ -33,10 +33,10 @@ public class Consulta extends BaseEntity {
     @JoinColumn(name = "psicologo_id", nullable = false)
     private Psicologo psicologo;
 
-    @Column(name = "inicio_em")
+    @Column(name = "inicio_em", nullable = false)
     private LocalDateTime inicioEm;
 
-    @Column(name = "fim_em")
+    @Column(name = "fim_em", nullable = false)
     private LocalDateTime fimEm;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -173,4 +173,3 @@ public class Consulta extends BaseEntity {
         this.pagamento = pagamento;
     }
 }
-

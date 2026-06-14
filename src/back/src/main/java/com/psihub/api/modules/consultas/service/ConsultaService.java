@@ -361,6 +361,9 @@ public class ConsultaService {
         if (!consulta.getPsicologo().getId().equals(psicologoId)) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
+        if (consulta.getStatus() == StatusConsulta.CONCLUIDA) {
+            throw new ApiException(HttpStatus.CONFLICT, "Consultas concluídas não podem ser excluídas");
+        }
         consulta.setAtivo(false);
         consulta.setStatus(StatusConsulta.CANCELADA);
         if (consulta.getMotivoCancelamento() == null) {

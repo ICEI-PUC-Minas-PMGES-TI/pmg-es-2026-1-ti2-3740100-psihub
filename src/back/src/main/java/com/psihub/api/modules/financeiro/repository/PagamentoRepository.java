@@ -58,4 +58,35 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     @Query("select p from Pagamento p where p.consulta.paciente.id = :pacienteId")
     List<Pagamento> findByPacienteId(@Param("pacienteId") Long pacienteId);
+
+    @Query("""
+            select count(p)
+            from Pagamento p
+            where p.consulta.psicologo.id = :psicologoId
+              and p.ativo = true
+              and p.consulta.ativo = true
+              and p.criadoEm >= :inicio
+              and p.criadoEm < :fim
+            """)
+    long countByPsicologoAndPeriodo(
+            @Param("psicologoId") Long psicologoId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
+    );
+
+    @Query("""
+            select count(p)
+            from Pagamento p
+            where p.consulta.psicologo.id = :psicologoId
+              and p.ativo = true
+              and p.consulta.ativo = true
+              and p.statusPagamento = com.psihub.api.modules.financeiro.entity.StatusPagamento.PAGO
+              and p.criadoEm >= :inicio
+              and p.criadoEm < :fim
+            """)
+    long countPagosByPsicologoAndPeriodo(
+            @Param("psicologoId") Long psicologoId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim
+    );
 }
