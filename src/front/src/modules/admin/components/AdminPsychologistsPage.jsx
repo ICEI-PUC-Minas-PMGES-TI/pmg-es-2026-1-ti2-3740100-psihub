@@ -19,8 +19,8 @@ export function AdminPsychologistsPage({ onToast }) {
 
     return (
         <div className="psihome">
-            <h1>Gestao de Psicologos</h1>
-            <p>Aprove ou revogue acesso sem acessar prontuarios ou registros clinicos.</p>
+            <h1>Gestão de Psicólogos</h1>
+            <p>Aprove ou revogue acesso sem acessar prontuários ou registros clínicos.</p>
 
             <section className="panel">
                 <div className="panel__header">
@@ -39,7 +39,7 @@ export function AdminPsychologistsPage({ onToast }) {
 
                 {error && <div className="inline-alert inline-alert--error">{error}</div>}
                 {loading ? <p className="state-row"><Loader2 className="spin" size={16} /> Carregando</p> : items.length === 0 ? (
-                    <p className="empty-state">Nenhum psicologo encontrado.</p>
+                    <p className="empty-state">Nenhum psicólogo encontrado.</p>
                 ) : (
                     <div className="simple-list">
                         {items.map((item) => (

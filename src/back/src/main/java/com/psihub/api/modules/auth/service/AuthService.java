@@ -1,5 +1,14 @@
 package com.psihub.api.modules.auth.service;
 
+import java.util.Locale;
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.psihub.api.modules.auth.dto.AuthResponse;
 import com.psihub.api.modules.auth.dto.AuthUserResponse;
 import com.psihub.api.modules.auth.dto.LoginRequest;
@@ -12,13 +21,6 @@ import com.psihub.api.shared.enums.StatusAcesso;
 import com.psihub.api.shared.enums.TipoUsuario;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.StringUtils;
-import java.util.Locale;
-import java.util.Objects;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -54,7 +56,7 @@ public class AuthService {
         validarCadastro(request, tipoUsuario);
 
         if (usuarioRepository.existsByEmail(email)) {
-            throw new ApiException(HttpStatus.CONFLICT, "Ja existe uma conta cadastrada com este e-mail");
+            throw new ApiException(HttpStatus.CONFLICT, "Já existe uma conta cadastrada com este e-mail");
         }
 
         Usuario usuario = new Usuario();
@@ -107,7 +109,7 @@ public class AuthService {
         boolean isPsychologist = usuario.getTipoUsuario() == TipoUsuario.PSICOLOGO;
         String crp = isPsychologist ? psicologoService.buscarCrpPorId(usuario.getId()) : null;
         String cargo = switch (usuario.getTipoUsuario()) {
-            case PSICOLOGO -> "Psicologo";
+            case PSICOLOGO -> "Psicólogo";
             case ADMIN -> "Administrador";
             case PACIENTE -> "Paciente";
         };

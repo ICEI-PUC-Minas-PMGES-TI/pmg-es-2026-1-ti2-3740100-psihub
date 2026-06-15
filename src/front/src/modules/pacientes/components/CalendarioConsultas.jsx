@@ -81,7 +81,7 @@ export function CalendarioConsultas({
             <section className="panel">
                 <div className="panel__header">
                     <div>
-                        <p className="eyebrow">Horarios</p>
+                        <p className="eyebrow">Horários</p>
                         <h2>{selectedDateKey ? formatDate(`${selectedDateKey}T00:00:00`) : 'Selecione uma data'}</h2>
                     </div>
                 </div>
@@ -108,7 +108,7 @@ export function CalendarioConsultas({
                 <div className="inline-actions inline-actions--spread">
                     <button className="ghost-button" type="button" onClick={onBack}>Voltar</button>
                     <button className="primary-button primary-button--fit" type="button" disabled={!selectedSlot} onClick={onContinue}>
-                        Selecionar horario
+                        Selecionar horário
                     </button>
                 </div>
             </section>

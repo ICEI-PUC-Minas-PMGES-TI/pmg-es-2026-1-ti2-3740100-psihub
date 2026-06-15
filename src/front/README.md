@@ -1,14 +1,14 @@
 # PsiHub Frontend
 
-Frontend React/Vite do PsiHub. A aplicacao atende os fluxos de autenticacao, area do paciente, area do psicologo, agenda de consultas, registros emocionais, relatorios e administracao de acesso de psicologos.
+Frontend React/Vite do PsiHub. A aplicação atende os fluxos de autenticação, area do paciente, area do psicólogo, agenda de consultas, registros emocionais, relatorios e administração de acesso de psicólogos.
 
 ## Pre-requisitos
 
-- Node.js 22 ou versao compativel com Vite 6
+- Node.js 22 ou versão compativel com Vite 6
 - npm
 - Backend PsiHub rodando localmente ou URL remota configurada
 
-## Instalacao
+## Instalação
 
 ```bash
 npm install
@@ -39,7 +39,7 @@ $env:VITE_API_BASE_URL="http://localhost:8080"; npm run dev
 | Comando | Finalidade |
 |---|---|
 | `npm run dev` | Inicia o servidor Vite em modo desenvolvimento |
-| `npm run build` | Gera build de producao em `dist/` |
+| `npm run build` | Gera build de produção em `dist/` |
 | `npm run preview` | Serve o build localmente |
 | `npm run lint` | Executa ESLint |
 
@@ -50,7 +50,7 @@ src/
   pages/      wrappers de rota; montam modulos e repassam props
   modules/    codigo por dominio de negocio
   shared/     componentes, hooks e utils sem regra de dominio
-  services/   toda comunicacao HTTP
+  services/   toda comunicação HTTP
   store/      reservado para estado global futuro
   assets/     estilos globais, imagens e icones estaticos
 ```
@@ -58,13 +58,13 @@ src/
 ## Regras essenciais
 
 - Importe dominios por barrel: `import { PatientDashboard } from '@/modules/pacientes'`.
-- Nao importe internals de outro modulo.
-- Nao use `fetch` ou `axios` fora de `src/services/`.
-- `shared/` nao pode importar `modules/`, `services/` ou `store/`.
-- `pages/` nao deve conter regra de negocio.
+- Não importe internals de outro modulo.
+- Não use `fetch` ou `axios` fora de `src/services/`.
+- `shared/` não pode importar `modules/`, `services/` ou `store/`.
+- `pages/` não deve conter regra de negocio.
 - Use o alias `@/` para imports entre camadas.
 
-## Validacao antes de entregar codigo
+## Validação antes de entregar codigo
 
 ```bash
 npm run lint

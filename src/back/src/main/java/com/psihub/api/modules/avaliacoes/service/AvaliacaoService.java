@@ -1,7 +1,14 @@
 package com.psihub.api.modules.avaliacoes.service;
 
-import com.psihub.api.modules.avaliacoes.dto.AvaliacoesPsicologoResponse;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.psihub.api.modules.avaliacoes.dto.AvaliacaoResponse;
+import com.psihub.api.modules.avaliacoes.dto.AvaliacoesPsicologoResponse;
 import com.psihub.api.modules.avaliacoes.dto.MediaAvaliacaoResponse;
 import com.psihub.api.modules.avaliacoes.dto.RegistrarAvaliacaoRequest;
 import com.psihub.api.modules.avaliacoes.entity.Avaliacao;
@@ -14,11 +21,6 @@ import com.psihub.api.shared.enums.StatusConsulta;
 import com.psihub.api.shared.enums.TipoUsuario;
 import com.psihub.api.shared.exception.ApiException;
 import com.psihub.api.shared.utils.StringUtils;
-import java.util.List;
-import java.util.Objects;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AvaliacaoService {
@@ -40,22 +42,22 @@ public class AvaliacaoService {
     @Transactional
     public AvaliacaoResponse registrar(Long pacienteId, Long consultaId, RegistrarAvaliacaoRequest request) {
         Consulta consulta = consultaRepository.findDetailedById(Objects.requireNonNull(consultaId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada"));
 
         if (!consulta.getPaciente().getId().equals(pacienteId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Esta consulta nao pertence ao paciente autenticado");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Esta consulta não pertence ao paciente autenticado");
         }
 
         if (consulta.getStatus() != StatusConsulta.CONCLUIDA) {
-            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Apenas consultas concluidas podem ser avaliadas");
+            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Apenas consultas concluídas podem ser avaliadas");
         }
 
         if (avaliacaoRepository.existsByConsultaId(consultaId)) {
-            throw new ApiException(HttpStatus.CONFLICT, "Esta consulta ja possui uma avaliacao");
+            throw new ApiException(HttpStatus.CONFLICT, "Esta consulta já possui uma avaliação");
         }
 
         Paciente paciente = pacienteRepository.findById(Objects.requireNonNull(pacienteId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente nao encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Paciente não encontrado"));
 
         Avaliacao avaliacao = new Avaliacao();
         avaliacao.setConsulta(consulta);
@@ -71,11 +73,11 @@ public class AvaliacaoService {
     @Transactional(readOnly = true)
     public AvaliacaoResponse buscarPorConsultaComoUsuario(Long consultaId, Long usuarioId, TipoUsuario tipoUsuario) {
         Consulta consulta = consultaRepository.findDetailedById(Objects.requireNonNull(consultaId))
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada"));
         validarAcessoConsulta(consulta, usuarioId, tipoUsuario);
 
         Avaliacao avaliacao = avaliacaoRepository.findDetailedByConsultaId(consultaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Avaliacao nao encontrada para esta consulta"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Avaliação não encontrada para esta consulta"));
 
         return toResponse(avaliacao);
     }
@@ -122,7 +124,7 @@ public class AvaliacaoService {
                 && consulta.getPsicologo().getId().equals(usuarioId);
 
         if (!pacienteDaConsulta && !psicologoDaConsulta) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta nao encontrada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Consulta não encontrada");
         }
     }
 }

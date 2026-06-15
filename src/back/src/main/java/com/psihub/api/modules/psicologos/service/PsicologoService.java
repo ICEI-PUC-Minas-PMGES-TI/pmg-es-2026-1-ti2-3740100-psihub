@@ -140,7 +140,7 @@ public class PsicologoService {
         if (crp != null) {
             // Valida unicidade do CRP apenas quando o valor muda.
             if (!crp.equalsIgnoreCase(psicologo.getCrp()) && existeCrp(crp)) {
-                throw new ApiException(HttpStatus.CONFLICT, "Ja existe um psicólogo cadastrado com este CRP");
+                throw new ApiException(HttpStatus.CONFLICT, "Já existe um psicólogo cadastrado com este CRP");
             }
             psicologo.setCrp(crp);
         }
