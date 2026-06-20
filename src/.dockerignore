@@ -1,0 +1,7 @@
+back/target/
+back/.env
+front/node_modules/
+front/dist/
+**/.DS_Store
+**/.env
+**/.env.*

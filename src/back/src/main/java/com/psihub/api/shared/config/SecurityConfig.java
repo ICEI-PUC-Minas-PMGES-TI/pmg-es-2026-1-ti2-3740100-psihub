@@ -37,6 +37,15 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                HttpMethod.GET,
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.ico",
+                                "/manifest.webmanifest",
+                                "/robots.txt"
+                        ).permitAll()
+                        .requestMatchers(
                                 HttpMethod.POST,
                                 "/auth/register",
                                 "/auth/registro",
@@ -49,15 +58,21 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots-publicos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/*/agenda/slots/disponiveis").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/paciente/**",
+                                "/psicologo/**",
+                                "/admin/**",
+                                "/forbidden"
+                        ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/pacientes/me/**").hasRole("PACIENTE")
                         .requestMatchers("/api/psicologos/me/**").hasRole("PSICOLOGO")
                         .requestMatchers(HttpMethod.GET, "/api/psicologos/disponiveis").hasRole("PACIENTE")
                         .requestMatchers("/api/consultas/**").hasAnyRole("PACIENTE", "PSICOLOGO")
                         .requestMatchers("/api/**").authenticated()
-                        // Qualquer rota fora de /api/** e /auth/** tamb\u00e9m exige autentica\u00e7\u00e3o,
-                        // evitando que endpoints n\u00e3o mapeados (actuator, swagger, etc.)
-                        // fiquem p\u00fablicos por padr\u00e3o.
+                        // Qualquer rota nao listada acima continua protegida, evitando que
+                        // endpoints nao mapeados (actuator, swagger, etc.) fiquem publicos.
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -70,4 +85,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 }
-

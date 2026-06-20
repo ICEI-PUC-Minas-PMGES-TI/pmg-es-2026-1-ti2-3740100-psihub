@@ -26,7 +26,7 @@ spring:
           time_zone: America/Sao_Paulo
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
 
 app:
   cors:
