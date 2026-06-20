@@ -148,7 +148,7 @@ function Wait-MySQLHealthy {
         $elapsed += 3
     }
 
-    throw "MySQL nao ficou saudavel em $TimeoutSeconds segundos. Verifique com: docker logs psihub-mysql"
+    throw "MySQL não ficou saudável em $TimeoutSeconds segundos. Verifique com: docker logs psihub-mysql"
 }
 
 function Get-DockerAccessHelp {
@@ -191,22 +191,22 @@ try {
     # ── Pre-flight ────────────────────────────────────────────────────────────
 
     if (-not (Test-Path (Join-Path $backendPath "mvnw.cmd"))) {
-        throw "Backend nao encontrado em $backendPath"
+        throw "Backend não encontrado em $backendPath"
     }
 
     if (-not (Test-Path (Join-Path $frontendPath "package.json"))) {
-        throw "Frontend nao encontrado em $frontendPath"
+        throw "Frontend não encontrado em $frontendPath"
     }
 
     if (-not (Test-Node)) {
-        throw "Node.js/npm nao encontrado. Instale em https://nodejs.org e reabra o terminal."
+        throw "Node.js/npm não encontrado. Instale em https://nodejs.org e reabra o terminal."
     }
 
     if (-not (Test-PortFree -Port 8080)) {
-        Write-Host "[PsiHub] AVISO: Porta 8080 ja esta em uso. O backend pode falhar ao iniciar." -ForegroundColor Yellow
+        Write-Host "[PsiHub] AVISO: Porta 8080 já esta em uso. O backend pode falhar ao iniciar." -ForegroundColor Yellow
     }
     if (-not (Test-PortFree -Port 5173)) {
-        Write-Host "[PsiHub] AVISO: Porta 5173 ja esta em uso. O frontend pode falhar ao iniciar." -ForegroundColor Yellow
+        Write-Host "[PsiHub] AVISO: Porta 5173 já esta em uso. O frontend pode falhar ao iniciar." -ForegroundColor Yellow
     }
 
     $dockerAvailable = Test-Docker
@@ -228,7 +228,7 @@ try {
             }
             $dockerMysqlStarted = $true
         } else {
-            Write-Host "[PsiHub] Docker nao encontrado. Assumindo MySQL ja rodando em localhost:3306." -ForegroundColor Yellow
+            Write-Host "[PsiHub] Docker não encontrado. Assumindo MySQL já rodando em localhost:3306." -ForegroundColor Yellow
         }
     }
 
@@ -238,7 +238,7 @@ try {
     $mvnWrapper = Get-MvnWrapper -Path $backendPath
 
     if ($UseLocalBackend -and -not $hasJdk25) {
-        throw "JDK 25 nao encontrado. Instale/configure o JDK 25 ou rode sem -UseLocalBackend para usar Docker."
+        throw "JDK 25 não encontrado. Instale/configure o JDK 25 ou rode sem -UseLocalBackend para usar Docker."
     }
 
     if ($hasJdk25 -or $UseLocalBackend) {
@@ -269,14 +269,14 @@ try {
         # Valida .env antes de acionar o Docker Compose do backend (JWT_SECRET e obrigatorio).
         $envFile = Join-Path $backendPath ".env"
         if (-not (Test-Path $envFile)) {
-            throw "Arquivo .env nao encontrado em $backendPath.`nCrie-o com pelo menos: JWT_SECRET=<segredo-com-32-ou-mais-caracteres>"
+            throw "Arquivo .env não encontrado em $backendPath.`nCrie-o com pelo menos: JWT_SECRET=<segredo-com-32-ou-mais-caracteres>"
         }
         if (-not (Select-String -Path $envFile -Pattern "^\s*JWT_SECRET\s*=\s*\S" -Quiet)) {
-            throw "JWT_SECRET nao esta definido no .env.`nAdicione: JWT_SECRET=<segredo-com-32-ou-mais-caracteres>"
+            throw "JWT_SECRET não esta definido no .env.`nAdicione: JWT_SECRET=<segredo-com-32-ou-mais-caracteres>"
         }
 
         $backendMode = "docker"
-        Write-Host "[PsiHub] JDK 25 nao encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
+        Write-Host "[PsiHub] JDK 25 não encontrado. Backend sera executado via Docker." -ForegroundColor Yellow
         Write-Step "Iniciando backend Docker em http://localhost:8080 (profile: dev)"
         Push-Location $backendPath
         try {
@@ -293,7 +293,7 @@ try {
             docker compose logs -f backend
         } -ArgumentList $backendPath
     } else {
-        throw "JDK 25 nao encontrado e Docker indisponivel. Instale o JDK 25 ou habilite Docker."
+        throw "JDK 25 não encontrado e Docker indisponível. Instale o JDK 25 ou habilite Docker."
     }
 
     # ── Frontend ──────────────────────────────────────────────────────────────
@@ -317,7 +317,7 @@ try {
     } -ArgumentList $frontendPath
 
     Write-Host ""
-    Write-Host "Aplicacao iniciando. Use Ctrl+C para encerrar backend e frontend." -ForegroundColor Green
+    Write-Host "Aplicação iniciando. Use Ctrl+C para encerrar backend e frontend." -ForegroundColor Green
     Write-Host ""
 
     # ── Loop principal ────────────────────────────────────────────────────────

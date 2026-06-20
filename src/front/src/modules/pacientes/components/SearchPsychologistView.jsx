@@ -19,18 +19,18 @@ export function SearchPsychologistView({ psychologists, loading, onOpenAgenda })
                 {loading && <LoadingState />}
 
                 {!loading && psychologists.length === 0 && (
-                    <EmptyState icon={SearchX} title="Nenhum psicologo disponivel no momento." />
+                    <EmptyState icon={SearchX} title="Nenhum psicólogo disponível no momento." />
                 )}
 
                 {!loading && psychologists.length > 0 && (
                     <table className="data-table data-table--native">
-                        <caption className="sr-only">Psicologos disponiveis para agendamento</caption> {/* Usa tabela nativa para leitores de tela anunciarem cabecalhos e linhas corretamente. */}
+                        <caption className="sr-only">Psicólogos disponíveis para agendamento</caption> {/* Usa tabela nativa para leitores de tela anunciarem cabecalhos e linhas corretamente. */}
                         <thead>
                             <tr className="data-table__row data-table__row--head">
                                 <th scope="col">Nome</th>
                                 <th scope="col">Especialidade</th>
-                                <th scope="col">Avaliacao</th>
-                                <th scope="col">Acoes</th>
+                                <th scope="col">Avaliação</th>
+                                <th scope="col">Ações</th>
                             </tr>
                         </thead>
                         <tbody>

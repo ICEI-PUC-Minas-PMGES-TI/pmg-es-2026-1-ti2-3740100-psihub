@@ -4,18 +4,18 @@ Backend em Java 25 com Spring Boot 3, Spring Data JPA/Hibernate, Flyway e MySQL 
 
 O backend implementa APIs para:
 
-- autenticacao JWT de pacientes e psicologos;
-- agenda e disponibilidade do psicologo;
-- agendamento, confirmacao e cancelamento de consultas;
-- preparacao, rascunho, encerramento e linha do tempo de sessoes;
-- consulta de psicologos disponiveis.
+- autenticação JWT de pacientes e psicólogos;
+- agenda e disponibilidade do psicólogo;
+- agendamento, confirmação e cancelamento de consultas;
+- preparação, rascunho, encerramento e linha do tempo de sessões;
+- consulta de psicólogos disponíveis.
 
 ## Requisitos
 
 - JDK 25
 - Docker, opcional para subir MySQL e backend em containers
 
-O projeto usa Maven Wrapper. Nao e necessario instalar Maven globalmente.
+O projeto usa Maven Wrapper. Não é necessário instalar Maven globalmente.
 
 ## Executar com Docker Compose
 
@@ -40,7 +40,7 @@ Para subir apenas o banco:
 docker compose up -d mysql
 ```
 
-Para reconstruir a imagem do backend apos alteracoes:
+Para reconstruir a imagem do backend após alterações:
 
 ```bash
 docker compose up -d --build backend
@@ -60,9 +60,9 @@ Linux/macOS:
 ./mvnw spring-boot:run
 ```
 
-Na primeira execucao, o wrapper baixa a distribuicao Maven definida em `.mvn/wrapper/maven-wrapper.properties`. Se `.mvn/wrapper/maven-wrapper.jar` nao existir, os scripts tambem baixam o jar do Maven Wrapper.
+Na primeira execução, o wrapper baixa a distribução Maven definida em `.mvn/wrapper/maven-wrapper.properties`. Se `.mvn/wrapper/maven-wrapper.jar` não existir, os scripts também baixam o jar do Maven Wrapper.
 
-## Validacao local
+## Validação local
 
 Windows:
 
@@ -76,9 +76,9 @@ Linux/macOS:
 ./mvnw -q -DskipTests compile
 ```
 
-Se a validacao falhar com mensagem de compilador ausente, confira se o `JAVA_HOME` aponta para um JDK 25. JRE nao e suficiente.
+Se a validação falhar com mensagem de compilador ausente, confira se o `JAVA_HOME` aponta para um JDK 25. JRE não é suficiente.
 
-## Configuracao
+## Configuração
 
 Variaveis de ambiente aceitas:
 
@@ -93,27 +93,27 @@ Variaveis de ambiente aceitas:
 - `MYSQL_PASSWORD`
 - `MYSQL_ROOT_PASSWORD`
 
-Valores padrao:
+Valores padrão:
 
 - `DB_URL=jdbc:mysql://localhost:3306/psihub?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo`
 - `BACKEND_DB_URL=jdbc:mysql://mysql:3306/psihub?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo`
 - `DB_USERNAME=psihub`
 - `DB_PASSWORD=psihub`
 - `SERVER_PORT=8080`
-- `JWT_SECRET` nao possui valor padrao e deve ter pelo menos 32 caracteres
+- `JWT_SECRET` não possui valor padrão e deve ter pelo menos 32 caracteres
 
-O `application.yml` importa `optional:file:.env[.properties]`, entao um `.env` local pode definir essas variaveis sem alterar o codigo. Use `.env.exemple` como base.
+O `application.yml` importa `optional:file:.env[.properties]`, então um `.env` local pode definir essas variáveis sem alterar o código. Use `.env.exemple` como base.
 
-## Autenticacao
+## Autenticação
 
-Rotas publicas:
+Rotas públicas:
 
 ```http
 POST /auth/register
 POST /auth/login
 ```
 
-As demais rotas `/api/**` exigem `Authorization: Bearer <token>`. O token e assinado com `JWT_SECRET`, expira em 7 dias e carrega `userId`, `email` e `tipo`.
+As demais rotas `/api/**` exigem `Authorization: Bearer <token>`. O token é assinado com `JWT_SECRET`, expira em 7 dias e carrega `userId`, `email` e `tipo`.
 
 Exemplo de cadastro:
 
@@ -126,20 +126,20 @@ Exemplo de cadastro:
 }
 ```
 
-Para psicologos autenticados, use as rotas de agenda com `me`, por exemplo:
+Para psicólogos autenticados, use as rotas de agenda com `me`, por exemplo:
 
 ```http
 POST /api/psicologos/me/disponibilidades
 GET /api/psicologos/me/agenda/slots
 ```
 
-Para pacientes autenticados, o backend usa o `userId` do token ao listar, agendar e cancelar consultas. Nao envie `pacienteId` ou `agendadoPorUsuarioId` no corpo da requisicao.
+Para pacientes autenticados, o backend usa o `userId` do token ao listar, agendar e cancelar consultas. Não envie `pacienteId` ou `agendadoPorUsuarioId` no corpo da requisição.
 
 ## Seed local
 
-Em ambientes fora de producao, o backend popula dados mockados automaticamente na inicializacao quando a tabela `usuarios` esta vazia. O seed cria 2 psicologos, 3 pacientes, regras de disponibilidade, slots futuros e consultas agendadas/concluidas usando a senha `senha123`.
+Em ambientes fora de produção, o backend popula dados mockados automaticamente na inicialização quando a tabela `usuarios` esta vazia. O seed cria 2 psicólogos, 3 pacientes, regras de disponibilidade, slots futuros e consultas agendadas/concluídas usando a senha `senha123`.
 
-O seed nao roda quando `NODE_ENV=production` ou quando o profile ativo e `production`/`prod`.
+O seed não roda quando `NODE_ENV=production` ou quando o profile ativo é `production`/`prod`.
 
 ## Estrutura
 
@@ -161,16 +161,16 @@ src/main/java/psihub
 
 ## Regras implementadas
 
-- Apenas psicologos com `statusAcesso=ATIVO` podem criar disponibilidade, slots e receber agendamentos.
-- Slots so podem ser agendados quando estao com status `DISPONIVEL`.
+- Apenas psicólogos com `statusAcesso=ATIVO` podem criar disponibilidade, slots e receber agendamentos.
+- Slots só podem ser agendados quando estão com status `DISPONIVEL`.
 - Ao agendar consulta, o slot passa para `RESERVADO`.
 - Ao cancelar consulta, o slot volta para `DISPONIVEL`.
-- O relacionamento `Consulta -> SlotConsulta` permite historico de mais de uma consulta para o mesmo slot, necessario para reagendar apos cancelamento.
-- A sessao so pode iniciar para consulta `AGENDADA`, `CONFIRMADA` ou `EM_ANDAMENTO`.
-- A sessao nao pode iniciar para data futura.
-- A sessao so pode encerrar quando estiver `EM_ANDAMENTO`.
-- O encerramento exige anotacoes clinicas e evolucao clinica.
-- A linha do tempo retorna apenas prontuarios marcados com `incluirLinhaTempo=true`.
+- O relacionamento `Consulta -> SlotConsulta` permite histórico de mais de uma consulta para o mesmo slot, necessário para reagendar após cancelamento.
+- A sessão só pode iniciar para consulta `AGENDADA`, `CONFIRMADA` ou `EM_ANDAMENTO`.
+- A sessão não pode iniciar para data futura.
+- A sessão só pode encerrar quando estiver `EM_ANDAMENTO`.
+- O encerramento exige anotações clinicas e evolução clínica.
+- A linha do tempo retorna apenas prontuários marcados com `incluirLinhaTempo=true`.
 
 ## Enums usados nas APIs
 
@@ -192,7 +192,7 @@ Base URL local: `http://localhost:8080`
 GET /api/psicologos/disponiveis
 ```
 
-Retorna psicologos ativos, com nome, CRP, valor de consulta, biografia e especialidades.
+Retorna psicólogos ativos, com nome, CRP, valor de consulta, biografia e especialidades.
 
 ### Agenda e disponibilidade
 
@@ -202,7 +202,7 @@ Retorna psicologos ativos, com nome, CRP, valor de consulta, biografia e especia
 POST /api/psicologos/{psicologoId}/disponibilidades
 ```
 
-Cria regras recorrentes e gera slots dentro do periodo informado.
+Cria regras recorrentes e gera slots dentro do período informado.
 
 ```json
 {
@@ -331,21 +331,21 @@ PATCH /api/consultas/{consultaId}/cancelar
 
 ```json
 {
-  "motivoCancelamento": "Paciente solicitou remarcacao"
+  "motivoCancelamento": "Paciente solicitou remarcação"
 }
 ```
 
-### Sessoes e prontuarios
+### Sessões e prontuários
 
-#### Preparar sessao
+#### Preparar sessão
 
 ```http
 GET /api/consultas/{consultaId}/sessao/preparacao
 ```
 
-Retorna dados da consulta, resumo emocional do paciente no periodo anterior e prontuario existente, se houver.
+Retorna dados da consulta, resumo emocional do paciente no período anterior e prontuário existente, se houver.
 
-#### Iniciar sessao
+#### Iniciar sessão
 
 ```http
 POST /api/consultas/{consultaId}/sessao/iniciar
@@ -360,7 +360,7 @@ Body opcional:
 }
 ```
 
-#### Salvar rascunho da sessao
+#### Salvar rascunho da sessão
 
 ```http
 PUT /api/consultas/{consultaId}/sessao/rascunho
@@ -368,14 +368,14 @@ PUT /api/consultas/{consultaId}/sessao/rascunho
 
 ```json
 {
-  "anotacoesClinicas": "Anotacoes parciais da sessao",
+  "anotacoesClinicas": "Anotçõoes parciais da sessão",
   "temasSessao": ["Ansiedade", "Trabalho"],
   "nivelEngajamento": "MEDIO",
-  "intercorrencias": "Sem intercorrencias"
+  "intercorrencias": "Sem intercorrências"
 }
 ```
 
-#### Encerrar sessao
+#### Encerrar sessão
 
 ```http
 POST /api/consultas/{consultaId}/sessao/encerrar
@@ -383,13 +383,13 @@ POST /api/consultas/{consultaId}/sessao/encerrar
 
 ```json
 {
-  "anotacoesClinicas": "Registro clinico final",
+  "anotacoesClinicas": "Registro clínico final",
   "temasSessao": ["Ansiedade", "Autoestima"],
   "nivelEngajamento": "ALTO",
-  "intercorrencias": "Sem intercorrencias",
+  "intercorrencias": "Sem intercorrências",
   "evolucaoClinica": "Paciente apresentou melhora no manejo de ansiedade",
   "intervencoes": ["TCC"],
-  "tarefasEncaminhamentos": "Registrar pensamentos automaticos durante a semana",
+  "tarefasEncaminhamentos": "Registrar pensamentos automáticos durante a semana",
   "nivelProgresso": 7,
   "incluirLinhaTempo": true,
   "finalizadoEm": "2026-05-12T14:50:00"
@@ -404,7 +404,7 @@ GET /api/pacientes/{pacienteId}/linha-do-tempo
 
 Query params:
 
-- `psicologoId`: obrigatorio
+- `psicologoId`: obrigatório
 - `inicio`: opcional, data ISO
 - `fim`: opcional, data ISO
 - `tema`: opcional
@@ -427,7 +427,7 @@ Resposta de sucesso com objeto:
   "data": {
     "id": 1
   },
-  "message": "Operacao realizada com sucesso",
+  "message": "Operação realizada com sucesso",
   "meta": null,
   "errors": [],
   "timestamp": "2026-05-09T20:00:00"
@@ -440,7 +440,7 @@ Resposta de sucesso com lista:
 {
   "success": true,
   "data": [],
-  "message": "Operacao realizada com sucesso",
+  "message": "Operação realizada com sucesso",
   "meta": {
     "page": null,
     "size": null,
@@ -459,7 +459,7 @@ Resposta de falha:
 {
   "success": false,
   "data": null,
-  "message": "Requisicao invalida",
+  "message": "Requisição inválida",
   "meta": null,
   "errors": [
     {
@@ -477,13 +477,13 @@ Resposta de falha:
 - `V1__create_initial_schema.sql`: schema inicial consolidado.
 
 O schema usa triggers MySQL para regras de integridade entre consultas,
-pagamentos, avaliacoes e evolucoes clinicas. No Docker Compose local, o MySQL
+pagamentos, avaliações e evoluções clínicas. No Docker Compose local, o MySQL
 sobe com `--log-bin-trust-function-creators=1` para permitir que o Flyway crie
-esses triggers usando o usuario da aplicacao.
+esses triggers usando o usuário da aplicação.
 
-Se uma migration falhar no meio da primeira inicializacao, o Flyway registra a
-versao como falhada e o banco pode ficar parcialmente criado. Em desenvolvimento,
-o caminho mais simples e recriar o volume do MySQL antes de subir novamente:
+Se uma migration falhar no meio da primeira inicialização, o Flyway registra a
+versão como falhada e o banco pode ficar parcialmente criado. Em desenvolvimento,
+o caminho mais simples é recriar o volume do MySQL antes de subir novamente:
 
 ```bash
 docker compose down -v

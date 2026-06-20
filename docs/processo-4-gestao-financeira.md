@@ -7,7 +7,8 @@ Em seguida, apresenta-se o modelo do processo descrito no padrão BPMN.
 
 new - Psicologo
 
-<img width="878" height="840" alt="image" src="https://github.com/user-attachments/assets/9c4b69d7-f180-41c8-a44e-ef936906879a" />
+<img width="1318" height="320" alt="image" src="https://github.com/user-attachments/assets/a038b769-4c88-412e-b2e7-a431f429877d" />
+
 
 new - Paciente
 

@@ -73,19 +73,38 @@ export function usePsychologistDashboard() {
         todayConsultations.filter((c) => c.status === 'CONCLUIDA').length,
         [todayConsultations]);
 
+    const pendingToday = useMemo(() =>
+        todayConsultations.length - completedToday,
+        [todayConsultations, completedToday]);
+
     const activePatients = useMemo(() => {
-        const ids = new Set(consultations.filter((c) => ACTIVE_STATUSES.has(c.status)).map((c) => c.pacienteId));
+        const ids = new Set(
+            consultations
+                .filter((c) => ACTIVE_STATUSES.has(c.status))
+                .map((c) => c.pacienteId)
+        );
         return ids.size;
     }, [consultations]);
 
-    const totalPatients = useMemo(() => new Set(consultations.map((c) => c.pacienteId)).size, [consultations]);
+    const totalPatients = useMemo(() =>
+        new Set(consultations.map((c) => c.pacienteId)).size,
+        [consultations]
+    );
 
     const sessionsThisMonth = useMemo(() =>
-        consultations.filter((c) => c.inicioEm.slice(0, 7) === currentMonthKey && c.status === 'CONCLUIDA').length,
+        consultations.filter(
+            (c) =>
+                c.inicioEm.slice(0, 7) === currentMonthKey &&
+                c.status === 'CONCLUIDA'
+        ).length,
         [consultations, currentMonthKey]);
 
     const sessionsLastMonth = useMemo(() =>
-        consultations.filter((c) => c.inicioEm.slice(0, 7) === lastMonthKey && c.status === 'CONCLUIDA').length,
+        consultations.filter(
+            (c) =>
+                c.inicioEm.slice(0, 7) === lastMonthKey &&
+                c.status === 'CONCLUIDA'
+        ).length,
         [consultations, lastMonthKey]);
 
     const sessionGrowth = sessionsLastMonth > 0
@@ -95,32 +114,45 @@ export function usePsychologistDashboard() {
     const notifications = useMemo(() => {
         const list = [];
 
-        const pendingLinks = consultations.filter((c) => c.status === 'PENDENTE_VINCULO');
-        if (pendingLinks.length > 0)
+        const pendingLinks = consultations.filter(
+            (c) => c.status === 'PENDENTE_VINCULO'
+        );
+
+        if (pendingLinks.length > 0) {
             list.push({
-                id: 'links', icon: 'link',
-                title: `${pendingLinks.length} solicitaÃ§Ã£o(Ãµes) de vÃ­nculo`,
+                id: 'links',
+                icon: 'link',
+                title: `${pendingLinks.length} solicitação(ões) de vínculo`,
                 sub: 'Pacientes aguardando aceite',
                 time: null,
             });
+        }
 
-        const newToday = consultations.filter((c) => c.criadoEm?.slice(0, 10) === todayKey && c.status === 'AGENDADA');
-        if (newToday.length > 0)
+        const newToday = consultations.filter(
+            (c) =>
+                c.criadoEm?.slice(0, 10) === todayKey &&
+                c.status === 'AGENDADA'
+        );
+
+        if (newToday.length > 0) {
             list.push({
-                id: 'new', icon: 'user',
+                id: 'new',
+                icon: 'user',
                 title: `${newToday.length} nova(s) consulta(s) agendada(s)`,
-                sub: 'Aguardando confirmaÃ§Ã£o',
+                sub: 'Aguardando confirmação',
                 time: newToday[0].criadoEm,
             });
+        }
 
-        /* fallback quando nÃ£o hÃ¡ eventos reais */
-        if (list.length === 0 && !loadingConsultations)
+        if (list.length === 0 && !loadingConsultations) {
             list.push({
-                id: 'ok', icon: 'ok',
+                id: 'ok',
+                icon: 'ok',
                 title: 'Tudo em dia!',
                 sub: 'Sem notificações pendentes.',
                 time: null,
             });
+        }
 
         return list;
     }, [consultations, todayKey, loadingConsultations]);
@@ -129,6 +161,7 @@ export function usePsychologistDashboard() {
         loadingConsultations,
         todayConsultations,
         completedToday,
+        pendingToday,
         activePatients,
         totalPatients,
         sessionsThisMonth,
