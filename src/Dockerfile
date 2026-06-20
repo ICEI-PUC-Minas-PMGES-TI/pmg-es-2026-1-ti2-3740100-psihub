@@ -34,10 +34,11 @@ FROM eclipse-temurin:25-jre-jammy
 
 WORKDIR /app
 
-ENV SERVER_PORT=8080
+ENV PORT=10000
+ENV SERVER_PORT=10000
 
 COPY --from=backend-build /workspace/back/target/*.jar app.jar
 
-EXPOSE 8080 10000
+EXPOSE 10000
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
