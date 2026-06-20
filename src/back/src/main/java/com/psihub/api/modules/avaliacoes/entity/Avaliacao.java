@@ -13,7 +13,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @SQLRestriction("ativo = true")
@@ -33,6 +35,7 @@ public class Avaliacao extends BaseEntity {
     private Psicologo psicologo;
 
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.TINYINT)
     private int nota;
 
     @Column(length = 300)

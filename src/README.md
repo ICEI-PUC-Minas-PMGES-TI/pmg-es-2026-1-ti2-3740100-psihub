@@ -13,7 +13,7 @@ Use o comando abaixo na raiz do projeto:
 ```
 ```
 terminal linux 
-sudo pwsh -File ./src/dev.ps1 
+sudo pwsh -File ./pmg-es-2026-1-ti2-3740100-psihub/src/dev.ps1 
 ```
 
 O script sobe o MySQL com Docker Compose, inicia o frontend em `http://localhost:5173` e inicia o backend em `http://localhost:8080`.
