@@ -2,26 +2,31 @@ cff-version: 1.0.1
 message: Please cite this software using these metadata.
 title: 
 authors:
-  - family-names: Dutra
+  - family-names: Tavares Dutra
     given-names: Hugo
-  - family-names: Fitipaldi
+  - family-names: Fitipaldi Moreira
     given-names: Gustavo
-  - family-names: Martins
-    given-names: Gabriel
-  - family-names: Chaves
+  - family-names: de Oliveira Martins
+    given-names: Gabriel Eduardo
+  - family-names: Garzon Chaves
     given-names: Yago
   - name-suffix: Professora
     affiliation: PUC Minas
-    family-names: Alonso Veloso
-    given-names: Eveline 
-  - name-suffix: Professora
+    family-names: Hanne Soares de Andrade
+    given-names: Michelle
+  - name-suffix: Professor
     affiliation: PUC Minas
-    family-names: Baroni De Carvalho
-    given-names: Juliana Amaral 
+    family-names: Carlos da Silva
+    given-names: Luiz 
+  - name-suffix: Professor
+    affiliation: PUC Minas
+    family-names: Soares de Paiva Lacerda
+    given-names: Lucca 
 keywords:
-  - 
-  - 
+  - saúde mental
+  - terapia
+  - psicologia
 repository-code: 
 license: CC-BY-4.0
 version: 1.0.0
-date-released:
+date-released: 2026-06-22
