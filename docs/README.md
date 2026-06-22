@@ -16,7 +16,7 @@ Professores:
 
 * Prof. Michelle Hanne Soares de Andrade *
 
-* Prof. Luiz Carlos da silva *
+* Prof. Luiz Carlos da Silva *
 
 ---
 
@@ -111,13 +111,11 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 
 ## 6. Interface do sistema
 
-_A sessão a seguir apresenta a descrição do produto de software desenvolvido._ 
-
 [Documentação da interface do sistema](interface.md)
 
 ## 7. Conclusão
 
-_Apresente aqui a conclusão do seu trabalho. Deve ser apresentada aqui uma discussão dos resultados obtidos no trabalho, local em que se verifica as observações pessoais de cada aluno. Essa seção poderá também apresentar sugestões de novas linhas de estudo._
+O desenvolvimento da plataforma PsiHub demonstrou a importância de soluções digitais voltadas para a saúde mental, especialmente no contexto da modernização dos consultórios de psicologia pós pandemia. A plataforma proposta foi efetiva em atender as principais necessidades previamente identificadas: centralizar informações clínicas, otimizar a gestão da agenda e o acompanhamento contínuo do paciente entre sessões. Essa integração alavancou melhorias tangíveis em termos de organização, eficiência e humanização do processo terapêutico como um todo. Entre os resultados alcançados com o projeto, estão em destaque a criação de um ambiente seguro e em conformidade com a Lei Geral de Proteção de Dados (LGPD), garantindo sigio terapêutico e proteção de dados sensíveis dos pacientes e psicólogos. Além disso, a implementação de relatórios dinâmicos permite o terapeuta analisar de forma precisa a evolução clínica de seu paciente, enquanto o recurso de monitoramento emocional inter-sessões amplia a visão sobre o estado psíquico do mesmo, fortalecendo ainda mais a continuidade do cuidado.
 
 # REFERÊNCIAS
 
@@ -138,12 +136,7 @@ http://portal.pucminas.br/imagedb/documento/DOC_DSC_NOME_ARQUI20160217102425.pdf
 **[1.5]** - _RUSSELL, Stuart J.; NORVIG, Peter. **Inteligência artificial**. Rio de Janeiro: Elsevier, c2013. xxi, 988 p. ISBN 9788535237016._
 
 
-
 # APÊNDICES
-
-
-_Atualizar os links e adicionar novos links para que a estrutura do código esteja corretamente documentada._
-
 
 ## Apêndice A - Código fonte
 
