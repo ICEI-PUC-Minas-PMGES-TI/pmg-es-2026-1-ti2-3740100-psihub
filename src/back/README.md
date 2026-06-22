@@ -80,7 +80,7 @@ Se a validação falhar com mensagem de compilador ausente, confira se o `JAVA_H
 
 ## Configuração
 
-Variaveis de ambiente aceitas:
+Variáveis de ambiente aceitas:
 
 - `DB_URL`
 - `BACKEND_DB_URL`
@@ -137,7 +137,7 @@ Para pacientes autenticados, o backend usa o `userId` do token ao listar, agenda
 
 ## Seed local
 
-Em ambientes fora de produção, o backend popula dados mockados automaticamente na inicialização quando a tabela `usuarios` esta vazia. O seed cria 2 psicólogos, 3 pacientes, regras de disponibilidade, slots futuros e consultas agendadas/concluídas usando a senha `senha123`.
+Em ambientes fora de produção, o backend popula dados mockados automaticamente na inicialização quando a tabela `usuarios` está vazia. O seed cria 2 psicólogos, 3 pacientes, regras de disponibilidade, slots futuros e consultas agendadas/concluídas usando a senha `senha123`.
 
 O seed não roda quando `NODE_ENV=production` ou quando o profile ativo é `production`/`prod`.
 
