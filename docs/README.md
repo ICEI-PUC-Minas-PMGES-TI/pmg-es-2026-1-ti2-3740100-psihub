@@ -12,11 +12,11 @@
 
 Professores:
 
-* Prof. Lucca Soares de Paiva Lacerda *
+* Prof. Lucca Soares de Paiva Lacerda
 
-* Prof. Michelle Hanne Soares de Andrade *
+* Prof. Michelle Hanne Soares de Andrade
 
-* Prof. Luiz Carlos da Silva *
+* Prof. Luiz Carlos da Silva
 
 ---
 
