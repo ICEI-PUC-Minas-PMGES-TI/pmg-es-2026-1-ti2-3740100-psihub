@@ -34,30 +34,30 @@ O PsiHub surge no contexto da crescente demanda por cuidados em saúde mental, v
 
 Este trabalho descreve o planejamento e o desenvolvimento de uma plataforma digital voltada para a gestão de atendimentos psicológicos, com foco em modernizar e otimizar a rotina de psicólogos e o acompanhamento de pacientes.
 
-### 1.1 Contextualização
+### 1.1. Contextualização
 
 A saúde mental tem se tornado um tema cada vez mais relevante na sociedade atual, diante do aumento da busca por acompanhamento psicológico. Com rotinas cada vez mais aceleradas e maiores níveis de estresse, cresce a demanda por atendimentos mais organizados, acessíveis e contínuos. No entanto, muitos profissionais ainda utilizam métodos tradicionais para gerenciar agendas e registrar informações dos pacientes, o que pode dificultar o acompanhamento adequado da evolução clínica.
 
 Diante desse cenário, a escolha do desenvolvimento de uma plataforma digital para psicólogos justifica-se pela necessidade de modernizar e centralizar a gestão dos atendimentos e do acompanhamento dos pacientes. A proposta de integrar recursos como agendamento de consultas, registros clínicos organizados em linha do tempo e acompanhamento emocional do paciente entre as sessões contribui para tornar o processo terapêutico mais eficiente, organizado e humanizado.
 
-### 1.2 Problema
+### 1.2. Problema
 
 Em muitos contextos de atendimento psicológico, a organização das consultas, o registro de informações clínicas e o acompanhamento da evolução do paciente ainda são realizados por meio de ferramentas genéricas ou métodos manuais, como anotações em papel e planilhas. Esse modelo descentralizado dificulta a consolidação do histórico do paciente ao longo do tempo e pode tornar o processo de acompanhamento menos prático e eficiente.
 
 Além disso, a ausência de um meio estruturado de registro entre as sessões faz com que informações relevantes sobre o cotidiano emocional do paciente dependam, em grande parte, de relatos pontuais durante as consultas. Esse formato limita a visão contínua do processo terapêutico e reduz as possibilidades de um acompanhamento mais próximo e orientado por dados ao longo do tratamento.
 
-### 1.3 Objetivo geral
+### 1.3. Objetivo geral
 
 Desenvolver uma plataforma digital para psicólogos que auxilie na gestão de atendimentos e no acompanhamento contínuo dos pacientes, integrando recursos de agendamento de consultas, organização de registros clínicos e monitoramento do bem-estar do paciente entre as sessões, visando tornar o processo terapêutico mais organizado, eficiente e humanizado.
 
-#### 1.3.1 Objetivos específicos
+#### 1.3.1. Objetivos específicos
 
 * Desenvolver um sistema de agendamento e cancelamento de consultas para pacientes.
 * Criar um painel de gerenciamento para psicólogos, com controle de agenda e lista de pacientes.
 * Implementar um espaço de anotações clínicas antes, durante e após as consultas.
 * Desenvolver uma linha do tempo para organizar e visualizar a evolução do paciente ao longo do acompanhamento.
 
-### 1.4 Justificativas
+### 1.4. Justificativas
 
 A criação de um sistema digital voltado para a gestão de atendimentos psicológicos justifica-se pela necessidade de centralizar e organizar informações clínicas, agenda de consultas e registros de evolução do paciente em um único ambiente. A utilização de ferramentas genéricas ou métodos manuais dificulta a visualização do histórico do paciente ao longo do tempo e torna o acompanhamento menos prático e integrado.
 
