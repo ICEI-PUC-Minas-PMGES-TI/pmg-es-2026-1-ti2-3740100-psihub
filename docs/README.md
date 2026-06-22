@@ -116,6 +116,7 @@ O PsiHub elimina esses gargalos através de uma plataforma unificada que foca na
 ## 7. Conclusão
 
 O desenvolvimento da plataforma PsiHub demonstrou a importância de soluções digitais voltadas para a saúde mental, especialmente no contexto da modernização dos consultórios de psicologia pós pandemia. A plataforma proposta foi efetiva em atender as principais necessidades previamente identificadas: centralizar informações clínicas, otimizar a gestão da agenda e o acompanhamento contínuo do paciente entre sessões. Essa integração alavancou melhorias tangíveis em termos de organização, eficiência e humanização do processo terapêutico como um todo. 
+
 Entre os resultados alcançados com o projeto, estão em destaque a criação de um ambiente seguro e em conformidade com a Lei Geral de Proteção de Dados (LGPD), garantindo sigio terapêutico e proteção de dados sensíveis dos pacientes e psicólogos. Além disso, a implementação de relatórios dinâmicos permite o terapeuta analisar de forma precisa a evolução clínica de seu paciente, enquanto o recurso de monitoramento emocional inter-sessões amplia a visão sobre o estado psíquico do mesmo, fortalecendo ainda mais a continuidade do cuidado.
 
 # REFERÊNCIAS
