@@ -1,10 +1,10 @@
 # PsiHub Frontend
 
-Frontend React/Vite do PsiHub. A aplicação atende os fluxos de autenticação, area do paciente, area do psicólogo, agenda de consultas, registros emocionais, relatorios e administração de acesso de psicólogos.
+Frontend React/Vite do PsiHub. A aplicação atende os fluxos de autenticação, área do paciente, área do psicólogo, agenda de consultas, registros emocionais, relatórios e administração de acesso de psicólogos.
 
-## Pre-requisitos
+## Pré-requisitos
 
-- Node.js 22 ou versão compativel com Vite 6
+- Node.js 22 ou versão compatível com Vite 6
 - npm
 - Backend PsiHub rodando localmente ou URL remota configurada
 
@@ -20,7 +20,7 @@ npm install
 npm run dev
 ```
 
-Por padrao, o Vite sobe em `http://localhost:5173` e encaminha chamadas `/api` para `http://localhost:8080`.
+Por padrão, o Vite sobe em `http://localhost:5173` e encaminha chamadas `/api` para `http://localhost:8080`.
 
 Para trocar o backend usado pelo proxy:
 
@@ -47,26 +47,26 @@ $env:VITE_API_BASE_URL="http://localhost:8080"; npm run dev
 
 ```text
 src/
-  pages/      wrappers de rota; montam modulos e repassam props
-  modules/    codigo por dominio de negocio
-  shared/     componentes, hooks e utils sem regra de dominio
+  pages/      wrappers de rota; montam módulos e repassam props
+  modules/    código por domínio de negócio
+  shared/     componentes, hooks e utils sem regra de domínio
   services/   toda comunicação HTTP
   store/      reservado para estado global futuro
-  assets/     estilos globais, imagens e icones estaticos
+  assets/     estilos globais, imagens e ícones estáticos
 ```
 
 ## Regras essenciais
 
-- Importe dominios por barrel: `import { PatientDashboard } from '@/modules/pacientes'`.
-- Não importe internals de outro modulo.
+- Importe domínios por barrel: `import { PatientDashboard } from '@/modules/pacientes'`.
+- Não importe internals de outro módulo.
 - Não use `fetch` ou `axios` fora de `src/services/`.
 - `shared/` não pode importar `modules/`, `services/` ou `store/`.
-- `pages/` não deve conter regra de negocio.
+- `pages/` não deve conter regra de negócio.
 - Use o alias `@/` para imports entre camadas.
 
-## Validação antes de entregar codigo
+## Validação antes de entregar código
 
 ```bash
-npm run lint
+npm run lin
 npm run build
 ```
