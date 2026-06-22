@@ -1,13 +1,19 @@
 
 ## 6. Interface do sistema
 
-## 6.1. Tela principal do sistema
+## 6.1. Telas principais do sistema
 
-_Descrição da tela principal do sistema._
-
-Tela principal do sistema
+### 6.1.1. Tela de Início do Sistema
 
 <img width="1919" height="1074" alt="image" src="https://github.com/user-attachments/assets/fc9fa834-c071-4d5c-821c-101679421f0b" />
+
+### 6.1.2. Tela de Login
+
+<img width="1918" height="1064" alt="image" src="https://github.com/user-attachments/assets/2a6cb156-bf59-46db-9e6e-2c1aeb30bd0d" />
+
+### 6.1.3. Tela de Cadastro de Psicólogo
+
+<img width="1919" height="1069" alt="image" src="https://github.com/user-attachments/assets/7e083e67-e942-4a7a-8ac4-454b648f5a52" />
 
 ## 6.2. Telas do processo 1 - Gestão de psicólogos
 
@@ -60,30 +66,6 @@ Tela principal do sistema
 <img width="1909" height="1059" alt="image" src="https://github.com/user-attachments/assets/b9497d22-16d0-468b-8121-3248978b791e" />
 
 
-
-Tela de Agendamento de consultas
-
-Tela da atividade 2
-
-1. <img width="1919" height="1066" alt="image" src="https://github.com/user-attachments/assets/707a6e8b-6d98-4b29-b71f-9cc9a8315486" />
-
-2. <img width="1918" height="1066" alt="image" src="https://github.com/user-attachments/assets/6ac3e297-ed54-45c5-9bd8-099f3e0c7bba" />
-
-3. <img width="1919" height="1064" alt="image" src="https://github.com/user-attachments/assets/0f0abdc2-9667-4166-8669-41873be98674" />
-
-<img width="1919" height="1067" alt="image" src="https://github.com/user-attachments/assets/33da509c-2e44-4526-a5ec-87b12eff292d" />
-
-5. <img width="1919" height="1067" alt="image" src="https://github.com/user-attachments/assets/354dd8c8-83ae-4afd-b0e9-f6f5db9fde93" />
-
-<img width="1919" height="1068" alt="image" src="https://github.com/user-attachments/assets/646ce458-cd90-470c-9b7d-7b3c3641ff27" />
-
-7. <img width="1919" height="1062" alt="image" src="https://github.com/user-attachments/assets/3bf84e6d-b8b1-4e50-9f35-10ee7c7fce4b" />
-
-<img width="1919" height="1066" alt="image" src="https://github.com/user-attachments/assets/d4b83b7f-6356-4806-bb4c-a09c185d735e" />
-
-9. <img width="1919" height="1069" alt="image" src="https://github.com/user-attachments/assets/a229d333-a66d-448f-8959-a14ae131f421" />
-
-10. <img width="1909" height="1059" alt="image" src="https://github.com/user-attachments/assets/b9497d22-16d0-468b-8121-3248978b791e" />
 
 
 
