@@ -11,7 +11,11 @@
 
 <img width="1918" height="1064" alt="image" src="https://github.com/user-attachments/assets/2a6cb156-bf59-46db-9e6e-2c1aeb30bd0d" />
 
-### 6.1.3. Tela de Cadastro de Psicólogo
+### 6.1.3. Tela de Cadastro de Paciente
+
+<img width="1919" height="1065" alt="image" src="https://github.com/user-attachments/assets/4c76c842-65df-44ee-8c28-d513952efe08" />
+
+### 6.1.4. Tela de Cadastro de Psicólogo
 
 <img width="1919" height="1069" alt="image" src="https://github.com/user-attachments/assets/7e083e67-e942-4a7a-8ac4-454b648f5a52" />
 
