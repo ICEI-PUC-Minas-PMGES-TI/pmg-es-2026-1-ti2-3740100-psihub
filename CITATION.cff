@@ -1,6 +1,6 @@
 cff-version: 1.0.1
 message: Please cite this software using these metadata.
-title: 
+title: PsiHub
 authors:
   - family-names: Tavares Dutra
     given-names: Hugo
@@ -16,8 +16,8 @@ authors:
     given-names: Michelle
   - name-suffix: Professor
     affiliation: PUC Minas
-    family-names: Carlos da Silva
-    given-names: Luiz 
+    family-names: da Silva
+    given-names: Luiz Carlos
   - name-suffix: Professor
     affiliation: PUC Minas
     family-names: Soares de Paiva Lacerda
@@ -26,7 +26,7 @@ keywords:
   - saúde mental
   - terapia
   - psicologia
-repository-code: 
+repository-code: https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-1-ti2-3740100-psihub.git
 license: CC-BY-4.0
 version: 1.0.0
 date-released: 2026-06-22
